@@ -1,0 +1,69 @@
+# Copyright 2017 ARICENT HOLDINGS LUXEMBOURG S.à.r.l. and Cable Television Laboratories, Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+- hosts: '{{ target }}'
+  become: yes
+  become_user: root
+  vars:
+    - is_ext: "{{ type == 'data' }}"
+    - is_mng: "{{ type == 'management' }}"
+    - is_tnt: "{{ type == 'tenant' }}"
+  environment:
+    http_proxy: "{{ http_proxy }}"
+    https_proxy: "{{ https_proxy }}"
+  tasks:
+   - name: Backing up interface file
+     command: cp /etc/network/interfaces /etc/network/interfaces.bak
+     ignore_errors: True
+     when: is_mng|bool and true
+   - name: Configuring nodes with static ip for mangment network
+     lineinfile:
+          dest: /etc/network/interfaces
+          state: present
+          backrefs: yes
+          regexp: 'iface {{ iface }} inet dhcp'
+          line: "iface {{ iface}} inet static\naddress {{ address }} \nnetmask {{netmask}}"
+     when: is_mng|bool and true
+   - name: Configuring nodes with static ip for external network
+     lineinfile:
+          dest: /etc/network/interfaces
+          line: "auto {{ iface }}\niface {{ iface}} inet static\naddress {{ address }} \nnetmask {{ netmask }} \ngateway {{ gateway }}\ndns-nameservers {{ dns }}\ndns-search {{ dn }}\nup route add netmask {{ netmask }} gw {{ gateway }}"
+     when: is_ext|bool and true
+   - name: Configuring nodes with static ip for tenant network
+     lineinfile:
+          dest: /etc/network/interfaces
+          line: "auto {{ iface }}\niface {{ iface }} inet static\naddress {{ address }} \nnetmask {{ netmask }}"
+     when: is_tnt|bool and true
+   - name: Backing up resolv.conf
+     command: cp /etc/resolvconf/resolv.conf.d/base /etc/resolvconf/resolv.conf.d/base.bak
+     ignore_errors: True
+     when: is_ext|bool and true
+   - name: Adding nameserver entries in resolv.conf
+     lineinfile:
+          dest: /etc/resolvconf/resolv.conf.d/base
+          line: "nameserver {{ dns }}\nsearch {{ dn }}"
+     when: is_ext|bool and true
+   - name: Backing up apt.conf
+     command: mv /etc/apt/apt.conf /etc/apt/apt.conf.bak
+     ignore_errors: True
+     when: is_ext|bool and true
+
+   - name: restarting system
+     shell: /sbin/shutdown -r 1 "Ansible restart"
+     ignore_errors: True
+     register: msg
+     when: is_ext|bool and true
+   - debug:
+       msg: "Please wait host is restarting in 1min. "
+     when: is_ext|bool and true

@@ -1,0 +1,33 @@
+# Copyright 2017 ARICENT HOLDINGS LUXEMBOURG S.à.r.l. and Cable Television Laboratories, Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+- hosts: "{{target}}"
+  become: yes
+  become_user: root
+
+
+  tasks:
+   - name: moving grub file
+     command: mv /etc/default/grub.bak /etc/default/grub
+     ignore_errors: True
+
+   - name: update grub command
+     command: update-grub
+     ignore_errors: true
+     when: (not(isolcpus == "") or not(hugepages == ""))
+
+   - name: reboot the system
+     command: reboot
+     ignore_errors: true
+     when: (not(isolcpus == "") or not(hugepages == ""))
