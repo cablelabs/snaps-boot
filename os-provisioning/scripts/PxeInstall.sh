@@ -2,7 +2,7 @@
 cr=`echo $'\n.'`
 cr=${cr%.}
 
-# Copyright 2017 ARICENT HOLDINGS LUXEMBOURG S.à.r.l. and Cable Television Laboratories, Inc.
+# Copyright 2017 ARICENT HOLDINGS LUXEMBOURG SARL and Cable Television Laboratories, Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
