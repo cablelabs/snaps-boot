@@ -201,18 +201,18 @@ CPUCORE section is an optional section. User should define these set of paramete
 
 Clone/FTP [SNAPS-PXE repo](https://github.com/cablelabs/snaps-pxe) on configuration node. All operations of configuration server expect the user should be explicitly switched (using `su root`) to the root user.
 
-In addition, user needs to download `ubuntu16.04 server image` from internet and need to place it in folder `~/snaps-pxe/snaps-pxe/packages/images/`. Use this download link for ISO: http://releases.ubuntu.com/16.04/ubuntu-16.04.3-server-amd64.iso then select and click on “64 - bit PC (AMD64) server install image”.
+In addition, user needs to download `ubuntu16.04 server image` from internet and need to place it in folder `~/snaps-pxe/os-provisioning/packages/images/`. Use this download link for ISO: http://releases.ubuntu.com/16.04/ubuntu-16.04.3-server-amd64.iso then select and click on “64 - bit PC (AMD64) server install image”.
 
 #### Step 2
 
-Go to directory `~/snaps-pxe/snaps-pxe/conf/pxe_cluster`.
+Go to directory `~/snaps-pxe/os-provisioning/conf/pxe_cluster`.
 
 Modify file `hosts.yaml` for provisioning of OS (Operating System) on cloud cluster host machines
 (controller node, compute nodes). Modify this file according to your set up environment only.
 
 #### Step 3
 
-Go to directory `~/snaps-pxe/snaps-pxe/`
+Go to directory `~/snaps-pxe/os-provisioning/`
 
 Change execution permissions for `PreRequisite.sh`. Run `PreRequisite.sh` as shown below:
 
@@ -224,7 +224,7 @@ Change execution permissions for `PreRequisite.sh`. Run `PreRequisite.sh` as sho
 
 Steps to configure PXE and DHCP server.
 
-Go to directory `~/snaps-pxe/snaps-pxe/`.
+Go to directory `~/snaps-pxe/os-provisioning/`.
 
 Run `iaas_launch.py` as shown below:
 
