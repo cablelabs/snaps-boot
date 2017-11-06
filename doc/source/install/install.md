@@ -43,26 +43,26 @@ The current release of SNAPS-PXE is tested on the following platform.
 
 | Hardware Required | Description | Configuration |
 | ----------------- | ----------- | ------------- |
-| Server machine with 64bit Intel AMD architecture. | Commodity Hardware or Cloud for hosting COTS servers | 16GB RAM, 80+ GB Hard disk with 3 network cards. Server should be network boot Enabled and IPMI capable |
+| Server machine with 64bit Intel AMD architecture. | COTS servers. | 16GB RAM, 80+ GB Hard disk with 3 network interfaces. Server should be network boot Enabled and IPMI capable. |
 
 **Controller Node**
 
 | Hardware Required | Description | Configuration |
 | ----------------- | ----------- | ------------- |
-| Server machine with 64bit Intel AMD architecture. | Commodity Hardware or Cloud for hosting COTS servers | 16GB RAM, 80+ GB Hard disk with 3 network cards. Server should be network boot Enabled and IPMI capable |
+| Server machine with 64bit Intel AMD architecture. | COTS servers. | 16GB RAM, 80+ GB Hard disk with 3 network interfaces. Server should be network boot Enabled and IPMI capable. |
 
 **Configuration Node**
 
 | Hardware Required | Description | Configuration |
 | ----------------- | ----------- | ------------- |
-| Server machine with 64bit Intel AMD architecture. | Commodity Hardware or Cloud for hosting COTS servers | 1 6GB RAM, 80+ GB Hard disk with 1 network cards. |
+| Server machine with 64bit Intel AMD architecture. | COTS servers. | 1 6GB RAM, 80+ GB Hard disk with 1 network interface. |
 
 ### 2.2 Software Requirements
 
 | Category | Software version |
 | -------- | ---------------- |
 | Operating System |  Ubuntu 16. |
-| Scripting | Python 2. |
+| Scripting | Python 2.6.X |
 | Framework |  Ansible 2.3.0. |
 | Openstack |  Newton |
 
@@ -201,7 +201,7 @@ CPUCORE section is an optional section. User should define these set of paramete
 
 Clone/FTP [SNAPS-PXE repo](https://github.com/cablelabs/snaps-pxe) on configuration node. All operations of configuration server expect the user should be explicitly switched (using `su root`) to the root user.
 
-In addition, user needs to download `ubuntu16.04 server image` from internet and need to place it in folder `~/snaps-pxe/snaps-pxe/packages/images/`. Use this download link for ISO: http://releases.ubuntu.com/16.04/ then select and click on “64 - bit PC (AMD64) server install image”.
+In addition, user needs to download `ubuntu16.04 server image` from internet and need to place it in folder `~/snaps-pxe/snaps-pxe/packages/images/`. Use this download link for ISO: http://releases.ubuntu.com/16.04/ubuntu-16.04.3-server-amd64.iso then select and click on “64 - bit PC (AMD64) server install image”.
 
 #### Step 2
 
