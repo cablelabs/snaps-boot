@@ -4,9 +4,9 @@ This document serves as a guide specifying the steps and configuration required 
 
 This document is to be used by development team, validation and network test teams.
 
-# 1 Introduction
+## 1 Introduction
 
-## 1.1 Terms and Conventions
+### 1.1 Terms and Conventions
 
 The terms and typographical conventions used in this document are listed and explained in below table.
 
@@ -15,7 +15,7 @@ The terms and typographical conventions used in this document are listed and exp
 | Host Machines | Machines to be used for Openstack deployment. Openstack node controller, compute, storage and network node will be deployed on these machines. |
 | Configuration node | Machine running installation scripts, PXE, DHCP, TFTP etc. |
 
-## 1.2 Acronyms
+### 1.2 Acronyms
 
 The acronyms expanded in below are fundamental to the information in this document.
 
@@ -29,7 +29,7 @@ The acronyms expanded in below are fundamental to the information in this docume
 | DHCP | Dynamic Host Configuration Protocol |
 | TFTP | Trivial FTP |
 
-## 1.3 References
+### 1.3 References
 
 [1] Openstack Installation guide: https://docs.openstack.org/newton/install-guide-ubuntu/
 
