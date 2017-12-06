@@ -1,6 +1,6 @@
 # Installation
 
-This document serves as a guide specifying the steps and configuration required for OS provisioning of bare metal machines via SNAPS-PXE. It does not provide implementation level details.
+This document serves as a guide specifying the steps and configuration required for OS provisioning of bare metal machines via SNAPS-Boot. It does not provide implementation level details.
 
 This document is to be used by development team, validation and network test teams.
 
@@ -37,7 +37,7 @@ The acronyms expanded in below are fundamental to the information in this docume
 
 ### 2.1 Hardware Requirements
 
-The current release of SNAPS-PXE is tested on the following platform.
+The current release of SNAPS-Boot is tested on the following platform.
 
 **Compute Node**
 
@@ -68,9 +68,9 @@ The current release of SNAPS-PXE is tested on the following platform.
 
 ### 2.3 Additional Requirements
 
-- Machine running SNAPS-PXE should have Ubuntu 16.04 Xenial as host OS and should have internet access.
+- Machine running SNAPS-Boot should have Ubuntu 16.04 Xenial as host OS and should have internet access.
 - All host machines should have identical interface names and should have at least 2 interfaces (one for management and one for data).
-- All host machines are connected to configuration node (machine running SNAPS-PXE) and have Internet access connectivity via data interface.
+- All host machines are connected to configuration node (machine running SNAPS-Boot) and have Internet access connectivity via data interface.
 
 > Note: Configuration node should have http/https and ftp proxy if node is behind corporate firewall. Set the http/https proxy for apt.
 
@@ -95,7 +95,7 @@ Configuration parameter defined in this section are explained below.
 | Parameter | Optionality | Description |
 | --------- | ----------- | ----------- |
 | address | N | Subnet address |
-| bind_host | N | This section defines group of mac and ip address. User is required to create one such group for each host machine. The ip addresses defined here are allocated by the SNAPS-PXE during OS provisioning. The ip addresses defined here should be from the subnet defined by parameter ‘address’. |
+| bind_host | N | This section defines group of mac and ip address. User is required to create one such group for each host machine. The ip addresses defined here are allocated by the SNAPS-Boot during OS provisioning. The ip addresses defined here should be from the subnet defined by parameter ‘address’. |
 | broadcast-address | Y | Broadcast address for the subnet |
 | default-lease | N | Lease time (in seconds) to be used by DHCP server on configuration node. |
 | dn | N | Domain name of configuration node. |
@@ -136,11 +136,11 @@ Configuration parameter defined here are used by PXE server.
 
 #### STATIC:
 
-SNAPS-PXE can be configured to allocate static IPs to host machines. This section has sub-section for each host machine. User is required to specify all the interfaces and IPs to be assigned to those interfaces.
+SNAPS-Boot can be configured to allocate static IPs to host machines. This section has sub-section for each host machine. User is required to specify all the interfaces and IPs to be assigned to those interfaces.
 
 | Parameter | Optionality | Description |
 | --------- | ----------- | ----------- |
-| access_ip | N | IP of the interface on management subnet (this is the IP allocated by SNAPS-PXE DHCP configuration to this machine). |
+| access_ip | N | IP of the interface on management subnet (this is the IP allocated by SNAPS-Boot DHCP configuration to this machine). |
 | name | N | OpenStack node type for this machine. Human readable values just for identification. For example: Controller, Compute1, Compute2 etc. |
 | interfaces | N | This section should be defined for each interface to be provisioned for static IP allocation. Each interface is defined by the attributes that follow. |
 | address | N | IP address to be allocated to the interface. |
@@ -156,7 +156,7 @@ SNAPS-PXE can be configured to allocate static IPs to host machines. This sectio
 
 #### BMC:
 
-Parameters defined here are used by SNAPS-PXE IPMI agents to communicate with host machines over IPMI interface. User is required to provide this information of each host machine.
+Parameters defined here are used by SNAPS-Boot IPMI agents to communicate with host machines over IPMI interface. User is required to provide this information of each host machine.
 
 | Parameter | Optionality | Description |
 | --------- | ----------- | ----------- |
@@ -174,13 +174,13 @@ This section defines parameters to specify the host OS image and SEED file to be
 | os | N | ISO of OS image to be installed on host machines. |
 | seed | N | Seed file to be used for host OS installation. |
 | timezone | N | Time zone configuration for host machines. |
-| user | N | Default user for all host machines. SNAPS-PXE creates this user. |
-| password | N | Password for the default user created by SNAPS-PXE. |
-| fullname | Y | Description of user created by SNAPS-PXE. |
+| user | N | Default user for all host machines. SNAPS-Boot creates this user. |
+| password | N | Password for the default user created by SNAPS-Boot. |
+| fullname | Y | Description of user created by SNAPS-Boot. |
 
 #### CPUCORE:
 
-This section is used to define parameters for isolating CPUs (Host vs Guest OS) and for creating persistent huge pages. SNAPS-PXE reads these parameters and make appropriate changes in OS grub file.
+This section is used to define parameters for isolating CPUs (Host vs Guest OS) and for creating persistent huge pages. SNAPS-Boot reads these parameters and make appropriate changes in OS grub file.
 
 Configuration parameter defined in this section are explained below.
 
@@ -199,20 +199,20 @@ CPUCORE section is an optional section. User should define these set of paramete
 
 #### Step 1
 
-Clone/FTP [SNAPS-PXE repo](https://github.com/cablelabs/snaps-pxe) on configuration node. All operations of configuration server expect the user should be explicitly switched (using `su root`) to the root user.
+Clone/FTP [SNAPS-Boot repo](https://github.com/cablelabs/snaps-boot) on configuration node. All operations of configuration server expect the user should be explicitly switched (using `su root`) to the root user.
 
-In addition, user needs to download `ubuntu16.04 server image` from internet and need to place it in folder `~/snaps-pxe/os-provisioning/packages/images/`. Use this download link for ISO: http://releases.ubuntu.com/16.04/ubuntu-16.04.3-server-amd64.iso then select and click on “64 - bit PC (AMD64) server install image”.
+In addition, user needs to download `ubuntu16.04 server image` from internet and need to place it in folder `~/snaps-boot/snaps-boot/packages/images/`. Use this download link for ISO: http://releases.ubuntu.com/16.04/ubuntu-16.04.3-server-amd64.iso then select and click on “64 - bit PC (AMD64) server install image”.
 
 #### Step 2
 
-Go to directory `~/snaps-pxe/os-provisioning/conf/pxe_cluster`.
+Go to directory `~/snaps-boot/snaps-boot/conf/pxe_cluster`.
 
 Modify file `hosts.yaml` for provisioning of OS (Operating System) on cloud cluster host machines
 (controller node, compute nodes). Modify this file according to your set up environment only.
 
 #### Step 3
 
-Go to directory `~/snaps-pxe/os-provisioning/`
+Go to directory `~/snaps-boot/snaps-boot/`
 
 Change execution permissions for `PreRequisite.sh`. Run `PreRequisite.sh` as shown below:
 
@@ -224,7 +224,7 @@ Change execution permissions for `PreRequisite.sh`. Run `PreRequisite.sh` as sho
 
 Steps to configure PXE and DHCP server.
 
-Go to directory `~/snaps-pxe/os-provisioning/`.
+Go to directory `~/snaps-boot/snaps-boot/`.
 
 Run `iaas_launch.py` as shown below:
 
@@ -312,7 +312,7 @@ sudo python iaas_launch.py -f conf/pxe_cluster/hosts.yaml - sc
 
 This will modify etc/network/interfaces file to remove static entries of the interfaces and will change back default route to management interface.
 
-### 5.3 Roll-back of SNAPS-PXE Installation
+### 5.3 Roll-back of SNAPS-Boot Installation
 
 ```
 sudo python iaas_launch.py - conf/pxe_cluster/hosts.yaml - pc
