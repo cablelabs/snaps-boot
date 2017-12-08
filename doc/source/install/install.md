@@ -1,19 +1,24 @@
 # Installation
 
-This document serves as a guide specifying the steps and configuration required for OS provisioning of bare metal machines via SNAPS-Boot. It does not provide implementation level details.
+This document serves as a guide specifying the steps and configuration
+required for OS provisioning of bare metal machines via SNAPS-Boot.
+It does not provide implementation level details.
 
-This document is to be used by development team, validation and network test teams.
+This document is to be used by development team, validation and network
+test teams.
 
 ## 1 Introduction
 
 ### 1.1 Terms and Conventions
 
-The terms and typographical conventions used in this document are listed and explained in below table.
+The terms and typographical conventions used in this document are
+listed and explained in below table.
+<br><br>
 
 | Convention | Usage |
 | ---------- | ----- |
 | Host Machines | Machines to be used for Openstack deployment. Openstack node controller, compute, storage and network node will be deployed on these machines. |
-| Configuration node | Machine running installation scripts, PXE, DHCP, TFTP etc. |
+| Configuration node | Machine running installation scripts, and hosting PXE, DHCP, TFTP services. |
 
 ### 1.2 Acronyms
 
@@ -31,62 +36,106 @@ The acronyms expanded in below are fundamental to the information in this docume
 
 ### 1.3 References
 
-[1] Openstack Installation guide: https://docs.openstack.org/newton/install-guide-ubuntu/
+[1] OpenStack Installation guide: https://docs.openstack.org/newton/install-guide-ubuntu/
 
 ## 2 Environment Prerequisites
 
 ### 2.1 Hardware Requirements
 
+The hardware requiremens are based on the OPNFV Pharos Specification
+https://wiki.opnfv.org/display/pharos/Pharos+Specification.
+Areas where SNAPS-Boot differs from Pharos are noted below.
 The current release of SNAPS-Boot is tested on the following platform.
 
 **Compute Node**
 
-| Hardware Required | Description | Configuration |
-| ----------------- | ----------- | ------------- |
-| Server machine with 64bit Intel AMD architecture. | COTS servers. | 16GB RAM, 80+ GB Hard disk with 3 network interfaces. Server should be network boot Enabled and IPMI capable. |
+| Hardware Required | Configuration |
+| ----------------- | ------------- |
+| Server machine with 64bit Intel AMD architecture. | 16GB RAM, 80+ GB Hard disk with 3 network interfaces. Server should be network boot Enabled and IPMI capable. |
 
 **Controller Node**
 
-| Hardware Required | Description | Configuration |
-| ----------------- | ----------- | ------------- |
-| Server machine with 64bit Intel AMD architecture. | COTS servers. | 16GB RAM, 80+ GB Hard disk with 3 network interfaces. Server should be network boot Enabled and IPMI capable. |
+| Hardware Required | Configuration |
+| ----------------- |  ------------- |
+| Server machine with 64bit Intel AMD architecture. | 16GB RAM, 80+ GB Hard disk with 3 network interfaces. Server should be network boot Enabled and IPMI capable. |
 
 **Configuration Node**
 
-| Hardware Required | Description | Configuration |
-| ----------------- | ----------- | ------------- |
-| Server machine with 64bit Intel AMD architecture. | COTS servers. | 1 6GB RAM, 80+ GB Hard disk with 1 network interface. |
+| Hardware Required | Configuration |
+| ----------------- | ------------- |
+| Server machine with 64bit Intel AMD architecture. | 16GB RAM, 80+ GB Hard disk with 1 network interface. |
 
 ### 2.2 Software Requirements
 
 | Category | Software version |
 | -------- | ---------------- |
-| Operating System |  Ubuntu 16. |
+| Operating System |  Ubuntu 16.04 |
 | Scripting | Python 2.6.X |
 | Framework |  Ansible 2.3.0. |
-| Openstack |  Newton |
 
-### 2.3 Additional Requirements
+### 2.3 Network configuration
 
-- Machine running SNAPS-Boot should have Ubuntu 16.04 Xenial as host OS and should have internet access.
-- All host machines should have identical interface names and should have at least 2 interfaces (one for management and one for data).
-- All host machines are connected to configuration node (machine running SNAPS-Boot) and have Internet access connectivity via data interface.
+- All host machines must have identical network interfaces.
+- 3 NICs per server are recommended, but only two are required.
+- Each NIC needs to be on a separate VLAN.
+- The first NIC is the admin network.  This is used to install Linux
+on the host machines.
+- All host machines are connected to configuration node (machine
+running SNAPS-Boot) and have Internet access connectivity via data
+interface.
 
-> Note: Configuration node should have http/https and ftp proxy if node is behind corporate firewall. Set the http/https proxy for apt.
+> Note: Configuration node should have http/https and ftp proxy if
+node is behind corporate firewall. Set the http/https proxy for apt.
+
+### 2.4 Configuration Node Setup
+
+- The Configuration node is where you run SNAPS-Boot
+- Install Ubuntu 16.04 Xenial as host OS.
+- This host need to be able to reach the Internet to download the
+software.
+
+<br>
+1. Install Ubuntu on the Configuration Node
+<br>
+2. Download SNAPS-boot from GitHub
+ ~~~~
+ wget https://github.com/cablelabs/snaps-boot/archive/master.zip
+ ~~~~
+<br>
+3. Extract the files
+~~~~
+unzip master.zip
+~~~~
+
+
 
 ## 3 Configuration
 
-### 3.1 hosts.yaml
+### 3.1 snaps-boot/hosts.yaml
 
-Configuration file used for hardware provisioning. Options defined here are used by deployment layer to discover and net boot host machines, allocate IP addresses, set proxies and install operating system on these machines.
+Save a copy of hosts.yaml before modifying it.
+`cp hosts.yaml origional-hosts.yaml`
+
+Configuration file used for hardware provisioning. Options defined here
+ are used by deployment layer to discover and net boot host machines,
+ allocate IP addresses, set proxies and install operating system on
+  these machines.
 
 #### DHCP:
 
-Configurations defined here are used to discover host machines and dynamically allocate IPs to them.
+Configurations defined here are used to discover host machines and
+dynamically allocate IPs to them.
 
-Deployment layer installs a DHCP server on the configuration node and configures it to allocate IPs to host machine. This DHCP server can be configured to support multiple subnets. User is required to define DHCP parameters for each subnet and fixed IPs to be allocated from the subnets.
+Deployment layer installs a DHCP server on the configuration node and
+configures it to allocate IPs to host machine. This DHCP server can be
+configured to support multiple subnets. User is required to define DHCP
+parameters for each subnet and fixed IPs to be allocated from the
+subnets.
 
-User is required to add a subnet section for each network being used in data centre. It is mandatory to define management subnet here; the other subnets are optional and are required only if user wishes to allocate static IPs from those subnets.
+User is required to add a subnet section for each network being used in
+ data centre. It is mandatory to define management subnet here; the
+ other subnets are optional and are required only if user wishes to
+ allocate static IPs from those subnets.
 
 > Note: **For static IP allocation define section ‘STATIC’**
 
@@ -94,7 +143,7 @@ Configuration parameter defined in this section are explained below.
 
 | Parameter | Optionality | Description |
 | --------- | ----------- | ----------- |
-| address | N | Subnet address |
+| address | N | Subnet address i.e. 10.10.10.0 |
 | bind_host | N | This section defines group of mac and ip address. User is required to create one such group for each host machine. The ip addresses defined here are allocated by the SNAPS-Boot during OS provisioning. The ip addresses defined here should be from the subnet defined by parameter ‘address’. |
 | broadcast-address | Y | Broadcast address for the subnet |
 | default-lease | N | Lease time (in seconds) to be used by DHCP server on configuration node. |
@@ -112,7 +161,10 @@ Configuration parameter defined in this section are explained below.
 
 #### PROXY:
 
-Configuration node and all other host machines requires internet connectivity to download open ware tools (python, Ansible etc.) and OpenStack services. User is required to set FTP, HTTP and HTTPs proxies on these machines if internet access is restricted by firewall.
+Configuration node and all other host machines requires internet
+connectivity to download open ware tools (python, Ansible etc.) and
+OpenStack services. User is required to set FTP, HTTP and HTTPs proxies
+on these machines if internet access is restricted by firewall.
 
 Configuration parameter defined in this section are explained below.
 
@@ -122,7 +174,8 @@ Configuration parameter defined in this section are explained below.
 | http_proxy | Y | Proxy to be used for HTTP traffic. |
 | https_proxy | Y | Proxy to be used for HTTPS traffic. |
 
-> Note: If proxy configuration is not required use null value **“”** for each of the parameters
+> Note: If proxy configuration is not required use null value **“”**
+for each of the parameters.  Do not remove the line from the file.
 
 #### PXE:
 
@@ -180,7 +233,9 @@ This section defines parameters to specify the host OS image and SEED file to be
 
 #### CPUCORE:
 
-This section is used to define parameters for isolating CPUs (Host vs Guest OS) and for creating persistent huge pages. SNAPS-Boot reads these parameters and make appropriate changes in OS grub file.
+This section is used to define parameters for isolating CPUs (Host vs
+Guest OS) and for creating persistent huge pages. SNAPS-Boot reads these
+parameters and make appropriate changes in OS grub file.
 
 Configuration parameter defined in this section are explained below.
 
@@ -191,33 +246,51 @@ Configuration parameter defined in this section are explained below.
 | hugepagesz | Y | Size of memory pages (2M, 1 G etc.). |
 | hugepages | Y | Number of huge pages. |
 
-CPUCORE section is an optional section. User should define these set of parameters for each host machine where CPU isolation and persistent huge memory pages are to be defined.
+CPUCORE section is an optional section. User should define these set of
+parameters for each host machine where CPU isolation and persistent huge
+memory pages are to be defined.
 
 ## 4 Installation Steps
 
-### 4.1 OS Provisioning with 2 or more NICs
+### 4.1 Server Provisioning
 
 #### Step 1
 
-Clone/FTP [SNAPS-Boot repo](https://github.com/cablelabs/snaps-boot) on configuration node. All operations of configuration server expect the user should be explicitly switched (using `su root`) to the root user.
-
-In addition, user needs to download `ubuntu16.04 server image` from internet and need to place it in folder `~/snaps-boot/snaps-boot/packages/images/`. Use this download link for ISO: http://releases.ubuntu.com/16.04/ubuntu-16.04.3-server-amd64.iso then select and click on “64 - bit PC (AMD64) server install image”.
-
+Download `ubuntu16.04 server image` from internet and need to place it
+in folder `~/snaps-boot/snaps-boot/packages/images/`. Use this download
+link for ISO:
+ http://releases.ubuntu.com/16.04/ubuntu-16.04.3-server-amd64.iso.
+```
+cd snaps-boot/packages/
+mkdir images
+cd images
+wget http://releases.ubuntu.com/16.04/ubuntu-16.04.3-server-amd64.iso
+```
 #### Step 2
 
 Go to directory `~/snaps-boot/snaps-boot/conf/pxe_cluster`.
 
-Modify file `hosts.yaml` for provisioning of OS (Operating System) on cloud cluster host machines
-(controller node, compute nodes). Modify this file according to your set up environment only.
+Modify file `hosts.yaml` for provisioning of OS (Operating System) on
+cloud cluster host machines (controller node, compute nodes). Modify
+this file according to your set up environment only.
 
 #### Step 3
 
 Go to directory `~/snaps-boot/snaps-boot/`
 
-Change execution permissions for `PreRequisite.sh`. Run `PreRequisite.sh` as shown below:
+Run `PreRequisite.sh` as shown below:
 
 ```
-./PreRequisite.sh
+sudo ./PreRequisite.sh
+```
+
+If you see failuers or errors.  Update your software, remove obsolete
+packages and reboot your server.
+```
+sudo apt-get update
+sudo apt-get upgrade
+sudo apt-get auto-remove
+sudo reboot
 ```
 
 #### Step 4
@@ -229,20 +302,26 @@ Go to directory `~/snaps-boot/snaps-boot/`.
 Run `iaas_launch.py` as shown below:
 
 ```
-root@conf-server# python iaas_launch.py -f conf/pxe_cluster/hosts.yaml -p
+sudo nohup python iaas_launch.py -f hosts.yaml -p
 ```
+
+Note: This updates the networking on the server and may cause your
+ssh session to be terminated.
 
 #### Step 5
 
 Manually verify DHCP server is running or not, using below given command:
 
 ```
-sudo systemctl status isc-dhcp-sever
+sudo systemctl status isc-dhcp-server.service
 ```
 
 State should be active running.
+If it is not running, then double check the hosts.yaml file and look
+at /var/log/syslog for error messages.
 
-Manually verify tftp-hpa service is running or not, using below given command:
+Manually verify tftp-hpa service is running or not, using below given
+command:
 
 ```
 sudo systemctl status tftpd-hpa
@@ -250,10 +329,11 @@ sudo systemctl status tftpd-hpa
 
 State should be active running.
 
-Manually verify apache2 service is running or not, using below given command:
+Manually verify apache2 service is running or not, using below given
+command:
 
 ```
-sudo systemctl status apache
+sudo systemctl status apache2
 ```
 
 State should be active running.
@@ -263,13 +343,15 @@ State should be active running.
 Run `iaas_launch.py` as shown below:
 
 ```
-root@conf-server# python iaas_launch.py -f conf/pxe_cluster/hosts.yaml -b
+sudo nohup python iaas_launch.py -f hosts.yaml -b
 ```
 
-This will boot host machines (controller/compute nodes), select NIC Controller (PXE client
-enabled) to use network booting.
+This will boot host machines (controller/compute nodes), select
+NIC Controller (PXE client enabled) to use network booting.
 
-Your OS provisioning will start and will get completed in 20 minutes.
+Your OS provisioning will start and will get completed in about 20
+minutes.  The time will vary depending on your network speed and
+server boot times.
 
 #### Step 7
 
@@ -282,17 +364,15 @@ root@conf-server# python iaas_launch.py -f conf/pxe_cluster/hosts.yaml -s
 
 #### Step 8
 
-Execute this step either for defining large memory pages or for isolating CPUs between host and guest OS.
+Execute this step either for defining large memory pages or for
+isolating CPUs between host and guest OS.
 
 ```
 root@conf-server# python iaas_launch.py -f conf/pxe_cluster/hosts.yaml -i
 ```
 
-> Note: This step is optional and should be executed only if CPU isolation or large memory page provisioning is required.
-
-### 4.2 OS Provisioning with single NIC
-
-The process for OS provisioning with a single NIC is currently TBD.
+> Note: This step is optional and should be executed only if CPU
+isolation or large memory page provisioning is required.
 
 ## 5 Clean-up and Troubleshooting
 
@@ -302,9 +382,12 @@ The process for OS provisioning with a single NIC is currently TBD.
 sudo python iaas_launch.py -f conf/pxe_cluster/hosts.yaml -ic
 ```
 
-This will modify grub file on all host machines to remove isolated cpu and huge page configuration and will boot the machine to default configuration.
+This will modify grub file on all host machines to remove isolated cpu
+and huge page configuration and will boot the machine to default
+configuration.
 
-### 5.2 Roll-back Static IP Configuration and Change Default Routes Back to Management Interface
+### 5.2 Roll-back Static IP Configuration and Change Default Routes
+Back to Management Interface
 
 ```
 sudo python iaas_launch.py -f conf/pxe_cluster/hosts.yaml - sc
