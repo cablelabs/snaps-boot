@@ -19,11 +19,11 @@ We're happy you want to contribute! You can help us in different ways:
 - [Open an issue][3] with suggestions for improvements
 - Fork this repository and submit a pull request
 - Improve the [documentation][4] (same pull request flow)
-- Join the conversation: [![IRC][5]][5]
+- Join the conversation: [![IRC](https://www.irccloud.com/invite-svg?channel=%23cablelabs-snaps&amp;hostname=irc.freenode.net&amp;port=6697&amp;ssl=1)][5]
 
 [3]: https://github.com/cablelabs/snaps-boot/issues
 [4]: https://github.com/cablelabs/snaps-boot/tree/master/doc
-[5]: (https://www.irccloud.com/invite-svg?channel=%23cablelabs-snaps&amp;hostname=irc.freenode.net&amp;port=6697&amp;ssl=1)
+[5]: https://www.irccloud.com/invite?channel=%23cablelabs-snaps&amp;hostname=irc.freenode.net&amp;port=6697&amp;ssl=1
 
 To submit a pull request, [fork][6] the [SNAPS-Boot repository][7] and then
 [clone][8] your fork:
