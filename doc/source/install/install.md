@@ -362,7 +362,7 @@ Execute this step only if static IPs to be assigned to host machines.
 
 Run `iaas_launch.py` as shown below:
 ```
-root@conf-server# python iaas_launch.py -f conf/pxe_cluster/hosts.yaml -s
+python iaas_launch.py -f hosts.yaml -s
 ```
 
 #### Step 8
@@ -371,7 +371,7 @@ Execute this step either for defining large memory pages or for
 isolating CPUs between host and guest OS.
 
 ```
-root@conf-server# python iaas_launch.py -f conf/pxe_cluster/hosts.yaml -i
+python iaas_launch.py -f hosts.yaml -i
 ```
 
 > Note: This step is optional and should be executed only if CPU
@@ -382,7 +382,7 @@ isolation or large memory page provisioning is required.
 ### 5.1 Roll-back Isolated CPUs and Huge Pages
 
 ```
-sudo python iaas_launch.py -f conf/pxe_cluster/hosts.yaml -ic
+sudo python iaas_launch.py -f hosts.yaml -ic
 ```
 
 This will modify grub file on all host machines to remove isolated cpu
@@ -393,7 +393,7 @@ configuration.
 Back to Management Interface
 
 ```
-sudo python iaas_launch.py -f conf/pxe_cluster/hosts.yaml - sc
+sudo python iaas_launch.py -f hosts.yaml -sc
 ```
 
 This will modify etc/network/interfaces file to remove static entries of the interfaces and will change back default route to management interface.
@@ -401,7 +401,7 @@ This will modify etc/network/interfaces file to remove static entries of the int
 ### 5.3 Roll-back of SNAPS-Boot Installation
 
 ```
-sudo python iaas_launch.py - conf/pxe_cluster/hosts.yaml - pc
+sudo python iaas_launch.py -f hosts.yaml -pc
 ```
 
 This will stop DHCP, PXE and TFTP services on configuration node.
