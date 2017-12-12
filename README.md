@@ -1,12 +1,12 @@
 # SNAPS-Boot
 
-SNAPS-Boot is the fundimental building block for the SDN/NFV Application
+SNAPS-Boot is the fundamental building block for the SDN/NFV Application
 Platform/Stack (SNAPS<sup>TM</sup>) we are developing at
 [CableLabs](http://cablelabs.com/). It performs a Linux install and network
 setup for a bare metal machine.
 
 If you're dabbling or big time into Software Defined Networks (SDN), Network
-Function Virtualization (NFV), or just building your own cloud, then this is 
+Function Virtualization (NFV), or just building your own cloud, then this is
 where you want to start.
 
 ## Getting started
@@ -31,7 +31,7 @@ There is an issue with the Ubuntu installer attempting to use only the first
 interface as enumerated alphabetically by the network device renaming code in
 the kernel. This can be a problem when re-imaging the pod nodes.
 
-The work around is to connect a monitor to each node and set up the network
+The workaround is to connect a monitor to each node and set up the network
 interface by hand or to reconfigure the PXE section of the `hosts.yaml` file to
 indicate the interface that the Ubuntu installer is trying to use.
 
