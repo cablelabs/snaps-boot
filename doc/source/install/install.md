@@ -305,7 +305,7 @@ Go to directory `snaps-boot/snaps-boot/`.
 Run `iaas_launch.py` as shown below:
 
 ```
-sudo nohup python iaas_launch.py -f hosts.yaml -p
+sudo -i python $PWD/iaas_launch.py -f $PWD/hosts.yaml -p
 ```
 
 Note: This updates the networking on the server and may cause your
@@ -346,7 +346,7 @@ State should be active running.
 Run `iaas_launch.py` as shown below:
 
 ```
-sudo nohup python iaas_launch.py -f hosts.yaml -b
+sudo -i python $PWD/iaas_launch.py -f $PWD/hosts.yaml -b
 ```
 
 This will boot host machines (controller/compute nodes), select
@@ -362,7 +362,7 @@ Execute this step only if static IPs to be assigned to host machines.
 
 Run `iaas_launch.py` as shown below:
 ```
-python iaas_launch.py -f hosts.yaml -s
+sudo -i python $PWD/iaas_launch.py -f $PWD/hosts.yaml -s
 ```
 
 #### Step 8
@@ -371,7 +371,7 @@ Execute this step either for defining large memory pages or for
 isolating CPUs between host and guest OS.
 
 ```
-python iaas_launch.py -f hosts.yaml -i
+sudo -i python $PWD/iaas_launch.py -f $PWD/hosts.yaml -i
 ```
 
 > Note: This step is optional and should be executed only if CPU
@@ -382,7 +382,7 @@ isolation or large memory page provisioning is required.
 ### 5.1 Roll-back Isolated CPUs and Huge Pages
 
 ```
-sudo python iaas_launch.py -f hosts.yaml -ic
+sudo -i python $PWD/iaas_launch.py -f $PWD/hosts.yaml -ic
 ```
 
 This will modify grub file on all host machines to remove isolated cpu
@@ -393,7 +393,7 @@ configuration.
 Back to Management Interface
 
 ```
-sudo python iaas_launch.py -f hosts.yaml -sc
+sudo -i python $PWD/iaas_launch.py -f $PWD/hosts.yaml -sc
 ```
 
 This will modify etc/network/interfaces file to remove static entries of the interfaces and will change back default route to management interface.
@@ -401,7 +401,7 @@ This will modify etc/network/interfaces file to remove static entries of the int
 ### 5.3 Roll-back of SNAPS-Boot Installation
 
 ```
-sudo python iaas_launch.py -f hosts.yaml -pc
+sudo -i python $PWD/iaas_launch.py -f $PWD/hosts.yaml -pc
 ```
 
 This will stop DHCP, PXE and TFTP services on configuration node.
