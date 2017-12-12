@@ -1,7 +1,7 @@
 # SNAPS-Boot
 
 SNAPS-Boot is the fundamental building block for the SDN/NFV Application
-Platform/Stack (SNAPS<sup>TM</sup>) we are developing at
+Platform and Stack (SNAPS<sup>TM</sup>) we are developing at
 [CableLabs](http://cablelabs.com/). It performs a Linux install and network
 setup for a bare metal machine.
 
