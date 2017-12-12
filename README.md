@@ -9,6 +9,9 @@ If you're working with Software Defined Networks (SDN), Network
 Function Virtualization (NFV) or just building your own cloud, then this is
 where you want to start.
 
+| TIP: [SNAPS-OpenStack](https://github.com/cablelabs/snaps-openstack) is where you
+should go next.
+
 ## Getting started
 
 To get started, you'll want to read the [SNAPS-Boot install
