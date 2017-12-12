@@ -14,7 +14,7 @@ where you want to start.
 To get started, you'll want to read the [SNAPS-Boot install
 guide](doc/source/install/install.md). The fun really begins with the
 [installation
-stpes](https://github.com/cablelabs/snaps-boot/blob/master/doc/source/install/install.md#4-installation-steps).
+steps](https://github.com/cablelabs/snaps-boot/blob/master/doc/source/install/install.md#4-installation-steps).
 That's where you'll be able to clone this repo and commence building:
 
 ```
