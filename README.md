@@ -5,7 +5,7 @@ Platform and Stack (SNAPS<sup>TM</sup>) we are developing at
 [CableLabs](http://cablelabs.com/). It performs a Linux install and network
 setup for a bare metal machine.
 
-If you're dabbling or big time into Software Defined Networks (SDN), Network
+If you're working with Software Defined Networks (SDN), Network
 Function Virtualization (NFV) or just building your own cloud, then this is
 where you want to start.
 
