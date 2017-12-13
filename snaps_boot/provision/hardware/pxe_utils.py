@@ -21,14 +21,14 @@ import subprocess
 import os
 from os import remove, close
 import sys
-from common.utils import file_utils
+from snaps_boot.common.utils import file_utils
 from tempfile import mkstemp
 import re
 import logging
 import shutil
 from shutil import move
-from common.consts import consts
-from ansible_p.ansible_utils import ansible_playbook_launcher
+from snaps_boot.common.consts import consts
+from snaps_boot.ansible_p.ansible_utils import ansible_playbook_launcher
 import os.path
 logger = logging.getLogger('deploy_venv')
 def __main(config,operation):
