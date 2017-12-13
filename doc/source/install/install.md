@@ -93,28 +93,21 @@ node is behind corporate firewall. Set the http/https proxy for apt.
 
 ### 2.4 Configuration Node Setup
 
-- The Configuration node is where you run SNAPS-Boot
-- Install Ubuntu 16.04 Xenial as host OS.
-- This host need to be able to reach the Internet to download the
-software.
+The Configuration node is where you run SNAPS-Boot. You will need to install
+Ubuntu 16.04 Xenial as host OS. This host needs to be able to reach the Internet
+to download the software.
 
-<br>
 1. Install Ubuntu on the Configuration Node
-<br>
 2. Download SNAPS-boot from GitHub
-
 ```
 wget https://github.com/cablelabs/snaps-boot/archive/master.zip
 ```
-
-<br>
 3. Extract the files
-
 ```
 unzip master.zip
 ```
 
-Note: Git can also be used to clone the repository.
+> Note: Git can also be used to clone the repository.
 
 ## 3 Configuration
 
