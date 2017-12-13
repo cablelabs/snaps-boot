@@ -19,8 +19,8 @@ import logging
 
 import os
 
-from common.utils import file_utils
-from provision.hardware import pxe_utils
+from snaps_boot.common.utils import file_utils
+from snaps_boot.provision.hardware import pxe_utils
 
 logger = logging.getLogger('launch_provisioning')
 
