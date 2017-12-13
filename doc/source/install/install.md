@@ -102,14 +102,17 @@ software.
 1. Install Ubuntu on the Configuration Node
 <br>
 2. Download SNAPS-boot from GitHub
- ~~~~
- wget https://github.com/cablelabs/snaps-boot/archive/master.zip
- ~~~~
+
+```
+wget https://github.com/cablelabs/snaps-boot/archive/master.zip
+```
+
 <br>
 3. Extract the files
-~~~~
+
+```
 unzip master.zip
-~~~~
+```
 
 Note: Git can also be used to clone the repository.
 
@@ -263,12 +266,14 @@ Download `ubuntu16.04 server image` from internet and need to place it
 in folder `snaps-boot/snaps-boot/packages/images/`. Use this download
 link for ISO:
  http://releases.ubuntu.com/16.04/ubuntu-16.04.3-server-amd64.iso.
+
 ```
 cd snaps-boot/packages/
 mkdir images
 cd images
 wget http://releases.ubuntu.com/16.04/ubuntu-16.04.3-server-amd64.iso
 ```
+
 #### Step 2
 
 Go to directory `snaps-boot/snaps-boot/conf/pxe_cluster`.
@@ -289,6 +294,7 @@ sudo ./PreRequisite.sh
 
 If you see failuers or errors.  Update your software, remove obsolete
 packages and reboot your server.
+
 ```
 sudo apt-get update
 sudo apt-get upgrade
