@@ -1,4 +1,5 @@
-# Copyright 2017 ARICENT HOLDINGS LUXEMBOURG SARL and Cable Television Laboratories, Inc.
+# Copyright 2017 ARICENT HOLDINGS LUXEMBOURG SARL and Cable Television
+# Laboratories, Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,19 +12,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import os
-import urllib2
 import logging
 
 import yaml
-
 
 """
 Utilities for file handling functions
 """
 
 logger = logging.getLogger('file_utils')
-
 
 
 def read_yaml(config_file_path):

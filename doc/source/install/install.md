@@ -111,7 +111,7 @@ unzip master.zip
 
 ## 3 Configuration
 
-### 3.1 snaps-boot/hosts.yaml
+### 3.1 snaps_boot/hosts.yaml
 
 Save a copy of hosts.yaml before modifying it.
 `cp hosts.yaml origional-hosts.yaml`
@@ -256,12 +256,12 @@ memory pages are to be defined.
 #### Step 1
 
 Download `ubuntu16.04 server image` from internet and need to place it
-in folder `snaps-boot/snaps-boot/packages/images/`. Use this download
+in folder `snaps-boot/snaps_boot/packages/images/`. Use this download
 link for ISO:
  http://releases.ubuntu.com/16.04/ubuntu-16.04.3-server-amd64.iso.
 
 ```
-cd snaps-boot/packages/
+cd snaps_boot/packages/
 mkdir images
 cd images
 wget http://releases.ubuntu.com/16.04/ubuntu-16.04.3-server-amd64.iso
@@ -269,7 +269,7 @@ wget http://releases.ubuntu.com/16.04/ubuntu-16.04.3-server-amd64.iso
 
 #### Step 2
 
-Go to directory `snaps-boot/snaps-boot/conf/pxe_cluster`.
+Go to directory `snaps-boot/snaps_boot/conf/pxe_cluster`.
 
 Modify file `hosts.yaml` for provisioning of OS (Operating System) on
 cloud cluster host machines (controller node, compute nodes). Modify
@@ -277,7 +277,7 @@ this file according to your set up environment only.
 
 #### Step 3
 
-Go to directory `snaps-boot/snaps-boot/`
+Go to directory `snaps-boot/`
 
 Run `PreRequisite.sh` as shown below:
 
@@ -299,7 +299,7 @@ sudo reboot
 
 Steps to configure PXE and DHCP server.
 
-Go to directory `snaps-boot/snaps-boot/`.
+Go to directory `snaps-boot/`.
 
 Run `iaas_launch.py` as shown below:
 
