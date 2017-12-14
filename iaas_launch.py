@@ -22,7 +22,7 @@ import os
 from snaps_boot.common.utils import file_utils
 from snaps_boot.provision.hardware import pxe_utils
 
-logger = logging.getLogger('launch_provisioning')
+logger = logging.getLogger('iaas_launch')
 
 ARG_NOT_SET = "argument not set"
 
@@ -33,7 +33,9 @@ def __read_hw_config(config, operation):
      :param config : This configuration data extracted from the host.yaml.
     """
     if config:
-        logger.info("Read & Validate functionality for Hardware Provisioning")
+        logger.info(
+            'Read & Validate functionality for Hardware Provisioning - %s',
+            operation)
         pxe_utils.__main(config, operation)
 
 
@@ -65,34 +67,28 @@ def main(arguments):
 
     config = file_utils.read_yaml(arguments.config)
     logger.info('Read configuration file - ' + arguments.config)
-    try:
-        if arguments.hardware is not ARG_NOT_SET:
-            __read_hw_config(config, "hardware")
+    if arguments.hardware is not ARG_NOT_SET:
+        __read_hw_config(config, "hardware")
 
-        if arguments.provisionClean is not ARG_NOT_SET:
-            __read_hw_config(config, "provisionClean")
+    if arguments.provisionClean is not ARG_NOT_SET:
+        __read_hw_config(config, "provisionClean")
 
-        if arguments.staticIPCleanup is not ARG_NOT_SET:
-            __read_hw_config(config, "staticIPCleanup")
+    if arguments.staticIPCleanup is not ARG_NOT_SET:
+        __read_hw_config(config, "staticIPCleanup")
 
-        if arguments.staticIPConfigure is not ARG_NOT_SET:
-            __read_hw_config(config, "staticIPConfigure")
+    if arguments.staticIPConfigure is not ARG_NOT_SET:
+        __read_hw_config(config, "staticIPConfigure")
 
-        if arguments.boot is not ARG_NOT_SET:
-            __read_hw_config(config, "boot")
+    if arguments.boot is not ARG_NOT_SET:
+        __read_hw_config(config, "boot")
 
-        if arguments.bootd is not ARG_NOT_SET:
-            __read_hw_config(config, "bootd")
-        if arguments.setIsolCpus is not ARG_NOT_SET:
-            __read_hw_config(config, "setIsolCpus")
-        if arguments.delIsolCpus is not ARG_NOT_SET:
-            __read_hw_config(config, "delIsolCpus")
-        logger.info('Completed opeartion successfully')
-    except Exception as e:
-        logger.error(
-            'Unexpected error deploying environment. Rolling back due to - %s',
-            e.message)
-        raise e
+    if arguments.bootd is not ARG_NOT_SET:
+        __read_hw_config(config, "bootd")
+    if arguments.setIsolCpus is not ARG_NOT_SET:
+        __read_hw_config(config, "setIsolCpus")
+    if arguments.delIsolCpus is not ARG_NOT_SET:
+        __read_hw_config(config, "delIsolCpus")
+    logger.info('Completed opeartion successfully')
 
 
 if __name__ == '__main__':
