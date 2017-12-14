@@ -277,7 +277,7 @@ this file according to your set up environment only.
 
 #### Step 3
 
-Go to directory `snaps-boot/snaps_boot/`
+Go to directory `snaps-boot/`
 
 Run `PreRequisite.sh` as shown below:
 
@@ -299,7 +299,7 @@ sudo reboot
 
 Steps to configure PXE and DHCP server.
 
-Go to directory `snaps-boot/snaps_boot/`.
+Go to directory `snaps-boot/`.
 
 Run `iaas_launch.py` as shown below:
 
