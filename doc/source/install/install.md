@@ -256,12 +256,12 @@ memory pages are to be defined.
 #### Step 1
 
 Download `ubuntu16.04 server image` from internet and need to place it
-in folder `snaps-boot/snaps_boot/packages/images/`. Use this download
+in folder `snaps-boot/images/`. Use this download
 link for ISO:
  http://releases.ubuntu.com/16.04/ubuntu-16.04.3-server-amd64.iso.
 
 ```
-cd snaps_boot/packages/
+cd snaps-boot/
 mkdir images
 cd images
 wget http://releases.ubuntu.com/16.04/ubuntu-16.04.3-server-amd64.iso
@@ -269,7 +269,7 @@ wget http://releases.ubuntu.com/16.04/ubuntu-16.04.3-server-amd64.iso
 
 #### Step 2
 
-Go to directory `snaps-boot/snaps_boot/conf/pxe_cluster`.
+Go to directory `snaps-boot/conf/pxe_cluster`.
 
 Modify file `hosts.yaml` for provisioning of OS (Operating System) on
 cloud cluster host machines (controller node, compute nodes). Modify
@@ -304,7 +304,7 @@ Go to directory `snaps-boot/`.
 Run `iaas_launch.py` as shown below:
 
 ```
-sudo -i python $PWD/iaas_launch.py -f $PWD/conf/hosts.yaml -p
+sudo -i python $PWD/iaas_launch.py -f $PWD/conf/pxe_cluster/hosts.yaml -p
 ```
 
 Note: This updates the networking on the server and may cause your
@@ -345,7 +345,7 @@ State should be active running.
 Run `iaas_launch.py` as shown below:
 
 ```
-sudo -i python $PWD/iaas_launch.py -f $PWD/conf/hosts.yaml -b
+sudo -i python iaas_launch.py -f $PWD/conf/pxe_cluster/hosts.yaml -b
 ```
 
 This will boot host machines (controller/compute nodes), select
@@ -361,7 +361,7 @@ Execute this step only if static IPs to be assigned to host machines.
 
 Run `iaas_launch.py` as shown below:
 ```
-sudo -i python $PWD/iaas_launch.py -f $PWD/conf/hosts.yaml -s
+sudo -i python iaas_launch.py -f $PWD/conf/pxe_cluster/hosts.yaml -s
 ```
 
 #### Step 8
@@ -370,7 +370,7 @@ Execute this step either for defining large memory pages or for
 isolating CPUs between host and guest OS.
 
 ```
-sudo -i python $PWD/iaas_launch.py -f $PWD/conf/hosts.yaml -i
+sudo -i python iaas_launch.py -f $PWD/conf/pxe_cluster/hosts.yaml -i
 ```
 
 > Note: This step is optional and should be executed only if CPU
@@ -381,7 +381,7 @@ isolation or large memory page provisioning is required.
 ### 5.1 Roll-back Isolated CPUs and Huge Pages
 
 ```
-sudo -i python $PWD/iaas_launch.py -f $PWD/conf/hosts.yaml -ic
+sudo -i python iaas_launch.py -f $PWD/conf/pxe_cluster/hosts.yaml -ic
 ```
 
 This will modify grub file on all host machines to remove isolated cpu
@@ -392,7 +392,7 @@ configuration.
 Back to Management Interface
 
 ```
-sudo -i python $PWD/iaas_launch.py -f $PWD/conf/hosts.yaml -sc
+sudo -i python iaas_launch.py -f $PWD/conf/pxe_cluster/hosts.yaml -sc
 ```
 
 This will modify etc/network/interfaces file to remove static entries of the interfaces and will change back default route to management interface.
@@ -400,7 +400,7 @@ This will modify etc/network/interfaces file to remove static entries of the int
 ### 5.3 Roll-back of SNAPS-Boot Installation
 
 ```
-sudo -i python $PWD/iaas_launch.py -f $PWD/conf/hosts.yaml -pc
+sudo -i python iaas_launch.py -f $PWD/conf/pxe_cluster/hosts.yaml -pc
 ```
 
 This will stop DHCP, PXE and TFTP services on configuration node.
