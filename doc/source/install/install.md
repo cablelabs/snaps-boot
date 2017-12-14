@@ -282,7 +282,7 @@ Go to directory `snaps-boot/`
 Run `PreRequisite.sh` as shown below:
 
 ```
-sudo ./PreRequisite.sh
+sudo ./scripts/PreRequisite.sh
 ```
 
 If you see failuers or errors.  Update your software, remove obsolete
@@ -304,7 +304,7 @@ Go to directory `snaps-boot/`.
 Run `iaas_launch.py` as shown below:
 
 ```
-sudo -i python $PWD/iaas_launch.py -f $PWD/hosts.yaml -p
+sudo -i python $PWD/iaas_launch.py -f $PWD/conf/hosts.yaml -p
 ```
 
 Note: This updates the networking on the server and may cause your
@@ -345,7 +345,7 @@ State should be active running.
 Run `iaas_launch.py` as shown below:
 
 ```
-sudo -i python $PWD/iaas_launch.py -f $PWD/hosts.yaml -b
+sudo -i python $PWD/iaas_launch.py -f $PWD/conf/hosts.yaml -b
 ```
 
 This will boot host machines (controller/compute nodes), select
@@ -361,7 +361,7 @@ Execute this step only if static IPs to be assigned to host machines.
 
 Run `iaas_launch.py` as shown below:
 ```
-sudo -i python $PWD/iaas_launch.py -f $PWD/hosts.yaml -s
+sudo -i python $PWD/iaas_launch.py -f $PWD/conf/hosts.yaml -s
 ```
 
 #### Step 8
@@ -370,7 +370,7 @@ Execute this step either for defining large memory pages or for
 isolating CPUs between host and guest OS.
 
 ```
-sudo -i python $PWD/iaas_launch.py -f $PWD/hosts.yaml -i
+sudo -i python $PWD/iaas_launch.py -f $PWD/conf/hosts.yaml -i
 ```
 
 > Note: This step is optional and should be executed only if CPU
@@ -381,7 +381,7 @@ isolation or large memory page provisioning is required.
 ### 5.1 Roll-back Isolated CPUs and Huge Pages
 
 ```
-sudo -i python $PWD/iaas_launch.py -f $PWD/hosts.yaml -ic
+sudo -i python $PWD/iaas_launch.py -f $PWD/conf/hosts.yaml -ic
 ```
 
 This will modify grub file on all host machines to remove isolated cpu
@@ -392,7 +392,7 @@ configuration.
 Back to Management Interface
 
 ```
-sudo -i python $PWD/iaas_launch.py -f $PWD/hosts.yaml -sc
+sudo -i python $PWD/iaas_launch.py -f $PWD/conf/hosts.yaml -sc
 ```
 
 This will modify etc/network/interfaces file to remove static entries of the interfaces and will change back default route to management interface.
@@ -400,7 +400,7 @@ This will modify etc/network/interfaces file to remove static entries of the int
 ### 5.3 Roll-back of SNAPS-Boot Installation
 
 ```
-sudo -i python $PWD/iaas_launch.py -f $PWD/hosts.yaml -pc
+sudo -i python $PWD/iaas_launch.py -f $PWD/conf/hosts.yaml -pc
 ```
 
 This will stop DHCP, PXE and TFTP services on configuration node.
