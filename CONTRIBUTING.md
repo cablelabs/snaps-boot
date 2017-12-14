@@ -23,7 +23,7 @@ We're happy you want to contribute! You can help us in different ways:
 
 [3]: https://github.com/cablelabs/snaps-boot/issues
 [4]: https://github.com/cablelabs/snaps-boot/tree/master/doc
-[5]: https://www.irccloud.com/invite?channel=%23cablelabs-snaps&amp;hostname=irc.freenode.net&amp;port=6697&amp;ssl=1
+[5]: http://webchat.freenode.net/?channels=cablelabs-snaps
 
 To submit a pull request, [fork][6] the [SNAPS-Boot repository][7] and then
 [clone][8] your fork:
