@@ -40,6 +40,13 @@ Make your suggested changes, `git commit`, `git push` and then [submit a pull re
 
 [9]: https://github.com/cablelabs/snaps-boot/compare
 
+Our [pull request template][13] should be used for all pull requests. If you're
+creating your pull request from the GitHub site, then it will be automatically
+populated with the template's contents, otherwise please copy and paste the
+template text into your pull request.
+
+[13]: PULL_REQUEST_TEMPLATE.md
+
 ## Resources
 
 Some useful resources to get started:
