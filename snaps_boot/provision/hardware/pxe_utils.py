@@ -23,6 +23,7 @@ import re
 import subprocess
 
 import os
+import pkg_resources
 
 from snaps_boot.ansible_p.ansible_utils import ansible_playbook_launcher
 from snaps_boot.common.consts import consts
@@ -495,7 +496,8 @@ def __provision_clean():
 
 
 def __static_ip_configure(static_dict, proxy_dict):
-    playbook_path = "ansible_p/commission/hardware/playbooks/setIPConfig.yaml"
+    playbook_path = pkg_resources.resource_filename(
+        'snaps_boot.ansible_p.hardware.playbooks', 'setIPConfig.yaml')
     host = static_dict.get('host')
     print "HOSTS---------------"
     print host
@@ -561,7 +563,8 @@ def __static_ip_configure(static_dict, proxy_dict):
 
 
 def __static_ip_cleanup(static_dict):
-    playbook_path = "ansible_p/commission/hardware/playbooks/delIPConfig.yaml"
+    playbook_path = pkg_resources.resource_filename(
+        'snaps_boot.ansible_p.hardware.playbooks', 'delIPConfig.yaml')
     host = static_dict.get('host')
     iplist = []
     next_word = None
@@ -646,7 +649,8 @@ def __set_isol_cpus(cpu_core_dict):
                 if "rootpw" in part:
                     root_pass = list_word[list_word.index("rootpw") + 1]
     user_name = 'root'
-    playbook_path = "ansible_p/commission/hardware/playbooks/setIsolCpus.yaml"
+    playbook_path = pkg_resources.resource_filename(
+        'snaps_boot.ansible_p.hardware.playbooks', 'setIsolCpus.yaml')
     host = cpu_core_dict.get('host')
     for ipCpu1 in host:
         target1 = ipCpu1.get('ip')
@@ -691,7 +695,8 @@ def __del_isol_cpus(cpu_core_dict):
                 if "rootpw" in part:
                     root_pass = list_word[list_word.index("rootpw") + 1]
     user_name = 'root'
-    playbook_path = "ansible_p/commission/hardware/playbooks/delIsolCpus.yaml"
+    playbook_path = pkg_resources.resource_filename(
+        'snaps_boot.ansible_p.hardware.playbooks', 'delIsolCpus.yaml')
     host = cpu_core_dict.get('host')
     for ipCpu1 in host:
         target1 = ipCpu1.get('ip')
