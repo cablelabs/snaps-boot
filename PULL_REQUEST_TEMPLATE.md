@@ -2,7 +2,7 @@
 #### Do you have any concerns with this PR?
 #### How can the reviewer verify this PR?
 #### Any background context you want to provide?
-#### Screenshots (if appropriate)
+#### Screenshots or logs (if appropriate)
 #### Questions:
 - Have you connected this PR to the issue it resolves?
 - Does the documentation need an update?
