@@ -1,9 +1,10 @@
 #### What does this PR do?
-#### Where should the reviewer start?
-#### How should this be manually tested?
+#### Do you have any concerns with this PR?
+#### How can the reviewer verify this PR?
 #### Any background context you want to provide?
 #### Screenshots (if appropriate)
 #### Questions:
-- Have you connected this PR to the issue it fixes?
+- Have you connected this PR to the issue it resolves?
 - Does the documentation need an update?
 - Does this add new Python dependencies?
+- Have you added unit or functional tests for this PR?
