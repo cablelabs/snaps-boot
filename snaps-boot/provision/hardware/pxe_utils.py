@@ -502,6 +502,7 @@ def __provisionClean():
 
 def __staticIPConfigure(staticDict,tftpDict,proxyDict):
  playbook_path="ansible_p/commission/hardware/playbooks/setIPConfig.yaml"
+ playbook_path_bak="ansible_p/commission/hardware/playbooks/interfaceBak.yaml"
  host= staticDict.get('host')
  print "HOSTS---------------"
  print host
@@ -538,6 +539,8 @@ def __staticIPConfigure(staticDict,tftpDict,proxyDict):
   command= "sshpass -p %s ssh-copy-id -o StrictHostKeyChecking=no %s@%s" %(password,user_name,target)
   subprocess.call(command,shell=True)
   interfaces=host[i].get('interfaces')
+  backup_var="Y"
+  ansible_playbook_launcher.__launch_ansible_playbook(iplist,playbook_path_bak,{'target': target, 'bak': backup_var})
   for i in range(len(interfaces)):
    address=interfaces[i].get('address')
    gateway=interfaces[i].get('gateway')
@@ -551,6 +554,7 @@ def __staticIPConfigure(staticDict,tftpDict,proxyDict):
 
 def __staticIPCleanup(staticDict,tftpDict):
  playbook_path="ansible_p/commission/hardware/playbooks/delIPConfig.yaml"
+ playbook_path_bak="ansible_p/commission/hardware/playbooks/interfaceBak.yaml"
  host= staticDict.get('host')
  access_ip=None
  iplist=[]
@@ -579,6 +583,8 @@ def __staticIPCleanup(staticDict,tftpDict):
   command= "sshpass -p %s ssh-copy-id -o StrictHostKeyChecking=no %s@%s" %(password,user_name,target)
   subprocess.call(command,shell=True)
   interfaces=host[i].get('interfaces')
+  backup_var="N"
+  ansible_playbook_launcher.__launch_ansible_playbook(iplist,playbook_path_bak,{'target': target, 'bak': backup_var})
   for i in range(len(interfaces)):
    address=interfaces[i].get('address')
    gateway=interfaces[i].get('gateway')

@@ -23,10 +23,10 @@
     http_proxy: "{{ http_proxy }}"
     https_proxy: "{{ https_proxy }}"
   tasks:
-   - name: Backing up interface file
-     command: cp /etc/network/interfaces /etc/network/interfaces.bak
-     ignore_errors: True
-     when: is_mng|bool and true
+#   - name: Backing up interface file
+#     command: cp /etc/network/interfaces /etc/network/interfaces.bak
+#     ignore_errors: True
+#     when: is_mng|bool and true
    - name: Configuring nodes with static ip for mangment network
      lineinfile:
           dest: /etc/network/interfaces

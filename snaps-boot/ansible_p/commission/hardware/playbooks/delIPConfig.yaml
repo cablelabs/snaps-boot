@@ -20,14 +20,14 @@
     - is_mng: "{{ type == 'management' }}"
     - is_tnt: "{{ type == 'tenant' }}"
   tasks:
-   - name: Backing up apt.conf
-     command: mv /etc/apt/apt.conf.bak /etc/apt/apt.conf
-     ignore_errors: True
-     when: is_mng|bool and true
-   - name: Backing up interface
-     command: mv /etc/network/interfaces.bak /etc/network/interfaces
-     ignore_errors: True
-     when: is_mng|bool and true
+#   - name: Backing up apt.conf
+#     command: mv /etc/apt/apt.conf.bak /etc/apt/apt.conf
+#     ignore_errors: True
+#     when: is_mng|bool and true
+#   - name: Backing up interface
+#     command: mv /etc/network/interfaces.bak /etc/network/interfaces
+#     ignore_errors: True
+#     when: is_mng|bool and true
    - name: Backing up resolv.conf
      command: mv /etc/resolvconf/resolv.conf.d/base.bak /etc/resolvconf/resolv.conf.d/base
      ignore_errors: True
