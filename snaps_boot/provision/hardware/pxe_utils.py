@@ -499,6 +499,10 @@ def __static_ip_configure(static_dict, proxy_dict):
     playbook_path = pkg_resources.resource_filename(
         'snaps_boot.ansible_p.commission.hardware.playbooks',
         'setIPConfig.yaml')
+    playbook_path_bak = pkg_resources.resource_filename(
+        'snaps_boot.ansible_p.commission.hardware.playbooks',
+        'interfaceBak.yaml')
+
     host = static_dict.get('host')
     print "HOSTS---------------"
     print host
@@ -538,7 +542,8 @@ def __static_ip_configure(static_dict, proxy_dict):
                   'StrictHostKeyChecking=no %s@%s' % (password, user_name, target)
         subprocess.call(command, shell=True)
         interfaces = host[i].get('interfaces')
-
+        backup_var="Y"
+        ansible_playbook_launcher.__launch_ansible_playbook(iplist,playbook_path_bak,{'target': target, 'bak': backup_var})
         # TODO/FIXME - why is the var 'i' being used in both the inner and
         # outer loops???
         for i in range(len(interfaces)):
@@ -567,6 +572,10 @@ def __static_ip_cleanup(static_dict):
     playbook_path = pkg_resources.resource_filename(
         'snaps_boot.ansible_p.commission.hardware.playbooks',
         'delIPConfig.yaml')
+    playbook_path_bak = pkg_resources.resource_filename(
+        'snaps_boot.ansible_p.commission.hardware.playbooks',
+        'interfaceBak.yaml')
+
     host = static_dict.get('host')
     iplist = []
     next_word = None
@@ -596,7 +605,8 @@ def __static_ip_cleanup(static_dict):
                   'StrictHostKeyChecking=no %s@%s' % (password, user_name, target)
         subprocess.call(command, shell=True)
         interfaces = host[i].get('interfaces')
-
+        backup_var="N"
+        ansible_playbook_launcher.__launch_ansible_playbook(iplist,playbook_path_bak,{'target': target, 'bak': backup_var})
         # TODO/FIXME - why is the var 'i' being used in both the inner and
         # outer loops???
         for i in range(len(interfaces)):
