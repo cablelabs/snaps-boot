@@ -1,0 +1,354 @@
+# Copyright (c) 2016 Cable Television Laboratories, Inc. ("CableLabs")
+#                    and others.  All rights reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at:
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+---
+openstack:
+  connections:
+    # Note - when http_proxy is set, you must also configure ssh for proxy tunneling on your host.
+    - connection:
+        name: admin-creds
+        username: {{ admin_user }}
+        project_name: {{ admin_proj }}
+        password: {{ admin_pass }}
+        auth_url: {{ auth_url }}
+        identity_api_version: {{ id_api_version }}
+        proxy_settings:
+          host: {{ proxy_host }}
+          port: {{ proxy_port }}
+          ssh_proxy_cmd: {{ ssh_proxy_cmd }}
+  projects:
+    - project:
+        os_creds_name: admin-creds
+        name: pxe-proj
+        description: Project for Orchestrators
+        users: [pxe-user, {{ admin_user }}]
+  users:
+    - user:
+        os_creds_name: admin-creds
+        name: pxe-user
+        password: password
+        project_name: pxe-proj
+        roles: {admin: pxe-proj}
+  flavors:
+    - flavor:
+        os_creds_name: admin-creds
+        name: build-flavor
+        ram: 4096
+        disk: 80
+        vcpus: 2
+    - flavor:
+        os_creds_name: admin-creds
+        name: pxe-flavor
+        ram: 1024
+        disk: 10
+        vcpus: 1
+  images:
+    - image:
+        os_creds_name: admin-creds
+        name: build-image
+        format: qcow2
+        image_user: ubuntu
+        download_url: https://cloud-images.ubuntu.com/xenial/current/xenial-server-cloudimg-amd64-disk1.img
+    - image:
+        os_creds_name: admin-creds
+        name: pxe-image
+        format: qcow2
+        image_user: ubuntu
+        image_file: {{ pxe_image_file }}
+  networks:
+    - network:
+        os_user:
+          name: pxe-user
+          project_name: pxe-proj
+        name: admin-net
+        project_name: pxe-proj
+        subnets:
+          - subnet:
+              name: admin-subnet
+              project_name: pxe-proj
+              cidr: 10.0.0.0/24
+              dns_nameservers: []
+    - network:
+        os_user:
+          name: pxe-user
+          project_name: pxe-proj
+        name: priv-net
+        project_name: pxe-proj
+        subnets:
+          - subnet:
+              name: priv-subnet
+              project_name: pxe-proj
+              cidr: 10.0.1.0/24
+              dns_nameservers: []
+    - network:
+        os_user:
+          name: pxe-user
+          project_name: pxe-proj
+        name: public-net
+        project_name: pxe-proj
+        subnets:
+          - subnet:
+              name: public-subnet
+              project_name: pxe-proj
+              cidr: 10.0.2.0/24
+              dns_nameservers: [8.8.8.8]
+  routers:
+    - router:
+        os_user:
+          name: pxe-user
+          project_name: pxe-proj
+        name: pxe-router
+        external_gateway: {{ ext_net }}
+        internal_subnets:
+          - public-subnet
+  keypairs:
+    - keypair:
+        os_user:
+          name: pxe-user
+          project_name: pxe-proj
+        name: pxe-build-kp
+        public_filepath: {{ pxe_kp_pub_path }}
+        private_filepath: {{ pxe_kp_priv_path }}
+        delete_on_clean: True
+  security_groups:
+    - security_group:
+        os_user:
+          name: pxe-user
+          project_name: pxe-proj
+        name: pxe-build-sg
+        rules:
+          - direction: ingress
+            protocol: icmp
+          - direction: ingress
+            protocol: tcp
+            port_range_min: 22
+            port_range_max: 22
+  instances:
+    - instance:
+        os_user:
+          name: pxe-user
+          project_name: pxe-proj
+        name: build-vm
+        flavor: build-flavor
+        imageName: build-image
+        keypair_name: pxe-build-kp
+        security_group_names: [pxe-build-sg]
+        userdata: |
+          #cloud-config
+          packages:
+            - python
+          password: password
+          chpasswd: { expire: False }
+          ssh_pwauth: True
+          bootcmd:
+            - [sh, -c, "echo 'this has been written via cloud-init' + $(date) >> /tmp/myScript.txt"]
+            - [sh, -c, "echo 'auto ens4\niface ens4 inet dhcp' | tee /etc/network/interfaces.d/ens4.cfg > /dev/null"]
+            - [sh, -c, "sudo ifup ens4"]
+            - [sh, -c, "echo 'auto ens5\niface ens5 inet dhcp' | tee /etc/network/interfaces.d/ens5.cfg > /dev/null"]
+            - [sh, -c, "sudo ifup ens5"]
+        ports:
+          - port:
+              name: build-pub-port
+              network_name: public-net
+          - port:
+              name: build-admin-port
+              network_name: admin-net
+          - port:
+              name: build-priv-port
+              network_name: priv-net
+        floating_ips:
+          - floating_ip:
+              name: fip1
+              port_name: build-pub-port
+              router_name: pxe-router
+    - instance:
+        os_user:
+          name: pxe-user
+          project_name: pxe-proj
+        name: pxe-vm-1
+        flavor: pxe-flavor
+        imageName: pxe-image
+        ports:
+          - port:
+              name: pxe-admin-port-1
+              network_name: admin-net
+          - port:
+              name: pxe-priv-port-1
+              network_name: priv-net
+          - port:
+              name: pxe-pub-port-1
+              network_name: public-net
+    - instance:
+        os_user:
+          name: pxe-user
+          project_name: pxe-proj
+        name: pxe-vm-2
+        flavor: pxe-flavor
+        imageName: pxe-image
+        ports:
+          - port:
+              name: pxe-admin-port-2
+              network_name: admin-net
+          - port:
+              name: pxe-priv-port-2
+              network_name: priv-net
+          - port:
+              name: pxe-pub-port-2
+              network_name: public-net
+    - instance:
+        os_user:
+          name: pxe-user
+          project_name: pxe-proj
+        name: pxe-vm-3
+        flavor: pxe-flavor
+        imageName: pxe-image
+        ports:
+          - port:
+              name: pxe-admin-port-3
+              network_name: admin-net
+          - port:
+              name: pxe-priv-port-3
+              network_name: priv-net
+          - port:
+              name: pxe-pub-port-3
+              network_name: public-net
+ansible:
+  # Install and configure snaps-boot to build host
+  - playbook_location: {{ setup_build_pb_loc }}
+    hosts:
+      - build-vm
+    variables:
+      priv_addr:
+        type: network
+        network_name: admin-net
+        subnet_name: admin-subnet
+        value: cidr_ip
+      admin_ip_1:
+        type: port
+        vm_name: pxe-vm-1
+        port_name: pxe-admin-port-1
+        port_value: ip_address
+      admin_mac_1:
+        type: port
+        vm_name: pxe-vm-1
+        port_name: pxe-admin-port-1
+        port_value: mac_address
+      private_ip_1:
+        type: port
+        vm_name: pxe-vm-1
+        port_name: pxe-pub-port-1
+        port_value: ip_address
+      public_ip_1:
+        type: port
+        vm_name: pxe-vm-1
+        port_name: pxe-pub-port-1
+        port_value: ip_address
+      admin_ip_2:
+        type: port
+        vm_name: pxe-vm-2
+        port_name: pxe-admin-port-2
+        port_value: ip_address
+      admin_mac_2:
+        type: port
+        vm_name: pxe-vm-2
+        port_name: pxe-admin-port-2
+        port_value: mac_address
+      private_ip_2:
+        type: port
+        vm_name: pxe-vm-2
+        port_name: pxe-pub-port-2
+        port_value: ip_address
+      public_ip_2:
+        type: port
+        vm_name: pxe-vm-2
+        port_name: pxe-pub-port-2
+        port_value: ip_address
+      admin_ip_3:
+        type: port
+        vm_name: pxe-vm-3
+        port_name: pxe-admin-port-3
+        port_value: ip_address
+      admin_mac_3:
+        type: port
+        vm_name: pxe-vm-3
+        port_name: pxe-admin-port-3
+        port_value: mac_address
+      private_ip_3:
+        type: port
+        vm_name: pxe-vm-3
+        port_name: pxe-pub-port-3
+        port_value: ip_address
+      public_ip_3:
+        type: port
+        vm_name: pxe-vm-3
+        port_name: pxe-pub-port-3
+        port_value: ip_address
+      public_gateway:
+        type: network
+        network_name: public-net
+        subnet_name: public-subnet
+        value: gateway_ip
+      broadcast_addr:
+        type: network
+        network_name: admin-net
+        subnet_name: admin-subnet
+        value: broadcast_ip
+      domain_name:
+        type: string
+        value: cablelabs.com
+      dns_addr:
+        type: string
+        value: 8.8.8.8
+      listen_iface:
+        type: string
+        value: ens5
+      max_lease:
+        type: string
+        value: 7200
+      netmask:
+        type: network
+        network_name: admin-net
+        subnet_name: admin-subnet
+        value: netmask
+      ip_range:
+        type: network
+        network_name: admin-net
+        subnet_name: admin-subnet
+        value: ip_range
+      router_ip:
+        type: router
+        router_name: pxe-router
+        attr: external_fixed_ip
+        subnet_name: {{ ext_subnet }}
+      build_admin_ip:
+        type: port
+        vm_name: build-vm
+        port_name: build-admin-port
+        port_value: ip_address
+      http_proxy_port:
+        type: string
+        value: 3142
+      priv_iface:
+        type: string
+        value: ens4
+      pub_iface:
+        type: string
+        value: ens5
+      pxe_pass:
+        type: string
+        value: password
+      pxe_image_user:
+        type: image
+        image_name: pxe-image
+        value: user
