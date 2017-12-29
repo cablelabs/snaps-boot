@@ -352,3 +352,6 @@ ansible:
         type: image
         image_name: pxe-image
         value: user
+      pxe_image_file:
+        type: string
+        value: {{ pxe_image }}
