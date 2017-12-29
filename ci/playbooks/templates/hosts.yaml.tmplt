@@ -66,7 +66,7 @@ PROVISION:
          -
            address: {{ public_ip_1 }}
            dn: ""
-           dns: ""
+           dns: {{ dns_addr }}
            gateway: {{ public_gateway }}
            iface: {{ pub_iface }}
            name: Tenant_Interface
@@ -88,7 +88,7 @@ PROVISION:
          -
            address: {{ public_ip_2 }}
            dn: ""
-           dns: ""
+           dns: {{ dns_addr }}
            gateway: {{ public_gateway }}
            iface: {{ pub_iface }}
            name: Tenant_Interface
@@ -110,7 +110,7 @@ PROVISION:
          -
            address: {{ public_ip_3 }}
            dn: ""
-           dns: ""
+           dns: {{ dns_addr }}
            gateway: {{ public_gateway }}
            iface: {{ pub_iface }}
            name: Tenant_Interface
@@ -146,10 +146,10 @@ PROVISION:
     timezone: America/Denver
     user: ubuntu
     fullname: ubuntu_user
-  CPUCORE:
-    host:
-       -
-         ip: {{ build_admin_ip }}
-         isolcpus: "0-20,1-22"
-         hugepagesz: "2M"
-         hugepages: "2048"
+#  CPUCORE:
+#    host:
+#       -
+#         ip: {{ build_admin_ip }}
+#         isolcpus: "0-20,1-22"
+#         hugepagesz: "2M"
+#         hugepages: "2048"

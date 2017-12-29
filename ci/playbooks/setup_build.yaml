@@ -14,12 +14,12 @@
 # limitations under the License.
 ---
 - hosts: all
-  become: yes
-  become_method: sudo
-  become_user: root
 
   tasks:
     - name: Install Git
+      become: yes
+      become_method: sudo
+      become_user: root
       apt: name=git
 
     - name: Clone snaps-boot
@@ -27,5 +27,19 @@
         repo: https://github.com/cablelabs/snaps-boot.git
         dest: ~/snaps_boot
 
+    - name: Create image directory
+      file: path=~/snaps_boot/images state=directory
+
+    - name: Copy PXE image
+      copy:
+        src: "{{ pxe_image_file }}"
+        dest: ~/snaps_boot/images/ubuntu-16.04.3-server-amd64.iso
+
     - name: Copy environment file
       action: template src=templates/hosts.yaml.tmplt dest=~/hosts.yaml
+
+    - name: Complete Setup
+      become: yes
+      become_method: sudo
+      become_user: root
+      command: "sh ~{{ ansible_user }}/snaps_boot/scripts/PreRequisite.sh"
