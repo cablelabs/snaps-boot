@@ -260,7 +260,7 @@ menu margin 8
 menu title installer boot menu
 label linux
         kernel ubuntu-installer/amd64/linux
-        append ks=http://$1/ubuntu/ks.cfg vga=normal initrd=ubuntu-installer/amd64/initrd.gz  url=http://$1/ubuntu/preseed/$2 live-installer/net-image=http://$1/ubuntu/install/filesystem.squashfs ramdisk_size=16432 root=/dev/rd/0 rw  --
+        append ks=http://$1/ubuntu/ks.cfg vga=normal initrd=ubuntu-installer/amd64/initrd.gz  url=http://$1/ubuntu/preseed/$2 live-installer/net-image=http://$1/ubuntu/install/filesystem.squashfs console=ttyS1,115200 console=ttyS0,115200 console=tty ramdisk_size=16432 root=/dev/rd/0 rw  --
 
 EOF
 command_status=$?
