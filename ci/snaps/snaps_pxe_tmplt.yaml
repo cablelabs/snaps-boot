@@ -71,13 +71,28 @@ openstack:
         os_user:
           name: pxe-user
           project_name: pxe-proj
+        name: ctrl-net
+        project_name: pxe-proj
+        subnets:
+          - subnet:
+              name: ctrl-subnet
+              project_name: pxe-proj
+              cidr: {{ ctrl_ip_prfx }}.0/24
+              dns_nameservers: [8.8.8.8]
+    - network:
+        os_user:
+          name: pxe-user
+          project_name: pxe-proj
         name: admin-net
         project_name: pxe-proj
         subnets:
           - subnet:
               name: admin-subnet
               project_name: pxe-proj
-              cidr: 10.0.0.0/24
+              cidr: {{ admin_ip_prfx }}.0/24
+              start: {{ admin_ip_prfx }}.2
+              end: {{ admin_ip_prfx }}.10
+              enable_dhcp: False
               dns_nameservers: []
     - network:
         os_user:
@@ -89,7 +104,10 @@ openstack:
           - subnet:
               name: priv-subnet
               project_name: pxe-proj
-              cidr: 10.0.1.0/24
+              cidr: {{ priv_ip_prfx }}.0/24
+              start: {{ priv_ip_prfx }}.2
+              end: {{ priv_ip_prfx }}.10
+              enable_dhcp: False
               dns_nameservers: []
     - network:
         os_user:
@@ -101,9 +119,20 @@ openstack:
           - subnet:
               name: public-subnet
               project_name: pxe-proj
-              cidr: 10.0.2.0/24
+              cidr: {{ pub_ip_prfx }}.0/24
+              start: {{ pub_ip_prfx }}.2
+              end: {{ pub_ip_prfx }}.10
+              enable_dhcp: False
               dns_nameservers: [8.8.8.8]
   routers:
+    - router:
+        os_user:
+          name: pxe-user
+          project_name: pxe-proj
+        name: ctrl-router
+        external_gateway: {{ ext_net }}
+        internal_subnets:
+          - ctrl-subnet
     - router:
         os_user:
           name: pxe-user
@@ -129,6 +158,10 @@ openstack:
         name: pxe-build-sg
         rules:
           - direction: ingress
+            protocol: udp
+          - direction: egress
+            protocol: udp
+          - direction: ingress
             protocol: icmp
           - direction: ingress
             protocol: tcp
@@ -144,6 +177,7 @@ openstack:
         imageName: build-image
         keypair_name: pxe-build-kp
         security_group_names: [pxe-build-sg]
+        cloud_init_timeout: 1000
         userdata: |
           #cloud-config
           packages:
@@ -152,26 +186,55 @@ openstack:
           chpasswd: { expire: False }
           ssh_pwauth: True
           bootcmd:
-            - [sh, -c, "echo 'this has been written via cloud-init' + $(date) >> /tmp/myScript.txt"]
-            - [sh, -c, "echo 'auto ens4\niface ens4 inet dhcp' | tee /etc/network/interfaces.d/ens4.cfg > /dev/null"]
+            - [sh, -c, "echo 'auto ens4' > /etc/network/interfaces.d/ens4.cfg"]
+            - [sh, -c, "echo '  iface ens4 inet static' >> /etc/network/interfaces.d/ens4.cfg"]
+            - [sh, -c, "echo '  address {{ admin_ip_prfx }}.10' >> /etc/network/interfaces.d/ens4.cfg"]
+            - [sh, -c, "echo '  netmask 255.255.255.0' >> /etc/network/interfaces.d/ens4.cfg"]
+            - [sh, -c, "echo '  network {{ admin_ip_prfx }}.0' >> /etc/network/interfaces.d/ens4.cfg"]
+            - [sh, -c, "echo '  broadcast {{ admin_ip_prfx }}.255' >> /etc/network/interfaces.d/ens4.cfg"]
             - [sh, -c, "sudo ifup ens4"]
-            - [sh, -c, "echo 'auto ens5\niface ens5 inet dhcp' | tee /etc/network/interfaces.d/ens5.cfg > /dev/null"]
             - [sh, -c, "sudo ifup ens5"]
+            - [sh, -c, "echo 'auto ens5' > /etc/network/interfaces.d/ens5.cfg"]
+            - [sh, -c, "echo '  iface ens5 inet static' >> /etc/network/interfaces.d/ens5.cfg"]
+            - [sh, -c, "echo '  address {{ priv_ip_prfx }}.10' >> /etc/network/interfaces.d/ens5.cfg"]
+            - [sh, -c, "echo '  netmask 255.255.255.0' >> /etc/network/interfaces.d/ens5.cfg"]
+            - [sh, -c, "echo '  network {{ priv_ip_prfx }}.0' >> /etc/network/interfaces.d/ens5.cfg"]
+            - [sh, -c, "echo '  broadcast {{ priv_ip_prfx }}.255' >> /etc/network/interfaces.d/ens5.cfg"]
+            - [sh, -c, "sudo ifup ens5"]
+            - [sh, -c, "echo 'auto ens6' > /etc/network/interfaces.d/ens6.cfg"]
+            - [sh, -c, "echo '  iface ens6 inet static' >> /etc/network/interfaces.d/ens6.cfg"]
+            - [sh, -c, "echo '  address {{ pub_ip_prfx }}.10' >> /etc/network/interfaces.d/ens6.cfg"]
+            - [sh, -c, "echo '  netmask 255.255.255.0' >> /etc/network/interfaces.d/ens6.cfg"]
+            - [sh, -c, "echo '  network {{ pub_ip_prfx }}.0' >> /etc/network/interfaces.d/ens6.cfg"]
+            - [sh, -c, "echo '  broadcast {{ pub_ip_prfx }}.255' >> /etc/network/interfaces.d/ens6.cfg"]
+            - [sh, -c, "sudo ifup ens6"]
         ports:
           - port:
-              name: build-pub-port
-              network_name: public-net
+              name: build-ctrl-port
+              network_name: ctrl-net
           - port:
               name: build-admin-port
               network_name: admin-net
+              ip_addrs:
+                - subnet_name: 'admin-subnet'
+                  ip: {{ admin_ip_prfx }}.10
           - port:
               name: build-priv-port
               network_name: priv-net
+              ip_addrs:
+                - subnet_name: 'priv-subnet'
+                  ip: {{ priv_ip_prfx }}.10
+          - port:
+              name: build-pub-port
+              network_name: public-net
+              ip_addrs:
+                - subnet_name: 'public-subnet'
+                  ip: {{ pub_ip_prfx }}.10
         floating_ips:
           - floating_ip:
               name: fip1
-              port_name: build-pub-port
-              router_name: pxe-router
+              port_name: build-ctrl-port
+              router_name: ctrl-router
     - instance:
         os_user:
           name: pxe-user
@@ -183,12 +246,21 @@ openstack:
           - port:
               name: pxe-admin-port-1
               network_name: admin-net
+              ip_addrs:
+                - subnet_name: 'admin-subnet'
+                  ip: {{ admin_ip_prfx }}.11
           - port:
               name: pxe-priv-port-1
               network_name: priv-net
+              ip_addrs:
+                - subnet_name: 'priv-subnet'
+                  ip: {{ priv_ip_prfx }}.11
           - port:
               name: pxe-pub-port-1
               network_name: public-net
+              ip_addrs:
+                - subnet_name: 'public-subnet'
+                  ip: {{ pub_ip_prfx }}.11
     - instance:
         os_user:
           name: pxe-user
@@ -200,12 +272,21 @@ openstack:
           - port:
               name: pxe-admin-port-2
               network_name: admin-net
+              ip_addrs:
+                - subnet_name: 'admin-subnet'
+                  ip: {{ admin_ip_prfx }}.12
           - port:
               name: pxe-priv-port-2
               network_name: priv-net
+              ip_addrs:
+                - subnet_name: 'priv-subnet'
+                  ip: {{ priv_ip_prfx }}.12
           - port:
               name: pxe-pub-port-2
               network_name: public-net
+              ip_addrs:
+                - subnet_name: 'public-subnet'
+                  ip: {{ pub_ip_prfx }}.12
     - instance:
         os_user:
           name: pxe-user
@@ -217,12 +298,21 @@ openstack:
           - port:
               name: pxe-admin-port-3
               network_name: admin-net
+              ip_addrs:
+                - subnet_name: 'admin-subnet'
+                  ip: {{ admin_ip_prfx }}.13
           - port:
               name: pxe-priv-port-3
               network_name: priv-net
+              ip_addrs:
+                - subnet_name: 'priv-subnet'
+                  ip: {{ priv_ip_prfx }}.13
           - port:
               name: pxe-pub-port-3
               network_name: public-net
+              ip_addrs:
+                - subnet_name: 'public-subnet'
+                  ip: {{ pub_ip_prfx }}.13
 ansible:
   # Install and configure snaps-boot to build host
   - playbook_location: {{ setup_build_pb_loc }}

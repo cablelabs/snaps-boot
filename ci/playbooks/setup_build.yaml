@@ -28,18 +28,24 @@
         dest: ~/snaps_boot
 
     - name: Create image directory
-      file: path=~/snaps_boot/images state=directory
+      file: path=~/snaps_boot/packages/images state=directory
 
-    - name: Copy PXE image
+    - name: Copy PXE image - ubuntu-16.04.3-server-amd64.iso
       copy:
         src: "{{ pxe_image_file }}"
-        dest: ~/snaps_boot/images/ubuntu-16.04.3-server-amd64.iso
+        dest: ~/snaps_boot/packages/images/ubuntu-16.04.3-server-amd64.iso
 
-    - name: Copy environment file
+    - name: Copy environment file - hosts.yaml
       action: template src=templates/hosts.yaml.tmplt dest=~/hosts.yaml
 
-    - name: Complete Setup
+    - name: Complete build host setup - PreRequisite.sh
       become: yes
       become_method: sudo
       become_user: root
       command: "sh ~{{ ansible_user }}/snaps_boot/scripts/PreRequisite.sh"
+
+    - name: Config PXE & DHCP server - iaas_launch.py -p
+      become: yes
+      become_method: sudo
+      become_user: root
+      command: "python ~{{ ansible_user }}/snaps_boot/iaas_launch.py -f ~{{ ansible_user }}/hosts.yaml -p"
