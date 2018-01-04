@@ -53,19 +53,34 @@ openstack:
         ram: 1024
         disk: 10
         vcpus: 1
+    - flavor:
+        os_creds_name: admin-creds
+        name: debug-flavor
+        ram: 512
+        disk: 5
+        vcpus: 1
   images:
     - image:
         os_creds_name: admin-creds
         name: build-image
         format: qcow2
+        public: True
         image_user: ubuntu
         download_url: https://cloud-images.ubuntu.com/xenial/current/xenial-server-cloudimg-amd64-disk1.img
     - image:
         os_creds_name: admin-creds
         name: pxe-image
         format: qcow2
+        public: True
         image_user: ubuntu
         image_file: {{ pxe_image_file }}
+    - image:
+        os_creds_name: admin-creds
+        name: debug-image
+        format: qcow2
+        public: True
+        image_user: cirros
+        download_url: http://download.cirros-cloud.net/0.3.4/cirros-0.3.4-x86_64-disk.img
   networks:
     - network:
         os_user:
@@ -167,6 +182,20 @@ openstack:
             protocol: tcp
             port_range_min: 22
             port_range_max: 22
+    - security_group:
+        os_user:
+          name: pxe-user
+          project_name: pxe-proj
+        name: udp-port-sg
+        rules:
+          - direction: ingress
+            protocol: udp
+          - direction: egress
+            protocol: udp
+          - direction: ingress
+            protocol: tcp
+          - direction: egress
+            protocol: tcp
   instances:
     - instance:
         os_user:
@@ -215,6 +244,7 @@ openstack:
           - port:
               name: build-admin-port
               network_name: admin-net
+              security_groups: [udp-port-sg]
               ip_addrs:
                 - subnet_name: 'admin-subnet'
                   ip: {{ admin_ip_prfx }}.10
@@ -246,6 +276,7 @@ openstack:
           - port:
               name: pxe-admin-port-1
               network_name: admin-net
+              security_groups: [udp-port-sg]
               ip_addrs:
                 - subnet_name: 'admin-subnet'
                   ip: {{ admin_ip_prfx }}.11
@@ -272,6 +303,7 @@ openstack:
           - port:
               name: pxe-admin-port-2
               network_name: admin-net
+              security_groups: [udp-port-sg]
               ip_addrs:
                 - subnet_name: 'admin-subnet'
                   ip: {{ admin_ip_prfx }}.12
@@ -298,6 +330,7 @@ openstack:
           - port:
               name: pxe-admin-port-3
               network_name: admin-net
+              security_groups: [udp-port-sg]
               ip_addrs:
                 - subnet_name: 'admin-subnet'
                   ip: {{ admin_ip_prfx }}.13
@@ -313,6 +346,34 @@ openstack:
               ip_addrs:
                 - subnet_name: 'public-subnet'
                   ip: {{ pub_ip_prfx }}.13
+    - instance:
+        os_user:
+          name: pxe-user
+          project_name: pxe-proj
+        name: debug-vm
+        flavor: debug-flavor
+        imageName: debug-image
+        keypair_name: pxe-build-kp
+        userdata: |
+          #cloud-config
+          bootcmd:
+            - [sh, -c, "sed '/^iface eth0/s/^/#/' /etc/network/interfaces > /etc/network/tmp.out"]
+            - [sh, -c, "mv /etc/network/tmp.out /etc/network/interfaces"]
+            - [sh, -c, "echo 'auto eth0' > /etc/network/interfaces"]
+            - [sh, -c, "echo '  iface eth0 inet static' >> /etc/network/interfaces"]
+            - [sh, -c, "echo '  address {{ admin_ip_prfx }}.15' >> /etc/network/interfaces"]
+            - [sh, -c, "echo '  netmask 255.255.255.0' >> /etc/network/interfaces"]
+            - [sh, -c, "echo '  network {{ admin_ip_prfx }}.0' >> /etc/network/interfaces"]
+            - [sh, -c, "echo '  broadcast {{ admin_ip_prfx }}.255' >> /etc/network/interfaces"]
+            - [sh, -c, "sudo ifup eth0"]
+        ports:
+          - port:
+              name: test-admin-port
+              network_name: admin-net
+              port_security_enabled: False
+              ip_addrs:
+                - subnet_name: 'admin-subnet'
+                  ip: {{ admin_ip_prfx }}.15
 ansible:
   # Install and configure snaps-boot to build host
   - playbook_location: {{ setup_build_pb_loc }}
@@ -402,7 +463,7 @@ ansible:
         value: 8.8.8.8
       listen_iface:
         type: string
-        value: ens5
+        value: ens4
       max_lease:
         type: string
         value: 7200
@@ -431,10 +492,10 @@ ansible:
         value: 3142
       priv_iface:
         type: string
-        value: ens4
+        value: ens5
       pub_iface:
         type: string
-        value: ens5
+        value: ens6
       pxe_pass:
         type: string
         value: password
