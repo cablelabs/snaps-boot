@@ -27,7 +27,7 @@
         repo: https://github.com/cablelabs/snaps-boot.git
         dest: ~/snaps_boot
 
-    - name: Create image directory
+    - name: Create PXE image directory
       file: path=~/snaps_boot/packages/images state=directory
 
     - name: Copy PXE image - ubuntu-16.04.3-server-amd64.iso
