@@ -53,12 +53,6 @@ openstack:
         ram: 1024
         disk: 10
         vcpus: 1
-    - flavor:
-        os_creds_name: admin-creds
-        name: debug-flavor
-        ram: 512
-        disk: 5
-        vcpus: 1
   images:
     - image:
         os_creds_name: admin-creds
@@ -74,13 +68,6 @@ openstack:
         public: True
         image_user: ubuntu
         image_file: {{ pxe_image_file }}
-    - image:
-        os_creds_name: admin-creds
-        name: debug-image
-        format: qcow2
-        public: True
-        image_user: cirros
-        download_url: http://download.cirros-cloud.net/0.3.4/cirros-0.3.4-x86_64-disk.img
   networks:
     - network:
         os_user:
@@ -106,8 +93,8 @@ openstack:
               project_name: pxe-proj
               cidr: {{ admin_ip_prfx }}.0/24
               start: {{ admin_ip_prfx }}.2
-              end: {{ admin_ip_prfx }}.10
-              enable_dhcp: False
+              end: {{ admin_ip_prfx }}.9
+              enable_dhcp: True
               dns_nameservers: []
     - network:
         os_user:
@@ -121,7 +108,7 @@ openstack:
               project_name: pxe-proj
               cidr: {{ priv_ip_prfx }}.0/24
               start: {{ priv_ip_prfx }}.2
-              end: {{ priv_ip_prfx }}.10
+              end: {{ priv_ip_prfx }}.9
               enable_dhcp: False
               dns_nameservers: []
     - network:
@@ -136,7 +123,7 @@ openstack:
               project_name: pxe-proj
               cidr: {{ pub_ip_prfx }}.0/24
               start: {{ pub_ip_prfx }}.2
-              end: {{ pub_ip_prfx }}.10
+              end: {{ pub_ip_prfx }}.9
               enable_dhcp: False
               dns_nameservers: [8.8.8.8]
   routers:
@@ -219,23 +206,17 @@ openstack:
             - [sh, -c, "echo '  iface ens4 inet static' >> /etc/network/interfaces.d/ens4.cfg"]
             - [sh, -c, "echo '  address {{ admin_ip_prfx }}.10' >> /etc/network/interfaces.d/ens4.cfg"]
             - [sh, -c, "echo '  netmask 255.255.255.0' >> /etc/network/interfaces.d/ens4.cfg"]
-            - [sh, -c, "echo '  network {{ admin_ip_prfx }}.0' >> /etc/network/interfaces.d/ens4.cfg"]
-            - [sh, -c, "echo '  broadcast {{ admin_ip_prfx }}.255' >> /etc/network/interfaces.d/ens4.cfg"]
             - [sh, -c, "sudo ifup ens4"]
-            - [sh, -c, "sudo ifup ens5"]
             - [sh, -c, "echo 'auto ens5' > /etc/network/interfaces.d/ens5.cfg"]
             - [sh, -c, "echo '  iface ens5 inet static' >> /etc/network/interfaces.d/ens5.cfg"]
             - [sh, -c, "echo '  address {{ priv_ip_prfx }}.10' >> /etc/network/interfaces.d/ens5.cfg"]
             - [sh, -c, "echo '  netmask 255.255.255.0' >> /etc/network/interfaces.d/ens5.cfg"]
-            - [sh, -c, "echo '  network {{ priv_ip_prfx }}.0' >> /etc/network/interfaces.d/ens5.cfg"]
-            - [sh, -c, "echo '  broadcast {{ priv_ip_prfx }}.255' >> /etc/network/interfaces.d/ens5.cfg"]
             - [sh, -c, "sudo ifup ens5"]
             - [sh, -c, "echo 'auto ens6' > /etc/network/interfaces.d/ens6.cfg"]
             - [sh, -c, "echo '  iface ens6 inet static' >> /etc/network/interfaces.d/ens6.cfg"]
             - [sh, -c, "echo '  address {{ pub_ip_prfx }}.10' >> /etc/network/interfaces.d/ens6.cfg"]
             - [sh, -c, "echo '  netmask 255.255.255.0' >> /etc/network/interfaces.d/ens6.cfg"]
-            - [sh, -c, "echo '  network {{ pub_ip_prfx }}.0' >> /etc/network/interfaces.d/ens6.cfg"]
-            - [sh, -c, "echo '  broadcast {{ pub_ip_prfx }}.255' >> /etc/network/interfaces.d/ens6.cfg"]
+            - [sh, -c, "echo '  gateway {{ pub_ip_prfx }}.1' >> /etc/network/interfaces.d/ens6.cfg"]
             - [sh, -c, "sudo ifup ens6"]
         ports:
           - port:
@@ -351,34 +332,71 @@ openstack:
           name: pxe-user
           project_name: pxe-proj
         name: debug-vm
-        flavor: debug-flavor
-        imageName: debug-image
+        flavor: pxe-flavor
+        imageName: build-image
         keypair_name: pxe-build-kp
+        security_group_names: [pxe-build-sg]
         userdata: |
           #cloud-config
+          password: password
+          chpasswd: { expire: False }
+          ssh_pwauth: True
           bootcmd:
-            - [sh, -c, "sed '/^iface eth0/s/^/#/' /etc/network/interfaces > /etc/network/tmp.out"]
-            - [sh, -c, "mv /etc/network/tmp.out /etc/network/interfaces"]
-            - [sh, -c, "echo 'auto eth0' > /etc/network/interfaces"]
-            - [sh, -c, "echo '  iface eth0 inet static' >> /etc/network/interfaces"]
-            - [sh, -c, "echo '  address {{ admin_ip_prfx }}.15' >> /etc/network/interfaces"]
-            - [sh, -c, "echo '  netmask 255.255.255.0' >> /etc/network/interfaces"]
-            - [sh, -c, "echo '  network {{ admin_ip_prfx }}.0' >> /etc/network/interfaces"]
-            - [sh, -c, "echo '  broadcast {{ admin_ip_prfx }}.255' >> /etc/network/interfaces"]
-            - [sh, -c, "sudo ifup eth0"]
+            - [sh, -c, "echo 'auto ens4' > /etc/network/interfaces.d/ens4.cfg"]
+            - [sh, -c, "echo '  iface ens4 inet static' >> /etc/network/interfaces.d/ens4.cfg"]
+            - [sh, -c, "echo '  address {{ admin_ip_prfx }}.15' >> /etc/network/interfaces.d/ens4.cfg"]
+            - [sh, -c, "echo '  netmask 255.255.255.0' >> /etc/network/interfaces.d/ens4.cfg"]
+            - [sh, -c, "sudo ifup ens4"]
+            - [sh, -c, "echo 'auto ens5' > /etc/network/interfaces.d/ens5.cfg"]
+            - [sh, -c, "echo '  iface ens5 inet static' >> /etc/network/interfaces.d/ens5.cfg"]
+            - [sh, -c, "echo '  address {{ priv_ip_prfx }}.15' >> /etc/network/interfaces.d/ens5.cfg"]
+            - [sh, -c, "echo '  netmask 255.255.255.0' >> /etc/network/interfaces.d/ens5.cfg"]
+            - [sh, -c, "sudo ifup ens5"]
+            - [sh, -c, "echo 'auto ens6' > /etc/network/interfaces.d/ens6.cfg"]
+            - [sh, -c, "echo '  iface ens6 inet static' >> /etc/network/interfaces.d/ens6.cfg"]
+            - [sh, -c, "echo '  address {{ pub_ip_prfx }}.15' >> /etc/network/interfaces.d/ens6.cfg"]
+            - [sh, -c, "echo '  netmask 255.255.255.0' >> /etc/network/interfaces.d/ens6.cfg"]
+            - [sh, -c, "echo '  gateway {{ pub_ip_prfx }}.1' >> /etc/network/interfaces.d/ens6.cfg"]
+            - [sh, -c, "sudo ifup ens6"]
         ports:
           - port:
-              name: test-admin-port
+              name: debug-ctrl-port
+              network_name: ctrl-net
+          - port:
+              name: debug-admin-port
               network_name: admin-net
-              port_security_enabled: False
+              security_groups: [udp-port-sg]
               ip_addrs:
                 - subnet_name: 'admin-subnet'
                   ip: {{ admin_ip_prfx }}.15
+          - port:
+              name: debug-priv-port
+              network_name: priv-net
+              ip_addrs:
+                - subnet_name: 'priv-subnet'
+                  ip: {{ priv_ip_prfx }}.15
+          - port:
+              name: debug-pub-port
+              network_name: public-net
+              ip_addrs:
+                - subnet_name: 'public-subnet'
+                  ip: {{ pub_ip_prfx }}.15
+        floating_ips:
+          - floating_ip:
+              name: fip1
+              port_name: debug-ctrl-port
+              router_name: ctrl-router
 ansible:
   # Install and configure snaps-boot to build host
   - playbook_location: {{ setup_build_pb_loc }}
     hosts:
       - build-vm
+    post_processing:
+      sleep: 15
+      reboot:
+        - pxe-vm-1
+        - pxe-vm-2
+        - pxe-vm-3
     variables:
       priv_addr:
         type: network

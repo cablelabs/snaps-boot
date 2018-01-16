@@ -22,7 +22,14 @@
       become_user: root
       apt: name=git
 
+    - name: Delete existing snaps-boot directory
+      file:
+        state: absent
+        dest: ~/snaps_boot
+
     - name: Clone snaps-boot
+      # TODO - change this to copying from disk as for CI, the CI server will
+      # have this already and cloning will simply return the latest master
       git:
         repo: https://github.com/cablelabs/snaps-boot.git
         dest: ~/snaps_boot
@@ -30,10 +37,11 @@
     - name: Create PXE image directory
       file: path=~/snaps_boot/packages/images state=directory
 
-    - name: Copy PXE image - ubuntu-16.04.3-server-amd64.iso
-      copy:
-        src: "{{ pxe_image_file }}"
+    - name: Download PXE image - ubuntu-16.04.3-server-amd64.iso
+      get_url:
+        url: http://releases.ubuntu.com/16.04/ubuntu-16.04.3-server-amd64.iso
         dest: ~/snaps_boot/packages/images/ubuntu-16.04.3-server-amd64.iso
+        timeout: 1000
 
     - name: Copy environment file - hosts.yaml
       action: template src=templates/hosts.yaml.tmplt dest=~/hosts.yaml
@@ -44,8 +52,30 @@
       become_user: root
       command: "sh ~{{ ansible_user }}/snaps_boot/scripts/PreRequisite.sh"
 
+    - name: Clean just in case PXE & DHCP server - iaas_launch.py -pc
+      become: yes
+      become_method: sudo
+      become_user: root
+      command: "python ~{{ ansible_user }}/snaps_boot/iaas_launch.py -f ~{{ ansible_user }}/hosts.yaml -p"
+
     - name: Config PXE & DHCP server - iaas_launch.py -p
       become: yes
       become_method: sudo
       become_user: root
       command: "python ~{{ ansible_user }}/snaps_boot/iaas_launch.py -f ~{{ ansible_user }}/hosts.yaml -p"
+
+    - name: Make sure isc-dhcp-server is running
+      become: yes
+      become_method: sudo
+      become_user: root
+      systemd:
+        name: isc-dhcp-server
+        state: started
+
+    - name: Stop isc-dhcp-server (will not work on OpenStack, requires the Neutron DHCP server instead)
+      become: yes
+      become_method: sudo
+      become_user: root
+      systemd:
+        name: isc-dhcp-server
+        state: stopped
