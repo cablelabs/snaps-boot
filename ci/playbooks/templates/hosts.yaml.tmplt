@@ -47,7 +47,7 @@ PROVISION:
   PXE:
     password: {{ pxe_pass }}
     serverIp: {{ build_admin_ip }}
-    user: {{ pxe_image_user }}
+    user: foo
   STATIC:
     host:
      -
@@ -60,7 +60,7 @@ PROVISION:
            dns: ""
            gateway: "0.0.0.0"
            iface: {{ priv_iface }}
-           name: Tenant_Interface
+           name: Private_Interface
            netmask: {{ netmask }}
            type: tenant
          -
@@ -69,7 +69,7 @@ PROVISION:
            dns: {{ dns_addr }}
            gateway: {{ public_gateway }}
            iface: {{ pub_iface }}
-           name: Tenant_Interface
+           name: Public_Interface
            netmask: {{ netmask }}
            type: data
      -
@@ -80,9 +80,9 @@ PROVISION:
            address: {{ private_ip_2 }}
            dn: ""
            dns: ""
-           gateway: {{ public_gateway }}
+           gateway: "0.0.0.0"
            iface: {{ priv_iface }}
-           name: Tenant_Interface
+           name: Private_Interface
            netmask: {{ netmask }}
            type: tenant
          -
@@ -91,7 +91,7 @@ PROVISION:
            dns: {{ dns_addr }}
            gateway: {{ public_gateway }}
            iface: {{ pub_iface }}
-           name: Tenant_Interface
+           name: Public_Interface
            netmask: {{ netmask }}
            type: data
      -
@@ -104,7 +104,7 @@ PROVISION:
            dns: ""
            gateway: "0.0.0.0"
            iface: {{ priv_iface }}
-           name: Tenant_Interface
+           name: Private_Interface
            netmask: {{ netmask }}
            type: tenant
          -
@@ -113,7 +113,7 @@ PROVISION:
            dns: {{ dns_addr }}
            gateway: {{ public_gateway }}
            iface: {{ pub_iface }}
-           name: Tenant_Interface
+           name: Public_Interface
            netmask: {{ netmask }}
            type: data
 
@@ -121,27 +121,27 @@ PROVISION:
      host:
        -
          user: "admin"
-         password: {{ pxe_pass }}
+         password: "password"
          ip: "10.197.124.22"
          mac: "ec:b1:d7:88:a8:be"
        -
          user: "admin"
-         password: {{ pxe_pass }}
+         password: "password"
          ip: "10.197.124.23"
          mac: "ec:b1:d7:88:49:d6"
        -
          user: "admin"
-         password: {{ pxe_pass }}
+         password: "password"
          ip: "10.197.124.24"
          mac: "ec:b1:d7:88:d8:9a"
        -
          user: "admin"
-         password: {{ pxe_pass }}
+         password: "password"
          ip: "10.197.124.25"
          mac: "ec:b1:d7:88:a8:aa"
   TFTP:
     os: ubuntu-16.04.3-server-amd64.iso
-    password: password
+    password: "password"
     seed: hwe-ubuntu-server.seed
     timezone: America/Denver
     user: ubuntu
