@@ -262,8 +262,8 @@ link for ISO:
 
 ```
 cd snaps-boot/
-mkdir images
-cd images
+mkdir -p packages/images
+cd packages/images
 wget http://releases.ubuntu.com/16.04/ubuntu-16.04.3-server-amd64.iso
 ```
 
