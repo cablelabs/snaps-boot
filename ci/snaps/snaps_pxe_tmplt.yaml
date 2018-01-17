@@ -149,8 +149,8 @@ openstack:
           name: pxe-user
           project_name: pxe-proj
         name: pxe-build-kp
-        public_filepath: {{ pxe_kp_pub_path }}
-        private_filepath: {{ pxe_kp_priv_path }}
+        public_filepath: {{ build_kp_pub_path }}
+        private_filepath: {{ build_kp_priv_path }}
         delete_on_clean: True
   security_groups:
     - security_group:
@@ -327,197 +327,388 @@ openstack:
               ip_addrs:
                 - subnet_name: 'public-subnet'
                   ip: {{ pub_ip_prfx }}.13
-    - instance:
-        os_user:
-          name: pxe-user
-          project_name: pxe-proj
-        name: debug-vm
-        flavor: pxe-flavor
-        imageName: build-image
-        keypair_name: pxe-build-kp
-        security_group_names: [pxe-build-sg]
-        userdata: |
-          #cloud-config
-          password: password
-          chpasswd: { expire: False }
-          ssh_pwauth: True
-          bootcmd:
-            - [sh, -c, "echo 'auto ens4' > /etc/network/interfaces.d/ens4.cfg"]
-            - [sh, -c, "echo '  iface ens4 inet static' >> /etc/network/interfaces.d/ens4.cfg"]
-            - [sh, -c, "echo '  address {{ admin_ip_prfx }}.15' >> /etc/network/interfaces.d/ens4.cfg"]
-            - [sh, -c, "echo '  netmask 255.255.255.0' >> /etc/network/interfaces.d/ens4.cfg"]
-            - [sh, -c, "sudo ifup ens4"]
-            - [sh, -c, "echo 'auto ens5' > /etc/network/interfaces.d/ens5.cfg"]
-            - [sh, -c, "echo '  iface ens5 inet static' >> /etc/network/interfaces.d/ens5.cfg"]
-            - [sh, -c, "echo '  address {{ priv_ip_prfx }}.15' >> /etc/network/interfaces.d/ens5.cfg"]
-            - [sh, -c, "echo '  netmask 255.255.255.0' >> /etc/network/interfaces.d/ens5.cfg"]
-            - [sh, -c, "sudo ifup ens5"]
-            - [sh, -c, "echo 'auto ens6' > /etc/network/interfaces.d/ens6.cfg"]
-            - [sh, -c, "echo '  iface ens6 inet static' >> /etc/network/interfaces.d/ens6.cfg"]
-            - [sh, -c, "echo '  address {{ pub_ip_prfx }}.15' >> /etc/network/interfaces.d/ens6.cfg"]
-            - [sh, -c, "echo '  netmask 255.255.255.0' >> /etc/network/interfaces.d/ens6.cfg"]
-            - [sh, -c, "echo '  gateway {{ pub_ip_prfx }}.1' >> /etc/network/interfaces.d/ens6.cfg"]
-            - [sh, -c, "sudo ifup ens6"]
-        ports:
-          - port:
-              name: debug-ctrl-port
-              network_name: ctrl-net
-          - port:
-              name: debug-admin-port
-              network_name: admin-net
-              security_groups: [udp-port-sg]
-              ip_addrs:
-                - subnet_name: 'admin-subnet'
-                  ip: {{ admin_ip_prfx }}.15
-          - port:
-              name: debug-priv-port
-              network_name: priv-net
-              ip_addrs:
-                - subnet_name: 'priv-subnet'
-                  ip: {{ priv_ip_prfx }}.15
-          - port:
-              name: debug-pub-port
-              network_name: public-net
-              ip_addrs:
-                - subnet_name: 'public-subnet'
-                  ip: {{ pub_ip_prfx }}.15
-        floating_ips:
-          - floating_ip:
-              name: fip1
-              port_name: debug-ctrl-port
-              router_name: ctrl-router
 ansible:
   # Install and configure snaps-boot to build host
-  - playbook_location: {{ setup_build_pb_loc }}
+#  - playbook_location: {{ setup_build_pb_loc }}
+#    hosts:
+#      - build-vm
+#    post_processing:
+#      sleep: 15
+#      reboot:
+#        - pxe-vm-1
+#        - pxe-vm-2
+#        - pxe-vm-3
+#    variables:
+#      priv_addr:
+#        type: network
+#        network_name: admin-net
+#        subnet_name: admin-subnet
+#        value: cidr_ip
+#      admin_ip_1:
+#        type: port
+#        vm_name: pxe-vm-1
+#        port_name: pxe-admin-port-1
+#        port_value: ip_address
+#      admin_mac_1:
+#        type: port
+#        vm_name: pxe-vm-1
+#        port_name: pxe-admin-port-1
+#        port_value: mac_address
+#      private_ip_1:
+#        type: port
+#        vm_name: pxe-vm-1
+#        port_name: pxe-priv-port-1
+#        port_value: ip_address
+#      public_ip_1:
+#        type: port
+#        vm_name: pxe-vm-1
+#        port_name: pxe-pub-port-1
+#        port_value: ip_address
+#      admin_ip_2:
+#        type: port
+#        vm_name: pxe-vm-2
+#        port_name: pxe-admin-port-2
+#        port_value: ip_address
+#      admin_mac_2:
+#        type: port
+#        vm_name: pxe-vm-2
+#        port_name: pxe-admin-port-2
+#        port_value: mac_address
+#      private_ip_2:
+#        type: port
+#        vm_name: pxe-vm-2
+#        port_name: pxe-priv-port-2
+#        port_value: ip_address
+#      public_ip_2:
+#        type: port
+#        vm_name: pxe-vm-2
+#        port_name: pxe-pub-port-2
+#        port_value: ip_address
+#      admin_ip_3:
+#        type: port
+#        vm_name: pxe-vm-3
+#        port_name: pxe-admin-port-3
+#        port_value: ip_address
+#      admin_mac_3:
+#        type: port
+#        vm_name: pxe-vm-3
+#        port_name: pxe-admin-port-3
+#        port_value: mac_address
+#      private_ip_3:
+#        type: port
+#        vm_name: pxe-vm-3
+#        port_name: pxe-priv-port-3
+#        port_value: ip_address
+#      public_ip_3:
+#        type: port
+#        vm_name: pxe-vm-3
+#        port_name: pxe-pub-port-3
+#        port_value: ip_address
+#      public_gateway:
+#        type: network
+#        network_name: public-net
+#        subnet_name: public-subnet
+#        value: gateway_ip
+#      broadcast_addr:
+#        type: network
+#        network_name: admin-net
+#        subnet_name: admin-subnet
+#        value: broadcast_ip
+#      domain_name:
+#        type: string
+#        value: cablelabs.com
+#      dns_addr:
+#        type: string
+#        value: 8.8.8.8
+#      listen_iface:
+#        type: string
+#        value: ens4
+#      max_lease:
+#        type: string
+#        value: 7200
+#      netmask:
+#        type: network
+#        network_name: admin-net
+#        subnet_name: admin-subnet
+#        value: netmask
+#      ip_range:
+#        type: network
+#        network_name: admin-net
+#        subnet_name: admin-subnet
+#        value: ip_range
+#      router_ip:
+#        type: router
+#        router_name: pxe-router
+#        attr: external_fixed_ip
+#        subnet_name: {{ ext_subnet }}
+#      build_admin_ip:
+#        type: port
+#        vm_name: build-vm
+#        port_name: build-admin-port
+#        port_value: ip_address
+#      http_proxy_port:
+#        type: string
+#        value: 3142
+#      priv_iface:
+#        type: string
+#        value: ens4
+#      pub_iface:
+#        type: string
+#        value: ens5
+#      pxe_pass:
+#        type: string
+#        value: {{ pxe_machine_pass }}
+#      hosts_yaml_path:
+#        type: string
+#        value: {{ hosts_yaml_target_path }}
+#
+  # Verify admin interface on pxe-vm-1 was configured
+  - playbook_location: {{ verify_intfs_pb_loc }}
+    hosts:
+      - build-vm
+    variables:
+      ip_addr:
+        type: port
+        vm_name: pxe-vm-1
+        port_name: pxe-admin-port-1
+        port_value: ip_address
+      username:
+        type: string
+        value: {{ pxe_machine_user }}
+      password:
+        type: string
+        value: {{ pxe_machine_pass }}
+      timeout:
+        type: string
+        value: 1800
+
+  # Verify admin interface on pxe-vm-2 was configured
+  - playbook_location: {{ verify_intfs_pb_loc }}
+    hosts:
+      - build-vm
+    variables:
+      ip_addr:
+        type: port
+        vm_name: pxe-vm-2
+        port_name: pxe-admin-port-2
+        port_value: ip_address
+      username:
+        type: string
+        value: {{ pxe_machine_user }}
+      password:
+        type: string
+        value: {{ pxe_machine_pass }}
+      timeout:
+        type: string
+        value: 120
+
+  # Verify admin interface on pxe-vm-3 was configured
+  - playbook_location: {{ verify_intfs_pb_loc }}
+    hosts:
+      - build-vm
+    variables:
+      ip_addr:
+        type: port
+        vm_name: pxe-vm-3
+        port_name: pxe-admin-port-3
+        port_value: ip_address
+      username:
+        type: string
+        value: {{ pxe_machine_user }}
+      password:
+        type: string
+        value: {{ pxe_machine_pass }}
+      timeout:
+        type: string
+        value: 120
+
+  # Statically configure interfaces
+  - playbook_location: {{ config_intfs_pb_loc }}
     hosts:
       - build-vm
     post_processing:
-      sleep: 15
-      reboot:
-        - pxe-vm-1
-        - pxe-vm-2
-        - pxe-vm-3
+      sleep: 120
     variables:
-      priv_addr:
-        type: network
-        network_name: admin-net
-        subnet_name: admin-subnet
-        value: cidr_ip
-      admin_ip_1:
+      hosts_yaml_path:
+        type: string
+        value: {{ hosts_yaml_target_path }}
+
+  # Verify admin interface on pxe-vm-1 was configured
+  - playbook_location: {{ verify_intfs_pb_loc }}
+    hosts:
+      - build-vm
+    variables:
+      ip_addr:
         type: port
         vm_name: pxe-vm-1
         port_name: pxe-admin-port-1
         port_value: ip_address
-      admin_mac_1:
-        type: port
-        vm_name: pxe-vm-1
-        port_name: pxe-admin-port-1
-        port_value: mac_address
-      private_ip_1:
-        type: port
-        vm_name: pxe-vm-1
-        port_name: pxe-pub-port-1
-        port_value: ip_address
-      public_ip_1:
-        type: port
-        vm_name: pxe-vm-1
-        port_name: pxe-pub-port-1
-        port_value: ip_address
-      admin_ip_2:
+      username:
+        type: string
+        value: {{ pxe_machine_user }}
+      password:
+        type: string
+        value: {{ pxe_machine_pass }}
+      timeout:
+        type: string
+        value: 120
+
+  # Verify admin interface on pxe-vm-2 was configured
+  - playbook_location: {{ verify_intfs_pb_loc }}
+    hosts:
+      - build-vm
+    variables:
+      ip_addr:
         type: port
         vm_name: pxe-vm-2
         port_name: pxe-admin-port-2
         port_value: ip_address
-      admin_mac_2:
+      username:
+        type: string
+        value: {{ pxe_machine_user }}
+      password:
+        type: string
+        value: {{ pxe_machine_pass }}
+      timeout:
+        type: string
+        value: 120
+
+  # Verify admin interface on pxe-vm-3 was configured
+  - playbook_location: {{ verify_intfs_pb_loc }}
+    hosts:
+      - build-vm
+    variables:
+      ip_addr:
+        type: port
+        vm_name: pxe-vm-3
+        port_name: pxe-admin-port-3
+        port_value: ip_address
+      username:
+        type: string
+        value: {{ pxe_machine_user }}
+      password:
+        type: string
+        value: {{ pxe_machine_pass }}
+      timeout:
+        type: string
+        value: 120
+
+  # Verify private interface on pxe-vm-1 was configured
+  - playbook_location: {{ verify_intfs_pb_loc }}
+    hosts:
+      - build-vm
+    variables:
+      ip_addr:
+        type: port
+        vm_name: pxe-vm-1
+        port_name: pxe-priv-port-1
+        port_value: ip_address
+      username:
+        type: string
+        value: {{ pxe_machine_user }}
+      password:
+        type: string
+        value: {{ pxe_machine_pass }}
+      timeout:
+        type: string
+        value: 120
+
+  # Verify private interface on pxe-vm-2 was configured
+  - playbook_location: {{ verify_intfs_pb_loc }}
+    hosts:
+      - build-vm
+    variables:
+      ip_addr:
         type: port
         vm_name: pxe-vm-2
-        port_name: pxe-admin-port-2
-        port_value: mac_address
-      private_ip_2:
+        port_name: pxe-priv-port-2
+        port_value: ip_address
+      username:
+        type: string
+        value: {{ pxe_machine_user }}
+      password:
+        type: string
+        value: {{ pxe_machine_pass }}
+      timeout:
+        type: string
+        value: 120
+
+  # Verify private interface on pxe-vm-3 was configured
+  - playbook_location: {{ verify_intfs_pb_loc }}
+    hosts:
+      - build-vm
+    variables:
+      ip_addr:
+        type: port
+        vm_name: pxe-vm-3
+        port_name: pxe-priv-port-3
+        port_value: ip_address
+      username:
+        type: string
+        value: {{ pxe_machine_user }}
+      password:
+        type: string
+        value: {{ pxe_machine_pass }}
+      timeout:
+        type: string
+        value: 120
+
+  # Verify public interface on pxe-vm-1 was configured
+  - playbook_location: {{ verify_intfs_pb_loc }}
+    hosts:
+      - build-vm
+    variables:
+      ip_addr:
+        type: port
+        vm_name: pxe-vm-1
+        port_name: pxe-pub-port-1
+        port_value: ip_address
+      username:
+        type: string
+        value: {{ pxe_machine_user }}
+      password:
+        type: string
+        value: {{ pxe_machine_pass }}
+      timeout:
+        type: string
+        value: 120
+
+  # Verify private interface on pxe-vm-2 was configured
+  - playbook_location: {{ verify_intfs_pb_loc }}
+    hosts:
+      - build-vm
+    variables:
+      ip_addr:
         type: port
         vm_name: pxe-vm-2
         port_name: pxe-pub-port-2
         port_value: ip_address
-      public_ip_2:
-        type: port
-        vm_name: pxe-vm-2
-        port_name: pxe-pub-port-2
-        port_value: ip_address
-      admin_ip_3:
-        type: port
-        vm_name: pxe-vm-3
-        port_name: pxe-admin-port-3
-        port_value: ip_address
-      admin_mac_3:
-        type: port
-        vm_name: pxe-vm-3
-        port_name: pxe-admin-port-3
-        port_value: mac_address
-      private_ip_3:
-        type: port
-        vm_name: pxe-vm-3
-        port_name: pxe-pub-port-3
-        port_value: ip_address
-      public_ip_3:
+      username:
+        type: string
+        value: {{ pxe_machine_user }}
+      password:
+        type: string
+        value: {{ pxe_machine_pass }}
+      timeout:
+        type: string
+        value: 120
+
+  # Verify private interface on pxe-vm-3 was configured
+  - playbook_location: {{ verify_intfs_pb_loc }}
+    hosts:
+      - build-vm
+    variables:
+      ip_addr:
         type: port
         vm_name: pxe-vm-3
         port_name: pxe-pub-port-3
         port_value: ip_address
-      public_gateway:
-        type: network
-        network_name: public-net
-        subnet_name: public-subnet
-        value: gateway_ip
-      broadcast_addr:
-        type: network
-        network_name: admin-net
-        subnet_name: admin-subnet
-        value: broadcast_ip
-      domain_name:
+      username:
         type: string
-        value: cablelabs.com
-      dns_addr:
+        value: {{ pxe_machine_user }}
+      password:
         type: string
-        value: 8.8.8.8
-      listen_iface:
+        value: {{ pxe_machine_pass }}
+      timeout:
         type: string
-        value: ens4
-      max_lease:
-        type: string
-        value: 7200
-      netmask:
-        type: network
-        network_name: admin-net
-        subnet_name: admin-subnet
-        value: netmask
-      ip_range:
-        type: network
-        network_name: admin-net
-        subnet_name: admin-subnet
-        value: ip_range
-      router_ip:
-        type: router
-        router_name: pxe-router
-        attr: external_fixed_ip
-        subnet_name: {{ ext_subnet }}
-      build_admin_ip:
-        type: port
-        vm_name: build-vm
-        port_name: build-admin-port
-        port_value: ip_address
-      http_proxy_port:
-        type: string
-        value: 3142
-      priv_iface:
-        type: string
-        value: ens5
-      pub_iface:
-        type: string
-        value: ens6
-      pxe_pass:
-        type: string
-        value: password
-      pxe_image_user:
-        type: image
-        image_name: pxe-image
-        value: user
+        value: 120
