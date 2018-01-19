@@ -37,7 +37,7 @@ openstack:
     - user:
         os_creds_name: admin-creds
         name: pxe-user
-        password: password
+        password: {{ os_pxe_user_pass }}
         project_name: pxe-proj
         roles: {admin: pxe-proj}
   flavors:
@@ -169,20 +169,6 @@ openstack:
             protocol: tcp
             port_range_min: 22
             port_range_max: 22
-    - security_group:
-        os_user:
-          name: pxe-user
-          project_name: pxe-proj
-        name: udp-port-sg
-        rules:
-          - direction: ingress
-            protocol: udp
-          - direction: egress
-            protocol: udp
-          - direction: ingress
-            protocol: tcp
-          - direction: egress
-            protocol: tcp
   instances:
     - instance:
         os_user:
@@ -225,7 +211,6 @@ openstack:
           - port:
               name: build-admin-port
               network_name: admin-net
-              security_groups: [udp-port-sg]
               ip_addrs:
                 - subnet_name: 'admin-subnet'
                   ip: {{ admin_ip_prfx }}.10
@@ -257,7 +242,6 @@ openstack:
           - port:
               name: pxe-admin-port-1
               network_name: admin-net
-              security_groups: [udp-port-sg]
               ip_addrs:
                 - subnet_name: 'admin-subnet'
                   ip: {{ admin_ip_prfx }}.11
@@ -284,7 +268,6 @@ openstack:
           - port:
               name: pxe-admin-port-2
               network_name: admin-net
-              security_groups: [udp-port-sg]
               ip_addrs:
                 - subnet_name: 'admin-subnet'
                   ip: {{ admin_ip_prfx }}.12
@@ -311,7 +294,6 @@ openstack:
           - port:
               name: pxe-admin-port-3
               network_name: admin-net
-              security_groups: [udp-port-sg]
               ip_addrs:
                 - subnet_name: 'admin-subnet'
                   ip: {{ admin_ip_prfx }}.13
@@ -449,6 +431,9 @@ ansible:
       http_proxy_port:
         type: string
         value: 3142
+      admin_iface:
+        type: string
+        value: ens3
       priv_iface:
         type: string
         value: ens4

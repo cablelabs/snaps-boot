@@ -45,7 +45,8 @@ PROVISION:
     http_proxy: http://{{ build_admin_ip }}:{{ http_proxy_port }}
     https_proxy: ""
   PXE:
-    password: {{ pxe_pass }}
+    # TODO - Determine exactly what this value does!
+    password: "password"
     serverIp: {{ build_admin_ip }}
     user: foo
   STATIC:
@@ -54,6 +55,15 @@ PROVISION:
        access_ip: {{ admin_ip_1 }}
        name: Controller
        interfaces:
+         -
+           address: {{ admin_ip_1 }}
+           dn: ""
+           dns: ""
+           gateway: "0.0.0.0"
+           iface: {{ admin_iface }}
+           name: Admin_Interface
+           netmask: {{ netmask }}
+           type: tenant
          -
            address: {{ private_ip_1 }}
            dn: ""
@@ -65,7 +75,7 @@ PROVISION:
            type: tenant
          -
            address: {{ public_ip_1 }}
-           dn: ""
+           dn: "cablelabs.com"
            dns: {{ dns_addr }}
            gateway: {{ public_gateway }}
            iface: {{ pub_iface }}
@@ -77,6 +87,15 @@ PROVISION:
        name: Compute1
        interfaces:
          -
+           address: {{ admin_ip_2 }}
+           dn: ""
+           dns: ""
+           gateway: "0.0.0.0"
+           iface: {{ admin_iface }}
+           name: Admin_Interface
+           netmask: {{ netmask }}
+           type: tenant
+         -
            address: {{ private_ip_2 }}
            dn: ""
            dns: ""
@@ -87,7 +106,7 @@ PROVISION:
            type: tenant
          -
            address: {{ public_ip_2 }}
-           dn: ""
+           dn: "cablelabs.com"
            dns: {{ dns_addr }}
            gateway: {{ public_gateway }}
            iface: {{ pub_iface }}
@@ -99,6 +118,15 @@ PROVISION:
        name: Compute2
        interfaces:
          -
+           address: {{ admin_ip_3 }}
+           dn: ""
+           dns: ""
+           gateway: "0.0.0.0"
+           iface: {{ admin_iface }}
+           name: Admin_Interface
+           netmask: {{ netmask }}
+           type: tenant
+         -
            address: {{ private_ip_3 }}
            dn: ""
            dns: ""
@@ -109,7 +137,7 @@ PROVISION:
            type: tenant
          -
            address: {{ public_ip_3 }}
-           dn: ""
+           dn: "cablelabs.com"
            dns: {{ dns_addr }}
            gateway: {{ public_gateway }}
            iface: {{ pub_iface }}
@@ -141,7 +169,7 @@ PROVISION:
          mac: "ec:b1:d7:88:a8:aa"
   TFTP:
     os: ubuntu-16.04.3-server-amd64.iso
-    password: "password"
+    password: {{ pxe_pass }}
     seed: hwe-ubuntu-server.seed
     timezone: America/Denver
     user: ubuntu
