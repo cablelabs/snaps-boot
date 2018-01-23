@@ -1,0 +1,30 @@
+---
+admin_user: admin
+admin_proj: admin
+admin_pass: <password>
+auth_url: <url>
+id_api_version: 3
+proxy_host:
+proxy_port:
+ssh_proxy_cmd:
+
+src_snaps_boot_dir: {{ src_snaps_boot_dir }}
+src_copy_dir: /tmp
+
+os_pxe_user_pass: password
+
+ext_net: <public1>
+ext_subnet: <public1-subnet>
+
+ctrl_ip_prfx: 10.0.0
+admin_ip_prfx: 10.1.0
+priv_ip_prfx: 10.1.1
+pub_ip_prfx: 10.1.2
+
+build_kp_pub_path: /tmp/pxe-kp-lab3.pub
+build_kp_priv_path: /tmp/pxe-kp-lab3
+
+pxe_machine_user: root
+pxe_machine_pass: Pa$$w0rd
+
+hosts_yaml_target_path: /tmp/hosts.yaml
