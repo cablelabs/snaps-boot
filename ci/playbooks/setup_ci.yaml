@@ -46,14 +46,14 @@
     - name: Copy this source tree from {{ src_snaps_boot_dir }} to {{ src_copy_dir }}/snaps-boot
       synchronize:
         src: "{{ src_snaps_boot_dir }}"
-        dest: "{{ src_copy_dir }}/snaps-boot"
+        dest: "{{ src_copy_dir }}"
 
     - name: Copy {{ env_file }} to {{ src_copy_dir }}/snaps-boot/env.yaml
       synchronize:
         src: "{{ env_file }}"
-        dest: "/tmp/env.yaml"
+        dest: "{{ src_copy_dir }}/env.yaml"
 
-    - name: Launch SNAPS-OO deploy with template {{ src_copy_dir }}/snaps-boot/ci/snaps/snaps_pxe_tmplt.yaml and env file {{ snaps_boot_dir }}/env.yaml
-      command: "~/snaps-venv/bin/python ~/snaps-oo/examples/launch.py -t {{ src_snaps_boot_dir }}/ci/snaps/snaps_pxe_tmplt.yaml -e /tmp/env.yaml -d"
+    - name: Launch SNAPS-OO deploy with template {{ src_copy_dir }}/snaps-boot/ci/snaps/snaps_pxe_tmplt.yaml and env file {{ src_copy_dir }}/env.yaml
+      command: "~/snaps-venv/bin/python ~/snaps-oo/examples/launch.py -t {{ src_copy_dir }}/snaps-boot/ci/snaps/snaps_pxe_tmplt.yaml -e {{ src_copy_dir }}/env.yaml -d"
       register: out
     - debug: var=out.stderr_lines
