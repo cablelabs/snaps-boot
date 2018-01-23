@@ -21,14 +21,15 @@
         state: absent
         dest: "{{ src_copy_dir }}/snaps-boot"
 
-    - name: Copy this source tree from {{ src_snaps_boot_dir }} to {{ src_copy_dir }}/snaps-boot
+    - name: Copy this source tree from local {{ local_snaps_boot_dir }} to {{ src_copy_dir }}/snaps-boot
       synchronize:
-        src: "{{ src_snaps_boot_dir }}"
+        src: "{{ local_snaps_boot_dir }}"
         dest: "{{ src_copy_dir }}"
         dirs: yes
         rsync_opts:
           - "--no-motd"
           - "--exclude=.git"
+
     - name: Make directory {{ src_copy_dir }}/snaps-boot/packages/images
       file:
         path: "{{ src_copy_dir }}/snaps-boot/packages/images"
