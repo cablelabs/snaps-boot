@@ -111,10 +111,10 @@ unzip master.zip
 
 ## 3 Configuration
 
-### 3.1 snaps_boot/hosts.yaml
+### <a name="3"> snaps-boot-master/conf/pxe_cluster/hosts.yaml</a>
 
 Save a copy of hosts.yaml before modifying it.
-`cp hosts.yaml origional-hosts.yaml`
+`cp hosts.yaml original-hosts.yaml`
 
 Configuration file used for hardware provisioning. Options defined here
  are used by deployment layer to discover and net boot host machines,
@@ -253,12 +253,12 @@ memory pages are to be defined.
 
 ### 4.1 Server Provisioning
 
-#### Step 1
+#### Step 1 Download Image
 
 Download `ubuntu16.04 server image` from internet and need to place it
 in folder `snaps-boot/images/`. Use this download
 link for ISO:
- http://releases.ubuntu.com/16.04/ubuntu-16.04.3-server-amd64.iso.
+ http://releases.ubuntu.com/16.04/ubuntu-16.04.3-server-amd64.iso
 
 ```
 cd snaps-boot/
@@ -267,17 +267,15 @@ cd packages/images
 wget http://releases.ubuntu.com/16.04/ubuntu-16.04.3-server-amd64.iso
 ```
 
-#### Step 2
+#### Step 2 Modify hosts.yaml
 
-Go to directory `snaps-boot/conf/pxe_cluster`.
+Go to directory `snaps-boot-master/conf/pxe_cluster`.
 
-Modify file `hosts.yaml` for provisioning of OS (Operating System) on
-cloud cluster host machines (controller node, compute nodes). Modify
-this file according to your set up environment only.
+Modify file `hosts.yaml` as described in [section 3](#3).
 
-#### Step 3
+#### Step 3 Check Prerequisites
 
-Go to directory `snaps-boot/`
+Go to directory `snaps-boot-master/`
 
 Run `PreRequisite.sh` as shown below:
 
@@ -295,11 +293,11 @@ sudo apt-get auto-remove
 sudo reboot
 ```
 
-#### Step 4
+#### Step 4 Configure PXE
 
 Steps to configure PXE and DHCP server.
 
-Go to directory `snaps-boot/`.
+Go to directory `snaps-boot-master/`.
 
 Run `iaas_launch.py` as shown below:
 
@@ -310,9 +308,9 @@ sudo -i python $PWD/iaas_launch.py -f $PWD/conf/pxe_cluster/hosts.yaml -p
 Note: This updates the networking on the server and may cause your
 ssh session to be terminated.
 
-#### Step 5
+#### Step 5 Verify DHCP, tftp, Apache2
 
-Manually verify DHCP server is running or not, using below given command:
+Manually verify DHCP server is running or not, using the command below:
 
 ```
 sudo systemctl status isc-dhcp-server.service
@@ -322,8 +320,7 @@ State should be active running.
 If it is not running, then double check the hosts.yaml file and look
 at /var/log/syslog for error messages.
 
-Manually verify tftp-hpa service is running or not, using below given
-command:
+Manually verify tftp-hpa service is running or not, using the command below:
 
 ```
 sudo systemctl status tftpd-hpa
@@ -340,7 +337,7 @@ sudo systemctl status apache2
 
 State should be active running.
 
-#### Step 6
+#### Step 6 Booting
 
 Run `iaas_launch.py` as shown below:
 
@@ -355,7 +352,7 @@ Your OS provisioning will start and will get completed in about 20
 minutes.  The time will vary depending on your network speed and
 server boot times.
 
-#### Step 7
+#### Step 7 Setup Static IP
 
 Execute this step only if static IPs to be assigned to host machines.
 
@@ -364,7 +361,7 @@ Run `iaas_launch.py` as shown below:
 sudo -i python $PWD/iaas_launch.py -f $PWD/conf/pxe_cluster/hosts.yaml -s
 ```
 
-#### Step 8
+#### Step 8 Setup Large Memory Pages or CPU Isolation
 
 Execute this step either for defining large memory pages or for
 isolating CPUs between host and guest OS.
