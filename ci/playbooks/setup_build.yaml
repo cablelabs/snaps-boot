@@ -56,7 +56,7 @@
       become: yes
       become_method: sudo
       become_user: root
-      command: "python {{ src_copy_dir }}/snaps-boot/iaas_launch.py -f {{ hosts_yaml_path }} -p"
+      command: "python {{ src_copy_dir }}/snaps-boot/iaas_launch.py -f {{ hosts_yaml_path }} -pc"
       register: out
     - debug: var=out.stderr_lines
 
