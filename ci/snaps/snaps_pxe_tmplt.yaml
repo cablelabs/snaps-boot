@@ -67,7 +67,7 @@ openstack:
         format: qcow2
         public: True
         image_user: ubuntu
-        image_file: {{ pxe_image_file }}
+        image_file: {{ src_snaps_boot_dir }}/ci/images/pxeboot.img
   networks:
     - network:
         os_user:
@@ -311,7 +311,7 @@ openstack:
                   ip: {{ pub_ip_prfx }}.13
 ansible:
   # Install and configure snaps-boot to build host
-  - playbook_location: {{ setup_build_pb_loc }}
+  - playbook_location: {{ src_snaps_boot_dir }}/ci/playbooks/setup_build.yaml
     hosts:
       - build-vm
     post_processing:
@@ -321,6 +321,12 @@ ansible:
         - pxe-vm-2
         - pxe-vm-3
     variables:
+      src_snaps_boot_dir:
+        type: string
+        value: {{ src_snaps_boot_dir }}
+      src_copy_dir:
+        type: string
+        value: {{ src_copy_dir }}
       priv_addr:
         type: network
         network_name: admin-net
@@ -448,10 +454,13 @@ ansible:
         value: {{ hosts_yaml_target_path }}
 
   # Verify admin interface on pxe-vm-1 was configured
-  - playbook_location: {{ verify_intfs_pb_loc }}
+  - playbook_location: {{ src_snaps_boot_dir }}/ci/playbooks/verify_intfs.yaml
     hosts:
       - build-vm
     variables:
+      snaps_boot_dir:
+        type: string
+        value: {{ src_copy_dir }}/snaps-boot
       ip_addr:
         type: port
         vm_name: pxe-vm-1
@@ -468,10 +477,13 @@ ansible:
         value: 1800
 
   # Verify admin interface on pxe-vm-2 was configured
-  - playbook_location: {{ verify_intfs_pb_loc }}
+  - playbook_location: {{ src_snaps_boot_dir }}/ci/playbooks/verify_intfs.yaml
     hosts:
       - build-vm
     variables:
+      snaps_boot_dir:
+        type: string
+        value: {{ src_copy_dir }}/snaps-boot
       ip_addr:
         type: port
         vm_name: pxe-vm-2
@@ -488,10 +500,13 @@ ansible:
         value: 120
 
   # Verify admin interface on pxe-vm-3 was configured
-  - playbook_location: {{ verify_intfs_pb_loc }}
+  - playbook_location: {{ src_snaps_boot_dir }}/ci/playbooks/verify_intfs.yaml
     hosts:
       - build-vm
     variables:
+      snaps_boot_dir:
+        type: string
+        value: {{ src_copy_dir }}/snaps-boot
       ip_addr:
         type: port
         vm_name: pxe-vm-3
@@ -508,21 +523,27 @@ ansible:
         value: 120
 
   # Statically configure interfaces
-  - playbook_location: {{ config_intfs_pb_loc }}
+  - playbook_location: {{ src_snaps_boot_dir }}/ci/playbooks/config_intfs.yaml
     hosts:
       - build-vm
     post_processing:
       sleep: 120
     variables:
+      snaps_boot_dir:
+        type: string
+        value: {{ src_copy_dir }}/snaps-boot
       hosts_yaml_path:
         type: string
         value: {{ hosts_yaml_target_path }}
 
   # Verify admin interface on pxe-vm-1 was configured
-  - playbook_location: {{ verify_intfs_pb_loc }}
+  - playbook_location: {{ src_snaps_boot_dir }}/ci/playbooks/verify_intfs.yaml
     hosts:
       - build-vm
     variables:
+      snaps_boot_dir:
+        type: string
+        value: {{ src_copy_dir }}/snaps-boot
       ip_addr:
         type: port
         vm_name: pxe-vm-1
@@ -539,10 +560,13 @@ ansible:
         value: 120
 
   # Verify admin interface on pxe-vm-2 was configured
-  - playbook_location: {{ verify_intfs_pb_loc }}
+  - playbook_location: {{ src_snaps_boot_dir }}/ci/playbooks/verify_intfs.yaml
     hosts:
       - build-vm
     variables:
+      snaps_boot_dir:
+        type: string
+        value: {{ src_copy_dir }}/snaps-boot
       ip_addr:
         type: port
         vm_name: pxe-vm-2
@@ -559,10 +583,13 @@ ansible:
         value: 120
 
   # Verify admin interface on pxe-vm-3 was configured
-  - playbook_location: {{ verify_intfs_pb_loc }}
+  - playbook_location: {{ src_snaps_boot_dir }}/ci/playbooks/verify_intfs.yaml
     hosts:
       - build-vm
     variables:
+      snaps_boot_dir:
+        type: string
+        value: {{ src_copy_dir }}/snaps-boot
       ip_addr:
         type: port
         vm_name: pxe-vm-3
@@ -579,10 +606,13 @@ ansible:
         value: 120
 
   # Verify private interface on pxe-vm-1 was configured
-  - playbook_location: {{ verify_intfs_pb_loc }}
+  - playbook_location: {{ src_snaps_boot_dir }}/ci/playbooks/verify_intfs.yaml
     hosts:
       - build-vm
     variables:
+      snaps_boot_dir:
+        type: string
+        value: {{ src_copy_dir }}/snaps-boot
       ip_addr:
         type: port
         vm_name: pxe-vm-1
@@ -599,10 +629,13 @@ ansible:
         value: 120
 
   # Verify private interface on pxe-vm-2 was configured
-  - playbook_location: {{ verify_intfs_pb_loc }}
+  - playbook_location: {{ src_snaps_boot_dir }}/ci/playbooks/verify_intfs.yaml
     hosts:
       - build-vm
     variables:
+      snaps_boot_dir:
+        type: string
+        value: {{ src_copy_dir }}/snaps-boot
       ip_addr:
         type: port
         vm_name: pxe-vm-2
@@ -619,10 +652,13 @@ ansible:
         value: 120
 
   # Verify private interface on pxe-vm-3 was configured
-  - playbook_location: {{ verify_intfs_pb_loc }}
+  - playbook_location: {{ src_snaps_boot_dir }}/ci/playbooks/verify_intfs.yaml
     hosts:
       - build-vm
     variables:
+      snaps_boot_dir:
+        type: string
+        value: {{ src_copy_dir }}/snaps-boot
       ip_addr:
         type: port
         vm_name: pxe-vm-3
@@ -639,10 +675,13 @@ ansible:
         value: 120
 
   # Verify public interface on pxe-vm-1 was configured
-  - playbook_location: {{ verify_intfs_pb_loc }}
+  - playbook_location: {{ src_snaps_boot_dir }}/ci/playbooks/verify_intfs.yaml
     hosts:
       - build-vm
     variables:
+      snaps_boot_dir:
+        type: string
+        value: {{ src_copy_dir }}/snaps-boot
       ip_addr:
         type: port
         vm_name: pxe-vm-1
@@ -659,10 +698,13 @@ ansible:
         value: 120
 
   # Verify private interface on pxe-vm-2 was configured
-  - playbook_location: {{ verify_intfs_pb_loc }}
+  - playbook_location: {{ src_snaps_boot_dir }}/ci/playbooks/verify_intfs.yaml
     hosts:
       - build-vm
     variables:
+      snaps_boot_dir:
+        type: string
+        value: {{ src_copy_dir }}/snaps-boot
       ip_addr:
         type: port
         vm_name: pxe-vm-2
@@ -679,10 +721,13 @@ ansible:
         value: 120
 
   # Verify private interface on pxe-vm-3 was configured
-  - playbook_location: {{ verify_intfs_pb_loc }}
+  - playbook_location: {{ src_snaps_boot_dir }}/ci/playbooks/verify_intfs.yaml
     hosts:
       - build-vm
     variables:
+      snaps_boot_dir:
+        type: string
+        value: {{ src_copy_dir }}/snaps-boot
       ip_addr:
         type: port
         vm_name: pxe-vm-3

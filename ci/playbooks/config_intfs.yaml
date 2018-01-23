@@ -20,4 +20,4 @@
       become: yes
       become_method: sudo
       become_user: root
-      command: "python ~{{ ansible_user }}/snaps-boot/iaas_launch.py -f {{ hosts_yaml_path }} -s"
+      command: "python {{ snaps_boot_dir }}//iaas_launch.py -f {{ hosts_yaml_path }} -s"
