@@ -30,67 +30,67 @@ openstack:
   projects:
     - project:
         os_creds_name: admin-creds
-        name: pxe-proj
+        name: pxe-proj-{{ build_num }}
         description: Project for Orchestrators
-        users: [pxe-user, {{ admin_user }}]
+        users: [pxe-user-{{ build_num }}, {{ admin_user }}]
   users:
     - user:
         os_creds_name: admin-creds
-        name: pxe-user
+        name: pxe-user-{{ build_num }}
         password: {{ os_pxe_user_pass }}
-        project_name: pxe-proj
-        roles: {admin: pxe-proj}
+        project_name: pxe-proj-{{ build_num }}
+        roles: {admin: pxe-proj-{{ build_num }} }
   flavors:
     - flavor:
         os_creds_name: admin-creds
-        name: build-flavor
+        name: build-flavor-{{ build_num }}
         ram: 4096
         disk: 80
         vcpus: 2
     - flavor:
         os_creds_name: admin-creds
-        name: pxe-flavor
+        name: pxe-flavor-{{ build_num }}
         ram: 1024
         disk: 10
         vcpus: 1
   images:
     - image:
         os_creds_name: admin-creds
-        name: build-image
+        name: build-image-{{ build_num }}
         format: qcow2
         public: True
         image_user: ubuntu
         download_url: https://cloud-images.ubuntu.com/xenial/current/xenial-server-cloudimg-amd64-disk1.img
     - image:
         os_creds_name: admin-creds
-        name: pxe-image
+        name: pxe-image-{{ build_num }}
         format: qcow2
         public: True
         image_user: ubuntu
-        image_file: {{ src_snaps_boot_dir }}/ci/images/pxeboot.img
+        image_file: {{ local_snaps_boot_dir }}/ci/images/pxeboot.img
   networks:
     - network:
         os_user:
-          name: pxe-user
-          project_name: pxe-proj
-        name: ctrl-net
-        project_name: pxe-proj
+          name: pxe-user-{{ build_num }}
+          project_name: pxe-proj-{{ build_num }}
+        name: ctrl-net-{{ build_num }}
+        project_name: pxe-proj-{{ build_num }}
         subnets:
           - subnet:
-              name: ctrl-subnet
-              project_name: pxe-proj
+              name: ctrl-subnet-{{ build_num }}
+              project_name: pxe-proj-{{ build_num }}
               cidr: {{ ctrl_ip_prfx }}.0/24
               dns_nameservers: [8.8.8.8]
     - network:
         os_user:
-          name: pxe-user
-          project_name: pxe-proj
-        name: admin-net
-        project_name: pxe-proj
+          name: pxe-user-{{ build_num }}
+          project_name: pxe-proj-{{ build_num }}
+        name: admin-net-{{ build_num }}
+        project_name: pxe-proj-{{ build_num }}
         subnets:
           - subnet:
-              name: admin-subnet
-              project_name: pxe-proj
+              name: admin-subnet-{{ build_num }}
+              project_name: pxe-proj-{{ build_num }}
               cidr: {{ admin_ip_prfx }}.0/24
               start: {{ admin_ip_prfx }}.2
               end: {{ admin_ip_prfx }}.9
@@ -98,14 +98,14 @@ openstack:
               dns_nameservers: []
     - network:
         os_user:
-          name: pxe-user
-          project_name: pxe-proj
-        name: priv-net
-        project_name: pxe-proj
+          name: pxe-user-{{ build_num }}
+          project_name: pxe-proj-{{ build_num }}
+        name: priv-net-{{ build_num }}
+        project_name: pxe-proj-{{ build_num }}
         subnets:
           - subnet:
-              name: priv-subnet
-              project_name: pxe-proj
+              name: priv-subnet-{{ build_num }}
+              project_name: pxe-proj-{{ build_num }}
               cidr: {{ priv_ip_prfx }}.0/24
               start: {{ priv_ip_prfx }}.2
               end: {{ priv_ip_prfx }}.9
@@ -113,14 +113,14 @@ openstack:
               dns_nameservers: []
     - network:
         os_user:
-          name: pxe-user
-          project_name: pxe-proj
-        name: public-net
-        project_name: pxe-proj
+          name: pxe-user-{{ build_num }}
+          project_name: pxe-proj-{{ build_num }}
+        name: public-net-{{ build_num }}
+        project_name: pxe-proj-{{ build_num }}
         subnets:
           - subnet:
-              name: public-subnet
-              project_name: pxe-proj
+              name: public-subnet-{{ build_num }}
+              project_name: pxe-proj-{{ build_num }}
               cidr: {{ pub_ip_prfx }}.0/24
               start: {{ pub_ip_prfx }}.2
               end: {{ pub_ip_prfx }}.9
@@ -129,35 +129,35 @@ openstack:
   routers:
     - router:
         os_user:
-          name: pxe-user
-          project_name: pxe-proj
-        name: ctrl-router
+          name: pxe-user-{{ build_num }}
+          project_name: pxe-proj-{{ build_num }}
+        name: ctrl-router-{{ build_num }}
         external_gateway: {{ ext_net }}
         internal_subnets:
-          - ctrl-subnet
+          - ctrl-subnet-{{ build_num }}
     - router:
         os_user:
-          name: pxe-user
-          project_name: pxe-proj
-        name: pxe-router
+          name: pxe-user-{{ build_num }}
+          project_name: pxe-proj-{{ build_num }}
+        name: pxe-router-{{ build_num }}
         external_gateway: {{ ext_net }}
         internal_subnets:
-          - public-subnet
+          - public-subnet-{{ build_num }}
   keypairs:
     - keypair:
         os_user:
-          name: pxe-user
-          project_name: pxe-proj
-        name: pxe-build-kp
+          name: pxe-user-{{ build_num }}
+          project_name: pxe-proj-{{ build_num }}
+        name: pxe-build-kp-{{ build_num }}
         public_filepath: {{ build_kp_pub_path }}
         private_filepath: {{ build_kp_priv_path }}
         delete_on_clean: True
   security_groups:
     - security_group:
         os_user:
-          name: pxe-user
-          project_name: pxe-proj
-        name: pxe-build-sg
+          name: pxe-user-{{ build_num }}
+          project_name: pxe-proj-{{ build_num }}
+        name: pxe-build-sg-{{ build_num }}
         rules:
           - direction: ingress
             protocol: udp
@@ -172,13 +172,13 @@ openstack:
   instances:
     - instance:
         os_user:
-          name: pxe-user
-          project_name: pxe-proj
-        name: build-vm
-        flavor: build-flavor
-        imageName: build-image
-        keypair_name: pxe-build-kp
-        security_group_names: [pxe-build-sg]
+          name: pxe-user-{{ build_num }}
+          project_name: pxe-proj-{{ build_num }}
+        name: build-vm-{{ build_num }}
+        flavor: build-flavor-{{ build_num }}
+        imageName: build-image-{{ build_num }}
+        keypair_name: pxe-build-kp-{{ build_num }}
+        security_group_names: [pxe-build-sg-{{ build_num }}]
         cloud_init_timeout: 1000
         userdata: |
           #cloud-config
@@ -206,120 +206,120 @@ openstack:
             - [sh, -c, "sudo ifup ens6"]
         ports:
           - port:
-              name: build-ctrl-port
-              network_name: ctrl-net
+              name: build-ctrl-port-{{ build_num }}
+              network_name: ctrl-net-{{ build_num }}
           - port:
-              name: build-admin-port
-              network_name: admin-net
+              name: build-admin-port-{{ build_num }}
+              network_name: admin-net-{{ build_num }}
               ip_addrs:
-                - subnet_name: 'admin-subnet'
+                - subnet_name: admin-subnet-{{ build_num }}
                   ip: {{ admin_ip_prfx }}.10
           - port:
-              name: build-priv-port
-              network_name: priv-net
+              name: build-priv-port-{{ build_num }}
+              network_name: priv-net-{{ build_num }}
               ip_addrs:
-                - subnet_name: 'priv-subnet'
+                - subnet_name: priv-subnet-{{ build_num }}
                   ip: {{ priv_ip_prfx }}.10
           - port:
-              name: build-pub-port
-              network_name: public-net
+              name: build-pub-port-{{ build_num }}
+              network_name: public-net-{{ build_num }}
               ip_addrs:
-                - subnet_name: 'public-subnet'
+                - subnet_name: public-subnet-{{ build_num }}
                   ip: {{ pub_ip_prfx }}.10
         floating_ips:
           - floating_ip:
               name: fip1
-              port_name: build-ctrl-port
-              router_name: ctrl-router
+              port_name: build-ctrl-port-{{ build_num }}
+              router_name: ctrl-router-{{ build_num }}
     - instance:
         os_user:
-          name: pxe-user
-          project_name: pxe-proj
-        name: pxe-vm-1
-        flavor: pxe-flavor
-        imageName: pxe-image
+          name: pxe-user-{{ build_num }}
+          project_name: pxe-proj-{{ build_num }}
+        name: pxe-vm-1-{{ build_num }}
+        flavor: pxe-flavor-{{ build_num }}
+        imageName: pxe-image-{{ build_num }}
         ports:
           - port:
-              name: pxe-admin-port-1
-              network_name: admin-net
+              name: pxe-admin-port-1-{{ build_num }}
+              network_name: admin-net-{{ build_num }}
               ip_addrs:
-                - subnet_name: 'admin-subnet'
+                - subnet_name: admin-subnet-{{ build_num }}
                   ip: {{ admin_ip_prfx }}.11
           - port:
-              name: pxe-priv-port-1
-              network_name: priv-net
+              name: pxe-priv-port-1-{{ build_num }}
+              network_name: priv-net-{{ build_num }}
               ip_addrs:
-                - subnet_name: 'priv-subnet'
+                - subnet_name: priv-subnet-{{ build_num }}
                   ip: {{ priv_ip_prfx }}.11
           - port:
-              name: pxe-pub-port-1
-              network_name: public-net
+              name: pxe-pub-port-1-{{ build_num }}
+              network_name: public-net-{{ build_num }}
               ip_addrs:
-                - subnet_name: 'public-subnet'
+                - subnet_name: public-subnet-{{ build_num }}
                   ip: {{ pub_ip_prfx }}.11
     - instance:
         os_user:
-          name: pxe-user
-          project_name: pxe-proj
-        name: pxe-vm-2
-        flavor: pxe-flavor
-        imageName: pxe-image
+          name: pxe-user-{{ build_num }}
+          project_name: pxe-proj-{{ build_num }}
+        name: pxe-vm-2-{{ build_num }}
+        flavor: pxe-flavor-{{ build_num }}
+        imageName: pxe-image-{{ build_num }}
         ports:
           - port:
-              name: pxe-admin-port-2
-              network_name: admin-net
+              name: pxe-admin-port-2-{{ build_num }}
+              network_name: admin-net-{{ build_num }}
               ip_addrs:
-                - subnet_name: 'admin-subnet'
+                - subnet_name: admin-subnet-{{ build_num }}
                   ip: {{ admin_ip_prfx }}.12
           - port:
-              name: pxe-priv-port-2
-              network_name: priv-net
+              name: pxe-priv-port-2-{{ build_num }}
+              network_name: priv-net-{{ build_num }}
               ip_addrs:
-                - subnet_name: 'priv-subnet'
+                - subnet_name: priv-subnet-{{ build_num }}
                   ip: {{ priv_ip_prfx }}.12
           - port:
-              name: pxe-pub-port-2
-              network_name: public-net
+              name: pxe-pub-port-2-{{ build_num }}
+              network_name: public-net-{{ build_num }}
               ip_addrs:
-                - subnet_name: 'public-subnet'
+                - subnet_name: public-subnet-{{ build_num }}
                   ip: {{ pub_ip_prfx }}.12
     - instance:
         os_user:
-          name: pxe-user
-          project_name: pxe-proj
-        name: pxe-vm-3
-        flavor: pxe-flavor
-        imageName: pxe-image
+          name: pxe-user-{{ build_num }}
+          project_name: pxe-proj-{{ build_num }}
+        name: pxe-vm-3-{{ build_num }}
+        flavor: pxe-flavor-{{ build_num }}
+        imageName: pxe-image-{{ build_num }}
         ports:
           - port:
-              name: pxe-admin-port-3
-              network_name: admin-net
+              name: pxe-admin-port-3-{{ build_num }}
+              network_name: admin-net-{{ build_num }}
               ip_addrs:
-                - subnet_name: 'admin-subnet'
+                - subnet_name: admin-subnet-{{ build_num }}
                   ip: {{ admin_ip_prfx }}.13
           - port:
-              name: pxe-priv-port-3
-              network_name: priv-net
+              name: pxe-priv-port-3-{{ build_num }}
+              network_name: priv-net-{{ build_num }}
               ip_addrs:
-                - subnet_name: 'priv-subnet'
+                - subnet_name: priv-subnet-{{ build_num }}
                   ip: {{ priv_ip_prfx }}.13
           - port:
-              name: pxe-pub-port-3
-              network_name: public-net
+              name: pxe-pub-port-3-{{ build_num }}
+              network_name: public-net-{{ build_num }}
               ip_addrs:
-                - subnet_name: 'public-subnet'
+                - subnet_name: public-subnet-{{ build_num }}
                   ip: {{ pub_ip_prfx }}.13
 ansible:
   # Install and configure snaps-boot to build host
-  - playbook_location: {{ src_snaps_boot_dir }}/ci/playbooks/setup_build.yaml
+  - playbook_location: {{ local_snaps_boot_dir }}/ci/playbooks/setup_build.yaml
     hosts:
-      - build-vm
+      - build-vm-{{ build_num }}
     post_processing:
       sleep: 15
       reboot:
-        - pxe-vm-1
-        - pxe-vm-2
-        - pxe-vm-3
+        - pxe-vm-1-{{ build_num }}
+        - pxe-vm-2-{{ build_num }}
+        - pxe-vm-3-{{ build_num }}
     variables:
       src_snaps_boot_dir:
         type: string
@@ -327,80 +327,83 @@ ansible:
       src_copy_dir:
         type: string
         value: {{ src_copy_dir }}
+      local_snaps_boot_dir:
+        type: string
+        value: {{ local_snaps_boot_dir }}
       priv_addr:
         type: network
-        network_name: admin-net
-        subnet_name: admin-subnet
+        network_name: admin-net-{{ build_num }}
+        subnet_name: admin-subnet-{{ build_num }}
         value: cidr_ip
       admin_ip_1:
         type: port
-        vm_name: pxe-vm-1
-        port_name: pxe-admin-port-1
+        vm_name: pxe-vm-1-{{ build_num }}
+        port_name: pxe-admin-port-1-{{ build_num }}
         port_value: ip_address
       admin_mac_1:
         type: port
-        vm_name: pxe-vm-1
-        port_name: pxe-admin-port-1
+        vm_name: pxe-vm-1-{{ build_num }}
+        port_name: pxe-admin-port-1-{{ build_num }}
         port_value: mac_address
       private_ip_1:
         type: port
-        vm_name: pxe-vm-1
-        port_name: pxe-priv-port-1
+        vm_name: pxe-vm-1-{{ build_num }}
+        port_name: pxe-priv-port-1-{{ build_num }}
         port_value: ip_address
       public_ip_1:
         type: port
-        vm_name: pxe-vm-1
-        port_name: pxe-pub-port-1
+        vm_name: pxe-vm-1-{{ build_num }}
+        port_name: pxe-pub-port-1-{{ build_num }}
         port_value: ip_address
       admin_ip_2:
         type: port
-        vm_name: pxe-vm-2
-        port_name: pxe-admin-port-2
+        vm_name: pxe-vm-2-{{ build_num }}
+        port_name: pxe-admin-port-2-{{ build_num }}
         port_value: ip_address
       admin_mac_2:
         type: port
-        vm_name: pxe-vm-2
-        port_name: pxe-admin-port-2
+        vm_name: pxe-vm-2-{{ build_num }}
+        port_name: pxe-admin-port-2-{{ build_num }}
         port_value: mac_address
       private_ip_2:
         type: port
-        vm_name: pxe-vm-2
-        port_name: pxe-priv-port-2
+        vm_name: pxe-vm-2-{{ build_num }}
+        port_name: pxe-priv-port-2-{{ build_num }}
         port_value: ip_address
       public_ip_2:
         type: port
-        vm_name: pxe-vm-2
-        port_name: pxe-pub-port-2
+        vm_name: pxe-vm-2-{{ build_num }}
+        port_name: pxe-pub-port-2-{{ build_num }}
         port_value: ip_address
       admin_ip_3:
         type: port
-        vm_name: pxe-vm-3
-        port_name: pxe-admin-port-3
+        vm_name: pxe-vm-3-{{ build_num }}
+        port_name: pxe-admin-port-3-{{ build_num }}
         port_value: ip_address
       admin_mac_3:
         type: port
-        vm_name: pxe-vm-3
-        port_name: pxe-admin-port-3
+        vm_name: pxe-vm-3-{{ build_num }}
+        port_name: pxe-admin-port-3-{{ build_num }}
         port_value: mac_address
       private_ip_3:
         type: port
-        vm_name: pxe-vm-3
-        port_name: pxe-priv-port-3
+        vm_name: pxe-vm-3-{{ build_num }}
+        port_name: pxe-priv-port-3-{{ build_num }}
         port_value: ip_address
       public_ip_3:
         type: port
-        vm_name: pxe-vm-3
-        port_name: pxe-pub-port-3
+        vm_name: pxe-vm-3-{{ build_num }}
+        port_name: pxe-pub-port-3-{{ build_num }}
         port_value: ip_address
       public_gateway:
         type: network
-        network_name: public-net
-        subnet_name: public-subnet
+        network_name: public-net-{{ build_num }}
+        subnet_name: public-subnet-{{ build_num }}
         value: gateway_ip
       broadcast_addr:
         type: network
-        network_name: admin-net
-        subnet_name: admin-subnet
+        network_name: admin-net-{{ build_num }}
+        subnet_name: admin-subnet-{{ build_num }}
         value: broadcast_ip
       domain_name:
         type: string
@@ -416,23 +419,23 @@ ansible:
         value: 7200
       netmask:
         type: network
-        network_name: admin-net
-        subnet_name: admin-subnet
+        network_name: admin-net-{{ build_num }}
+        subnet_name: admin-subnet-{{ build_num }}
         value: netmask
       ip_range:
         type: network
-        network_name: admin-net
-        subnet_name: admin-subnet
+        network_name: admin-net-{{ build_num }}
+        subnet_name: admin-subnet-{{ build_num }}
         value: ip_range
       router_ip:
         type: router
-        router_name: pxe-router
+        router_name: pxe-router-{{ build_num }}
         attr: external_fixed_ip
         subnet_name: {{ ext_subnet }}
       build_admin_ip:
         type: port
-        vm_name: build-vm
-        port_name: build-admin-port
+        vm_name: build-vm-{{ build_num }}
+        port_name: build-admin-port-{{ build_num }}
         port_value: ip_address
       http_proxy_port:
         type: string
@@ -454,17 +457,17 @@ ansible:
         value: {{ hosts_yaml_target_path }}
 
   # Verify admin interface on pxe-vm-1 was configured
-  - playbook_location: {{ src_snaps_boot_dir }}/ci/playbooks/verify_intfs.yaml
+  - playbook_location: {{ local_snaps_boot_dir }}/ci/playbooks/verify_intfs.yaml
     hosts:
-      - build-vm
+      - build-vm-{{ build_num }}
     variables:
       snaps_boot_dir:
         type: string
         value: {{ src_copy_dir }}/snaps-boot
       ip_addr:
         type: port
-        vm_name: pxe-vm-1
-        port_name: pxe-admin-port-1
+        vm_name: pxe-vm-1-{{ build_num }}
+        port_name: pxe-admin-port-1-{{ build_num }}
         port_value: ip_address
       username:
         type: string
@@ -477,17 +480,17 @@ ansible:
         value: 1800
 
   # Verify admin interface on pxe-vm-2 was configured
-  - playbook_location: {{ src_snaps_boot_dir }}/ci/playbooks/verify_intfs.yaml
+  - playbook_location: {{ local_snaps_boot_dir }}/ci/playbooks/verify_intfs.yaml
     hosts:
-      - build-vm
+      - build-vm-{{ build_num }}
     variables:
       snaps_boot_dir:
         type: string
         value: {{ src_copy_dir }}/snaps-boot
       ip_addr:
         type: port
-        vm_name: pxe-vm-2
-        port_name: pxe-admin-port-2
+        vm_name: pxe-vm-2-{{ build_num }}
+        port_name: pxe-admin-port-2-{{ build_num }}
         port_value: ip_address
       username:
         type: string
@@ -500,17 +503,17 @@ ansible:
         value: 120
 
   # Verify admin interface on pxe-vm-3 was configured
-  - playbook_location: {{ src_snaps_boot_dir }}/ci/playbooks/verify_intfs.yaml
+  - playbook_location: {{ local_snaps_boot_dir }}/ci/playbooks/verify_intfs.yaml
     hosts:
-      - build-vm
+      - build-vm-{{ build_num }}
     variables:
       snaps_boot_dir:
         type: string
         value: {{ src_copy_dir }}/snaps-boot
       ip_addr:
         type: port
-        vm_name: pxe-vm-3
-        port_name: pxe-admin-port-3
+        vm_name: pxe-vm-3-{{ build_num }}
+        port_name: pxe-admin-port-3-{{ build_num }}
         port_value: ip_address
       username:
         type: string
@@ -523,9 +526,9 @@ ansible:
         value: 120
 
   # Statically configure interfaces
-  - playbook_location: {{ src_snaps_boot_dir }}/ci/playbooks/config_intfs.yaml
+  - playbook_location: {{ local_snaps_boot_dir }}/ci/playbooks/config_intfs.yaml
     hosts:
-      - build-vm
+      - build-vm-{{ build_num }}
     post_processing:
       sleep: 120
     variables:
@@ -537,17 +540,17 @@ ansible:
         value: {{ hosts_yaml_target_path }}
 
   # Verify admin interface on pxe-vm-1 was configured
-  - playbook_location: {{ src_snaps_boot_dir }}/ci/playbooks/verify_intfs.yaml
+  - playbook_location: {{ local_snaps_boot_dir }}/ci/playbooks/verify_intfs.yaml
     hosts:
-      - build-vm
+      - build-vm-{{ build_num }}
     variables:
       snaps_boot_dir:
         type: string
         value: {{ src_copy_dir }}/snaps-boot
       ip_addr:
         type: port
-        vm_name: pxe-vm-1
-        port_name: pxe-admin-port-1
+        vm_name: pxe-vm-1-{{ build_num }}
+        port_name: pxe-admin-port-1-{{ build_num }}
         port_value: ip_address
       username:
         type: string
@@ -560,17 +563,17 @@ ansible:
         value: 120
 
   # Verify admin interface on pxe-vm-2 was configured
-  - playbook_location: {{ src_snaps_boot_dir }}/ci/playbooks/verify_intfs.yaml
+  - playbook_location: {{ local_snaps_boot_dir }}/ci/playbooks/verify_intfs.yaml
     hosts:
-      - build-vm
+      - build-vm-{{ build_num }}
     variables:
       snaps_boot_dir:
         type: string
         value: {{ src_copy_dir }}/snaps-boot
       ip_addr:
         type: port
-        vm_name: pxe-vm-2
-        port_name: pxe-admin-port-2
+        vm_name: pxe-vm-2-{{ build_num }}
+        port_name: pxe-admin-port-2-{{ build_num }}
         port_value: ip_address
       username:
         type: string
@@ -583,17 +586,17 @@ ansible:
         value: 120
 
   # Verify admin interface on pxe-vm-3 was configured
-  - playbook_location: {{ src_snaps_boot_dir }}/ci/playbooks/verify_intfs.yaml
+  - playbook_location: {{ local_snaps_boot_dir }}/ci/playbooks/verify_intfs.yaml
     hosts:
-      - build-vm
+      - build-vm-{{ build_num }}
     variables:
       snaps_boot_dir:
         type: string
         value: {{ src_copy_dir }}/snaps-boot
       ip_addr:
         type: port
-        vm_name: pxe-vm-3
-        port_name: pxe-admin-port-3
+        vm_name: pxe-vm-3-{{ build_num }}
+        port_name: pxe-admin-port-3-{{ build_num }}
         port_value: ip_address
       username:
         type: string
@@ -606,17 +609,17 @@ ansible:
         value: 120
 
   # Verify private interface on pxe-vm-1 was configured
-  - playbook_location: {{ src_snaps_boot_dir }}/ci/playbooks/verify_intfs.yaml
+  - playbook_location: {{ local_snaps_boot_dir }}/ci/playbooks/verify_intfs.yaml
     hosts:
-      - build-vm
+      - build-vm-{{ build_num }}
     variables:
       snaps_boot_dir:
         type: string
         value: {{ src_copy_dir }}/snaps-boot
       ip_addr:
         type: port
-        vm_name: pxe-vm-1
-        port_name: pxe-priv-port-1
+        vm_name: pxe-vm-1-{{ build_num }}
+        port_name: pxe-priv-port-1-{{ build_num }}
         port_value: ip_address
       username:
         type: string
@@ -629,17 +632,17 @@ ansible:
         value: 120
 
   # Verify private interface on pxe-vm-2 was configured
-  - playbook_location: {{ src_snaps_boot_dir }}/ci/playbooks/verify_intfs.yaml
+  - playbook_location: {{ local_snaps_boot_dir }}/ci/playbooks/verify_intfs.yaml
     hosts:
-      - build-vm
+      - build-vm-{{ build_num }}
     variables:
       snaps_boot_dir:
         type: string
         value: {{ src_copy_dir }}/snaps-boot
       ip_addr:
         type: port
-        vm_name: pxe-vm-2
-        port_name: pxe-priv-port-2
+        vm_name: pxe-vm-2-{{ build_num }}
+        port_name: pxe-priv-port-2-{{ build_num }}
         port_value: ip_address
       username:
         type: string
@@ -652,17 +655,17 @@ ansible:
         value: 120
 
   # Verify private interface on pxe-vm-3 was configured
-  - playbook_location: {{ src_snaps_boot_dir }}/ci/playbooks/verify_intfs.yaml
+  - playbook_location: {{ local_snaps_boot_dir }}/ci/playbooks/verify_intfs.yaml
     hosts:
-      - build-vm
+      - build-vm-{{ build_num }}
     variables:
       snaps_boot_dir:
         type: string
         value: {{ src_copy_dir }}/snaps-boot
       ip_addr:
         type: port
-        vm_name: pxe-vm-3
-        port_name: pxe-priv-port-3
+        vm_name: pxe-vm-3-{{ build_num }}
+        port_name: pxe-priv-port-3-{{ build_num }}
         port_value: ip_address
       username:
         type: string
@@ -675,17 +678,17 @@ ansible:
         value: 120
 
   # Verify public interface on pxe-vm-1 was configured
-  - playbook_location: {{ src_snaps_boot_dir }}/ci/playbooks/verify_intfs.yaml
+  - playbook_location: {{ local_snaps_boot_dir }}/ci/playbooks/verify_intfs.yaml
     hosts:
-      - build-vm
+      - build-vm-{{ build_num }}
     variables:
       snaps_boot_dir:
         type: string
         value: {{ src_copy_dir }}/snaps-boot
       ip_addr:
         type: port
-        vm_name: pxe-vm-1
-        port_name: pxe-pub-port-1
+        vm_name: pxe-vm-1-{{ build_num }}
+        port_name: pxe-pub-port-1-{{ build_num }}
         port_value: ip_address
       username:
         type: string
@@ -698,17 +701,17 @@ ansible:
         value: 120
 
   # Verify private interface on pxe-vm-2 was configured
-  - playbook_location: {{ src_snaps_boot_dir }}/ci/playbooks/verify_intfs.yaml
+  - playbook_location: {{ local_snaps_boot_dir }}/ci/playbooks/verify_intfs.yaml
     hosts:
-      - build-vm
+      - build-vm-{{ build_num }}
     variables:
       snaps_boot_dir:
         type: string
         value: {{ src_copy_dir }}/snaps-boot
       ip_addr:
         type: port
-        vm_name: pxe-vm-2
-        port_name: pxe-pub-port-2
+        vm_name: pxe-vm-2-{{ build_num }}
+        port_name: pxe-pub-port-2-{{ build_num }}
         port_value: ip_address
       username:
         type: string
@@ -721,17 +724,17 @@ ansible:
         value: 120
 
   # Verify private interface on pxe-vm-3 was configured
-  - playbook_location: {{ src_snaps_boot_dir }}/ci/playbooks/verify_intfs.yaml
+  - playbook_location: {{ local_snaps_boot_dir }}/ci/playbooks/verify_intfs.yaml
     hosts:
-      - build-vm
+      - build-vm-{{ build_num }}
     variables:
       snaps_boot_dir:
         type: string
         value: {{ src_copy_dir }}/snaps-boot
       ip_addr:
         type: port
-        vm_name: pxe-vm-3
-        port_name: pxe-pub-port-3
+        vm_name: pxe-vm-3-{{ build_num }}
+        port_name: pxe-pub-port-3-{{ build_num }}
         port_value: ip_address
       username:
         type: string
