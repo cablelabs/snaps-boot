@@ -1,8 +1,8 @@
 ---
 admin_user: admin
 admin_proj: admin
-admin_pass: <password>
-auth_url: <url>
+admin_pass: {{ admin_pass }}
+auth_url: {{ auth_url }}
 id_api_version: 3
 proxy_host:
 proxy_port:
