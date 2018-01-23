@@ -17,4 +17,4 @@
 
   tasks:
     - name: Attempting to obtain an SSH connection to {{ ip_addr }}
-      command: python ~{{ ansible_user }}/snaps-boot/ci/scripts/validate_ssh_ip.py -u {{ username }} -p {{ password }} -i {{ ip_addr }} -t {{ timeout }}
+      command: python {{ snaps_boot_dir }}/ci/scripts/validate_ssh_ip.py -u {{ username }} -p {{ password }} -i {{ ip_addr }} -t {{ timeout }}

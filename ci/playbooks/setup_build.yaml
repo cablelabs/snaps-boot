@@ -16,31 +16,28 @@
 - hosts: all
 
   tasks:
-    - name: Install Git
-      become: yes
-      become_method: sudo
-      become_user: root
-      apt: name=git
-
-    - name: Delete existing snaps-boot directory
+    - name: Delete {{ src_copy_dir }}/snaps-boot directory
       file:
         state: absent
-        dest: ~/snaps-boot
+        dest: "{{ src_copy_dir }}/snaps-boot"
 
-    - name: Copy this source tree
+    - name: Copy this source tree from {{ src_snaps_boot_dir }} to {{ src_copy_dir }}/snaps-boot
       synchronize:
-        src: ../../../
-        dest: ~{{ ansible_user }}/snaps-boot
-
-    - name: Make directory ~{{ ansible_user }}/snaps-boot/packages/images
+        src: "{{ src_snaps_boot_dir }}"
+        dest: "{{ src_copy_dir }}"
+        dirs: yes
+        rsync_opts:
+          - "--no-motd"
+          - "--exclude=.git"
+    - name: Make directory {{ src_copy_dir }}/snaps-boot/packages/images
       file:
-        path: ~{{ ansible_user }}/snaps-boot/packages/images
+        path: "{{ src_copy_dir }}/snaps-boot/packages/images"
         state: directory
 
     - name: Download PXE image - ubuntu-16.04.3-server-amd64.iso
       get_url:
         url: http://releases.ubuntu.com/16.04/ubuntu-16.04.3-server-amd64.iso
-        dest: ~/snaps-boot/packages/images/ubuntu-16.04.3-server-amd64.iso
+        dest: "{{ src_copy_dir }}/snaps-boot/packages/images/ubuntu-16.04.3-server-amd64.iso"
         timeout: 1000
 
     - name: Apply template and copy hosts.yaml to {{ hosts_yaml_path }}
@@ -50,19 +47,25 @@
       become: yes
       become_method: sudo
       become_user: root
-      command: "sh ~{{ ansible_user }}/snaps-boot/scripts/PreRequisite.sh"
+      command: "sh {{ src_copy_dir }}/snaps-boot/scripts/PreRequisite.sh"
+      register: out
+    - debug: var=out.stderr_lines
 
     - name: Clean just in case PXE & DHCP server - iaas_launch.py -pc
       become: yes
       become_method: sudo
       become_user: root
-      command: "python ~{{ ansible_user }}/snaps-boot/iaas_launch.py -f {{ hosts_yaml_path }} -p"
+      command: "python {{ src_copy_dir }}/snaps-boot/iaas_launch.py -f {{ hosts_yaml_path }} -p"
+      register: out
+    - debug: var=out.stderr_lines
 
     - name: Config PXE & DHCP server - iaas_launch.py -p
       become: yes
       become_method: sudo
       become_user: root
-      command: "python ~{{ ansible_user }}/snaps-boot/iaas_launch.py -f {{ hosts_yaml_path }} -p"
+      command: "python {{ src_copy_dir }}/snaps-boot/iaas_launch.py -f {{ hosts_yaml_path }} -p"
+      register: out
+    - debug: var=out.stderr_lines
 
     - name: Make sure isc-dhcp-server is running
       become: yes
