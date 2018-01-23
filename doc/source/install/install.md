@@ -111,7 +111,7 @@ unzip master.zip
 
 ## 3 Configuration
 
-### <a name="3.1"> snaps-boot-master/conf/pxe_cluster/hosts.yaml</a>
+### <a name="3"> snaps-boot-master/conf/pxe_cluster/hosts.yaml</a>
 
 Save a copy of hosts.yaml before modifying it.
 `cp hosts.yaml original-hosts.yaml`
@@ -269,9 +269,9 @@ wget http://releases.ubuntu.com/16.04/ubuntu-16.04.3-server-amd64.iso
 
 #### Step 2 Modify hosts.yaml
 
-Go to directory `snaps-boot/conf/pxe_cluster`.
+Go to directory `snaps-boot-master/conf/pxe_cluster`.
 
-Modify file `hosts.yaml` as described in [section 3.1](#<a-name="3.1">-snaps-boot-master/conf/pxe_cluster/hosts.yaml</a>).
+Modify file `hosts.yaml` as described in [section 3](#3).
 
 #### Step 3 Check Prerequisites
 
