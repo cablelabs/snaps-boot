@@ -52,7 +52,7 @@
           - "--no-motd"
           - "--exclude=.git"
 
-    - name: Copy {{ env_file }} to {{ src_copy_dir }}/snaps-boot/env.yaml
+    - name: Copy {{ env_file }} to {{ src_copy_dir }}/env.yaml
       copy:
         src: "{{ env_file }}"
         dest: "{{ src_copy_dir }}/env.yaml"
