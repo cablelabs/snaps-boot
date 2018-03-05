@@ -258,13 +258,13 @@ memory pages are to be defined.
 Download `ubuntu16.04 server image` from internet and need to place it
 in folder `snaps-boot/images/`. Use this download
 link for ISO:
- http://releases.ubuntu.com/16.04/ubuntu-16.04.3-server-amd64.iso
+ http://releases.ubuntu.com/16.04/ubuntu-16.04.4-server-amd64.iso
 
 ```
 cd snaps-boot/
 mkdir -p packages/images
 cd packages/images
-wget http://releases.ubuntu.com/16.04/ubuntu-16.04.3-server-amd64.iso
+wget http://releases.ubuntu.com/16.04/ubuntu-16.04.4-server-amd64.iso
 ```
 
 #### Step 2 Modify hosts.yaml
