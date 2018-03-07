@@ -256,12 +256,12 @@ memory pages are to be defined.
 #### Step 1 Download Image
 
 Download `ubuntu16.04 server image` from internet and need to place it
-in folder `snaps-boot/images/`. Use this download
+in folder `snaps-boot-master/packages/images/`. Use this download
 link for ISO:
  http://releases.ubuntu.com/16.04/ubuntu-16.04.4-server-amd64.iso
 
 ```
-cd snaps-boot/
+cd snaps-boot-master/
 mkdir -p packages/images
 cd packages/images
 wget http://releases.ubuntu.com/16.04/ubuntu-16.04.4-server-amd64.iso
