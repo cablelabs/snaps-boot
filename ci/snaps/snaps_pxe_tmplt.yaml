@@ -178,7 +178,6 @@ openstack:
         flavor: build-flavor-{{ build_num }}
         imageName: build-image-{{ build_num }}
         keypair_name: pxe-build-kp-{{ build_num }}
-        security_group_names: [pxe-build-sg-{{ build_num }}]
         cloud_init_timeout: 1000
         userdata: |
           #cloud-config
@@ -208,6 +207,7 @@ openstack:
           - port:
               name: build-ctrl-port-{{ build_num }}
               network_name: ctrl-net-{{ build_num }}
+              port_security_enabled: False
           - port:
               name: build-admin-port-{{ build_num }}
               network_name: admin-net-{{ build_num }}
@@ -218,12 +218,14 @@ openstack:
           - port:
               name: build-priv-port-{{ build_num }}
               network_name: priv-net-{{ build_num }}
+              port_security_enabled: False
               ip_addrs:
                 - subnet_name: priv-subnet-{{ build_num }}
                   ip: {{ priv_ip_prfx }}.10
           - port:
               name: build-pub-port-{{ build_num }}
               network_name: public-net-{{ build_num }}
+              port_security_enabled: False
               ip_addrs:
                 - subnet_name: public-subnet-{{ build_num }}
                   ip: {{ pub_ip_prfx }}.10

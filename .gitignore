@@ -105,3 +105,6 @@ ENV/
 
 # IntelaJ
 .idea/
+
+# Ansible rety files
+*.retry
