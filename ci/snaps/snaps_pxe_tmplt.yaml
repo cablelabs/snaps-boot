@@ -211,6 +211,7 @@ openstack:
           - port:
               name: build-admin-port-{{ build_num }}
               network_name: admin-net-{{ build_num }}
+              port_security_enabled: False
               ip_addrs:
                 - subnet_name: admin-subnet-{{ build_num }}
                   ip: {{ admin_ip_prfx }}.10
