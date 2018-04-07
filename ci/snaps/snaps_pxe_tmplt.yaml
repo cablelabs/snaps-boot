@@ -94,7 +94,7 @@ openstack:
               cidr: {{ admin_ip_prfx }}.0/24
               start: {{ admin_ip_prfx }}.2
               end: {{ admin_ip_prfx }}.9
-              enable_dhcp: True
+              enable_dhcp: False
               dns_nameservers: []
     - network:
         os_user:
@@ -191,17 +191,20 @@ openstack:
             - [sh, -c, "echo '  iface ens4 inet static' >> /etc/network/interfaces.d/ens4.cfg"]
             - [sh, -c, "echo '  address {{ admin_ip_prfx }}.10' >> /etc/network/interfaces.d/ens4.cfg"]
             - [sh, -c, "echo '  netmask 255.255.255.0' >> /etc/network/interfaces.d/ens4.cfg"]
+            - [sh, -c, "echo '  mtu 1450' >> /etc/network/interfaces.d/ens4.cfg"]
             - [sh, -c, "sudo ifup ens4"]
             - [sh, -c, "echo 'auto ens5' > /etc/network/interfaces.d/ens5.cfg"]
             - [sh, -c, "echo '  iface ens5 inet static' >> /etc/network/interfaces.d/ens5.cfg"]
             - [sh, -c, "echo '  address {{ priv_ip_prfx }}.10' >> /etc/network/interfaces.d/ens5.cfg"]
             - [sh, -c, "echo '  netmask 255.255.255.0' >> /etc/network/interfaces.d/ens5.cfg"]
+            - [sh, -c, "echo '  mtu 1450' >> /etc/network/interfaces.d/ens5.cfg"]
             - [sh, -c, "sudo ifup ens5"]
             - [sh, -c, "echo 'auto ens6' > /etc/network/interfaces.d/ens6.cfg"]
             - [sh, -c, "echo '  iface ens6 inet static' >> /etc/network/interfaces.d/ens6.cfg"]
             - [sh, -c, "echo '  address {{ pub_ip_prfx }}.10' >> /etc/network/interfaces.d/ens6.cfg"]
             - [sh, -c, "echo '  netmask 255.255.255.0' >> /etc/network/interfaces.d/ens6.cfg"]
             - [sh, -c, "echo '  gateway {{ pub_ip_prfx }}.1' >> /etc/network/interfaces.d/ens6.cfg"]
+            - [sh, -c, "echo '  mtu 1450' >> /etc/network/interfaces.d/ens6.cfg"]
             - [sh, -c, "sudo ifup ens6"]
         ports:
           - port:
@@ -431,10 +434,10 @@ ansible:
         subnet_name: admin-subnet-{{ build_num }}
         value: ip_range
       router_ip:
-        type: router
-        router_name: pxe-router-{{ build_num }}
-        attr: external_fixed_ip
-        subnet_name: {{ ext_subnet }}
+        type: network
+        network_name: admin-net-{{ build_num }}
+        subnet_name: admin-subnet-{{ build_num }}
+        value: gateway_ip
       build_admin_ip:
         type: port
         vm_name: build-vm-{{ build_num }}

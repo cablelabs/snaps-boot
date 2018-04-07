@@ -75,11 +75,3 @@
       systemd:
         name: isc-dhcp-server
         state: started
-
-    - name: Stop isc-dhcp-server (will not work on OpenStack, requires the Neutron DHCP server instead)
-      become: yes
-      become_method: sudo
-      become_user: root
-      systemd:
-        name: isc-dhcp-server
-        state: stopped
