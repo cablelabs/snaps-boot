@@ -108,3 +108,6 @@ ENV/
 
 # Ansible rety files
 *.retry
+
+# VI swap files
+*.swp

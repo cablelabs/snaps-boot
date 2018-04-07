@@ -157,7 +157,7 @@ openstack:
         os_user:
           name: pxe-user-{{ build_num }}
           project_name: pxe-proj-{{ build_num }}
-        name: pxe-build-sg-{{ build_num }}
+        name: pxe-vm-sg-{{ build_num }}
         rules:
           - direction: ingress
             protocol: udp
@@ -244,6 +244,7 @@ openstack:
         name: pxe-vm-1-{{ build_num }}
         flavor: pxe-flavor-{{ build_num }}
         imageName: pxe-image-{{ build_num }}
+        security_group_names: [pxe-vm-sg-{{ build_num }}]
         ports:
           - port:
               name: pxe-admin-port-1-{{ build_num }}
@@ -270,6 +271,7 @@ openstack:
         name: pxe-vm-2-{{ build_num }}
         flavor: pxe-flavor-{{ build_num }}
         imageName: pxe-image-{{ build_num }}
+        security_group_names: [pxe-vm-sg-{{ build_num }}]
         ports:
           - port:
               name: pxe-admin-port-2-{{ build_num }}
@@ -296,6 +298,7 @@ openstack:
         name: pxe-vm-3-{{ build_num }}
         flavor: pxe-flavor-{{ build_num }}
         imageName: pxe-image-{{ build_num }}
+        security_group_names: [pxe-vm-sg-{{ build_num }}]
         ports:
           - port:
               name: pxe-admin-port-3-{{ build_num }}
