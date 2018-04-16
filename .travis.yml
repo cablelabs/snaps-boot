@@ -6,11 +6,11 @@ services:
   - echo "No services here"
 
 install:
-  - pip install pep8
+  - pip install pycodestyle
 
 script:
   - echo "Checking pep8 compliance"
-  - pep8
+  - pycodestyle *.py
 
 after_success:
   - echo "Executing after_success, nothing here"
