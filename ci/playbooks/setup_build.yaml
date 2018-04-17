@@ -1,0 +1,77 @@
+# Copyright (c) 2017 Cable Television Laboratories, Inc. ("CableLabs")
+#                    and others.  All rights reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at:
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+---
+- hosts: all
+
+  tasks:
+    - name: Delete {{ src_copy_dir }}/snaps-boot directory
+      file:
+        state: absent
+        dest: "{{ src_copy_dir }}/snaps-boot"
+
+    - name: Copy this source tree from local {{ local_snaps_boot_dir }} to {{ src_copy_dir }}/snaps-boot
+      synchronize:
+        src: "{{ local_snaps_boot_dir }}"
+        dest: "{{ src_copy_dir }}"
+        dirs: yes
+        rsync_opts:
+          - "--no-motd"
+          - "--exclude=.git"
+
+    - name: Make directory {{ src_copy_dir }}/snaps-boot/packages/images
+      file:
+        path: "{{ src_copy_dir }}/snaps-boot/packages/images"
+        state: directory
+
+    - name: Download PXE image - ubuntu-16.04.4-server-amd64.iso
+      get_url:
+        url: http://releases.ubuntu.com/16.04/ubuntu-16.04.4-server-amd64.iso
+        dest: "{{ src_copy_dir }}/snaps-boot/packages/images/ubuntu-16.04.4-server-amd64.iso"
+        timeout: 1000
+
+    - name: Apply template and copy hosts.yaml to {{ hosts_yaml_path }}
+      action: template src=templates/hosts.yaml.tmplt dest={{ hosts_yaml_path }}
+
+    - name: Complete build host setup - PreRequisite.sh
+      become: yes
+      become_method: sudo
+      become_user: root
+      command: "sh {{ src_copy_dir }}/snaps-boot/scripts/PreRequisite.sh"
+      register: out
+    - debug: var=out.stderr_lines
+
+    - name: Clean just in case PXE & DHCP server - iaas_launch.py -pc
+      become: yes
+      become_method: sudo
+      become_user: root
+      command: "python {{ src_copy_dir }}/snaps-boot/iaas_launch.py -f {{ hosts_yaml_path }} -pc"
+      register: out
+    - debug: var=out.stderr_lines
+
+    - name: Config PXE & DHCP server - iaas_launch.py -p
+      become: yes
+      become_method: sudo
+      become_user: root
+      command: "python {{ src_copy_dir }}/snaps-boot/iaas_launch.py -f {{ hosts_yaml_path }} -p"
+      register: out
+    - debug: var=out.stderr_lines
+
+    - name: Make sure isc-dhcp-server is running
+      become: yes
+      become_method: sudo
+      become_user: root
+      systemd:
+        name: isc-dhcp-server
+        state: started

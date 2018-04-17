@@ -1,0 +1,63 @@
+# Copyright (c) 2017 Cable Television Laboratories, Inc. ("CableLabs")
+#                    and others.  All rights reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at:
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+---
+- hosts: all
+
+  tasks:
+    - name: Install Git
+      become: yes
+      become_method: sudo
+      become_user: root
+      apt: name=git
+
+    - name: Install Corkscrew
+      become: yes
+      become_method: sudo
+      become_user: root
+      apt: name=corkscrew
+
+    - name: Clone snaps-oo
+      git:
+        repo: https://gerrit.opnfv.org/gerrit/snaps
+        dest: ~/snaps-oo
+
+    - name: Install snaps-oo
+      pip:
+        name: ~/snaps-oo
+        virtualenv: ~/snaps-venv
+
+    - name: Delete {{ src_copy_dir }}/snaps-boot directory
+      file:
+        state: absent
+        dest: "{{ src_copy_dir }}/snaps-boot"
+
+    - name: Copy this source tree from {{ src_snaps_boot_dir }} to {{ src_copy_dir }}/snaps-boot
+      synchronize:
+        src: "{{ src_snaps_boot_dir }}"
+        dest: "{{ src_copy_dir }}"
+        dirs: yes
+        rsync_opts:
+          - "--no-motd"
+          - "--exclude=.git"
+
+    - name: Copy {{ env_file }} to {{ src_copy_dir }}/env.yaml
+      copy:
+        src: "{{ env_file }}"
+        dest: "{{ src_copy_dir }}/env.yaml"
+
+    - name: Launch SNAPS-OO deploy with template {{ src_copy_dir }}/snaps-boot/ci/snaps/snaps_pxe_tmplt.yaml and env file {{ src_copy_dir }}/env.yaml (THIS WILL RUN FOR A LONG TIME WITHOUT OUTPUT)
+      command: "~/snaps-venv/bin/python ~/snaps-oo/examples/launch.py -t {{ src_copy_dir }}/snaps-boot/ci/snaps/snaps_pxe_tmplt.yaml -e {{ src_copy_dir }}/env.yaml -d"
+      register: out
+    - debug: var=out.stderr_lines
