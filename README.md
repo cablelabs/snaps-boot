@@ -49,4 +49,9 @@ We use an [Apache 2.0 License](LICENSE) for SNAPS-Boot.
 
 Questions? Just send us an email at
 [snaps@cablelabs.com](mailto:snaps@cablelabs.com) or join the conversation:
-[![IRC](https://www.irccloud.com/invite-svg?channel=%23cablelabs-snaps&amp;hostname=irc.freenode.net&amp;port=6697&amp;ssl=1)](http://webchat.freenode.net/?channels=cablelabs-snaps).
+[![IRC](https://www.irccloud.com/invite-svg?channel=%23cablelabs-snaps&amp;hostname=irc.freenode.net&amp;port=6697&amp;ssl=1)](http://webchat.freenode.net/?channels=cablelabs-snaps)[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fcablelabs%2Fsnaps-boot.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2Fcablelabs%2Fsnaps-boot?ref=badge_shield)
+.
+
+
+## License
+[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fcablelabs%2Fsnaps-boot.svg?type=large)](https://app.fossa.io/projects/git%2Bgithub.com%2Fcablelabs%2Fsnaps-boot?ref=badge_large)
