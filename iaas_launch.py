@@ -80,7 +80,12 @@ def main(arguments):
         __read_hw_config(config, "staticIPConfigure")
 
     if arguments.boot is not ARG_NOT_SET:
-        __read_hw_config(config, "boot")
+        if arguments.boot == "ubuntu":
+           __read_hw_config(config, "ubuntu")
+        elif arguments.boot == "centos":
+           __read_hw_config(config, "centos")
+        else:
+           __read_hw_config(config, "boot")
 
     if arguments.bootd is not ARG_NOT_SET:
         __read_hw_config(config, "bootd")
@@ -88,7 +93,7 @@ def main(arguments):
         __read_hw_config(config, "setIsolCpus")
     if arguments.delIsolCpus is not ARG_NOT_SET:
         __read_hw_config(config, "delIsolCpus")
-    logger.info('Completed operation successfully')
+    logger.info('Completed opeartion successfully')
 
 
 if __name__ == '__main__':

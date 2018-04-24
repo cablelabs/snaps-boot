@@ -50,6 +50,8 @@ PROVISION:
     ftp_proxy: ""
     http_proxy: "http://10.197.121.21:3142"
     https_proxy: ""
+    ngcacher_proxy: "http://gur44646:Verizon1230@165.225.104.34:80"
+
   PXE:
     password: cable123
     serverIp: "10.197.121.21"
@@ -146,12 +148,22 @@ PROVISION:
          ip: "10.197.124.25"
          mac: "ec:b1:d7:88:a8:aa"
   TFTP:
-    os: ubuntu-16.04.4-server-amd64.iso
-    password: cable123
-    seed: hwe-ubuntu-server.seed
-    timezone: America/Denver
-    user: ubuntu
-    fullname: ubuntu_user
+     pxe_server_configuration:
+       -
+        ubuntu:
+           os: ubuntu-16.04.4-server-amd64.iso
+           password: ChangeMe
+           seed: hwe-ubuntu-server.seed
+           timezone: America/Denver
+           user: ubuntu
+           fullname: ubuntu_user
+       -
+        centos:
+           os: CentOS-7-x86_64-DVD-1708.iso
+           root_password: ChangeMe123
+           user: centos
+           user_password: ChangeMe123
+           timezone: America/Denver
   CPUCORE:
     host:
        -
