@@ -226,18 +226,20 @@ This section defines parameters to specify the host OS image and SEED file to be
 | --------- | ----------- | ----------- |
 | pxe_server_configuration |  | Details of OS to be used in PXE server installation.  |
 | ubuntu |  | Details of Ubuntu OS. |
-| os | Y | ISO of ubuntu OS image to be installed on host machines. |
-| password | Y | Password for the default user created by SNAPS-Boot. |
-| seed | Y | Seed file to be used for host OS installation. |
-| timezone | Y | Time zone configuration for host machines. |
-| user | Y | Default user for all host machines. SNAPS-Boot creates this user. |
+| os | N | ISO of ubuntu OS image to be installed on host machines. |
+| password | N | Password for the default user created by SNAPS-Boot. |
+| seed | N | Seed file to be used for host OS installation. |
+| timezone | N | Time zone configuration for host machines. |
+| user | N | Default user for all host machines. SNAPS-Boot creates this user. |
 | fullname | N | Description of user created by SNAPS-Boot. |
 | centos |  | Details of Centos OS. |
-| os | Y | ISO of centos OS image to be installed on host machines. |
-| root_password | Y | Password for the root user created by SNAPS-Boot. |
-| user | Y | Default user for all host machines. SNAPS-Boot creates this user. |
-| user_password | Y | Password for the default user created by SNAPS-Boot. |
-| timezone | Y | Time zone configuration for host machines. |
+| os | N | ISO of centos OS image to be installed on host machines. |
+| root_password | N | Password for the root user created by SNAPS-Boot. |
+| user | N | Default user for all host machines. SNAPS-Boot creates this user. |
+| user_password | N | Password for the default user created by SNAPS-Boot. |
+| timezone | N | Time zone configuration for host machines. |
+
+Note: A User can give either Ubuntu OS or Centos OS or Both.
 
 
 #### CPUCORE:
