@@ -239,7 +239,7 @@ This section defines parameters to specify the host OS image and SEED file to be
 | user_password | N | Password for the default user created by SNAPS-Boot. |
 | timezone | N | Time zone configuration for host machines. |
 
-Note: A User can give details of either Ubuntu OS or Centos OS or Both.
+> Note: User has to give details of atleast one OS(either Ubuntu OS or Centos OS or Both) as per the PXE requirement.
 
 
 #### CPUCORE:
