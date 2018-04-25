@@ -50,7 +50,7 @@ PROVISION:
     ftp_proxy: ""
     http_proxy: "http://10.197.121.21:3142"
     https_proxy: ""
-    ngcacher_proxy: "http://gur44646:Verizon1230@165.225.104.34:80"
+    ngcacher_proxy: "http://gur44646:Aricent1230@165.225.104.34:80"
 
   PXE:
     password: cable123
