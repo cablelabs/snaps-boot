@@ -239,7 +239,7 @@ This section defines parameters to specify the host OS image and SEED file to be
 | user_password | N | Password for the default user created by SNAPS-Boot. |
 | timezone | N | Time zone configuration for host machines. |
 
-> Note: User has to give details of atleast one OS(either Ubuntu OS or Centos OS or Both) as per the PXE requirement.
+> Note: User has to give details of at least one OS(either Ubuntu OS or Centos OS or Both) as per the PXE requirement.
 
 
 #### CPUCORE:
@@ -299,7 +299,7 @@ Run `PreRequisite.sh` as shown below:
 sudo ./scripts/PreRequisite.sh
 ```
 
-If you see failuers or errors.  Update your software, remove obsolete
+If you see failures or errors.  Update your software, remove obsolete
 packages and reboot your server.
 
 ```
@@ -326,7 +326,7 @@ ssh session to be terminated.
 
 #### Step 5
 
-Manually verify DHCP server is running or not, using below given command:
+Manually verify DHCP server is running or not, using the given command below:
 
 ```
 sudo systemctl status isc-dhcp-server.service
@@ -336,8 +336,8 @@ State should be active running.
 If it is not running, then double check the hosts.yaml file and look
 at /var/log/syslog for error messages.
 
-Manually verify tftp-hpa service is running or not, using below given
-command:
+Manually verify tftp-hpa service is running or not, using the given
+command below:
 
 ```
 sudo systemctl status tftpd-hpa
@@ -345,8 +345,8 @@ sudo systemctl status tftpd-hpa
 
 State should be active running.
 
-Manually verify apache2 service is running or not, using below given
-command:
+Manually verify apache2 service is running or not, using the given
+command below:
 
 ```
 sudo systemctl status apache2
@@ -429,7 +429,7 @@ Run `PreRequisite.sh` as shown below:
 sudo ./scripts/PreRequisite.sh
 ```
 
-If you see failuers or errors.  Update your software, remove obsolete
+If you see failures or errors.  Update your software, remove obsolete
 packages and reboot your server.
 
 ```
@@ -456,7 +456,7 @@ ssh session to be terminated.
 
 #### Step 5
 
-Manually verify DHCP server is running or not, using below given command:
+Manually verify DHCP server is running or not, using the given command below: 
 
 ```
 sudo systemctl status isc-dhcp-server.service
@@ -466,8 +466,8 @@ State should be active running.
 If it is not running, then double check the hosts.yaml file and look
 at /var/log/syslog for error messages.
 
-Manually verify tftp-hpa service is running or not, using below given
-command:
+Manually verify tftp-hpa service is running or not, using the given
+command below:
 
 ```
 sudo systemctl status tftpd-hpa
@@ -475,8 +475,8 @@ sudo systemctl status tftpd-hpa
 
 State should be active running.
 
-Manually verify apache2 service is running or not, using below given
-command:
+Manually verify apache2 service is running or not, using the given
+command below:
 
 ```
 sudo systemctl status apache2
@@ -563,7 +563,7 @@ Run `PreRequisite.sh` as shown below:
 sudo ./scripts/PreRequisite.sh
 ```
 
-If you see failuers or errors.  Update your software, remove obsolete
+If you see failures or errors.  Update your software, remove obsolete
 packages and reboot your server.
 
 ```
@@ -590,7 +590,7 @@ ssh session to be terminated.
 
 #### Step 5
 
-Manually verify DHCP server is running or not, using below given command:
+Manually verify DHCP server is running or not, using the given command below:
 
 ```
 sudo systemctl status isc-dhcp-server.service
@@ -600,8 +600,8 @@ State should be active running.
 If it is not running, then double check the hosts.yaml file and look
 at /var/log/syslog for error messages.
 
-Manually verify tftp-hpa service is running or not, using below given
-command:
+Manually verify tftp-hpa service is running or not, using the given
+command below:
 
 ```
 sudo systemctl status tftpd-hpa
@@ -609,8 +609,8 @@ sudo systemctl status tftpd-hpa
 
 State should be active running.
 
-Manually verify apache2 service is running or not, using below given
-command:
+Manually verify apache2 service is running or not, using the given
+command below:
 
 ```
 sudo systemctl status apache2
