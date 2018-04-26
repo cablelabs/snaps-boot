@@ -93,7 +93,7 @@ def main(arguments):
         __read_hw_config(config, "setIsolCpus")
     if arguments.delIsolCpus is not ARG_NOT_SET:
         __read_hw_config(config, "delIsolCpus")
-    logger.info('Completed opeartion successfully')
+    logger.info('Completed operation successfully')
 
 
 if __name__ == '__main__':
