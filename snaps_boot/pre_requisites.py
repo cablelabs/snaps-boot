@@ -10,7 +10,7 @@ failed_cmds = []
 def system(cmd):
     failure, output = commands.getstatusoutput(cmd)
     if failure:
-        print 'Command %s failed to install\n' % cmd
+        print 'Command %s failed to install' % cmd
         failed_cmds.append(cmd)
         #sys.exit(1)
         print output
@@ -39,6 +39,8 @@ system('apt-get install -y ipmitool')
 system('apt-get install -y sshpass')
 
 #   ssh-keygen  generation
+#system('ssh-keygen -t rsa -N "" -f ssh.key')
+#system('ssh-copy-id -i ssh.key.pub YOUR-REMOTE-HOST-IP')
 
 #   apt-get install openjdk
 system('sudo apt-get install -y openjdk-8-jdk')
