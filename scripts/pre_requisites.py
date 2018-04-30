@@ -12,7 +12,6 @@ def system(cmd):
     if failure:
         print 'Command %s failed to install' % cmd
         failed_cmds.append(cmd)
-        #sys.exit(1)
         print output
     else:
         print 'Command %s successfully executed' %cmd
@@ -49,6 +48,18 @@ system('sudo apt-get install -y openjdk-8-jdk')
 system('sudo pip install cryptography')
 
 if len(failed_cmds) > 1:
-    print 'Failed to execute the following commands: '
+    print '* * * Failed to execute the following commands * * *'
     for line in failed_cmds:
         print line
+    print 'Attempting to resolve errors . . .'
+    system('yes | sudo apt-get update')
+    system('yes | sudo apt-get upgrade')
+    system('yes | sudo apt-get auto-remove')
+    print 'It is recommended you reboot your system'
+    reboot = raw_input('Reboot now? y/n: ')
+    if reboot == 'y' or reboot == 'Y':
+        print reboot
+        system('sudo reboot')
+    else:
+        print reboot
+        sys.exit(1)
