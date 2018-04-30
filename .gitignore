@@ -105,3 +105,9 @@ ENV/
 
 # IntelaJ
 .idea/
+
+# Ansible rety files
+*.retry
+
+# VI swap files
+*.swp

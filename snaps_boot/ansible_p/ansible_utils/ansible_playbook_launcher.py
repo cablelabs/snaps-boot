@@ -48,6 +48,7 @@ def __launch_ansible_playbook(list_ip, playbook, extra_variable=None):
         logger.info(extra_variable)
     else:
         logger.info('NO EXTRA VARS')
+
     loader = DataLoader()
     inventory = Inventory(loader=loader, variable_manager=variable_manager,
                           host_list=list_ip)
@@ -81,6 +82,7 @@ def __launch_ansible_playbook(list_ip, playbook, extra_variable=None):
         options=ansible_opts,
         passwords=None)
 
-    logger.debug('Executing Ansible Playbook - ' + playbook)
+    logger.info('Executing Ansible Playbook - ' + playbook)
     ret = executor.run()
-    return ret
+    if ret != 0:
+        raise Exception('Error Executing Ansible Playbook - ' + playbook)

@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 # Copyright 2017 ARICENT HOLDINGS LUXEMBOURG SARL and Cable Television Laboratories, Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -96,4 +97,12 @@ echo "++++++++++++++++++++++++++++++++++++++++++++++"
 sudo apt-get install -y openjdk-8-jdk
 command_status=$?
 checkStatus $command_status "install  openjdk using apt-get"
+sleep 5
+
+echo "++++++++++++++++++++++++++++++++++++++++++++++"
+echo "pip install cryptography"
+echo "++++++++++++++++++++++++++++++++++++++++++++++"
+sudo pip install cryptography
+command_status=$?
+checkStatus $command_status "install cryptography using pip"
 sleep 5

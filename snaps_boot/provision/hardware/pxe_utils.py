@@ -24,8 +24,11 @@ import subprocess
 
 import os
 import pkg_resources
+from cryptography.hazmat.backends import default_backend
+from cryptography.hazmat.primitives import serialization
+from cryptography.hazmat.primitives.asymmetric import rsa
 
-from snaps_boot.ansible_p.ansible_utils import ansible_playbook_launcher
+from snaps_boot.ansible_p.ansible_utils import ansible_playbook_launcher as apl
 from snaps_boot.common.consts import consts
 
 logger = logging.getLogger('deploy_venv')
@@ -51,10 +54,8 @@ def __main(config, operation):
     elif operation == "provisionClean":
         __provision_clean()
     elif operation == "staticIPConfigure":
-        print 'AAAAA'
         __static_ip_configure(static_dict, proxy_dict)
     elif operation == "staticIPCleanup":
-        print 'AAAAA'
         __static_ip_cleanup(static_dict)
     elif operation == "setIsolCpus":
         __set_isol_cpus(cpu_core_dict)
@@ -534,16 +535,23 @@ def __static_ip_configure(static_dict, proxy_dict):
     consts.KEY_IP_LIST = iplist
     for i in range(len(host)):
         target = host[i].get('access_ip')
-        subprocess.call(
-            'echo -e y|ssh-keygen -b 2048 -t rsa -f '
-            '/root/.ssh/id_rsa -q -N ""',
-            shell=True)
-        command = 'sshpass -p %s ssh-copy-id -o ' \
-                  'StrictHostKeyChecking=no %s@%s' % (password, user_name, target)
-        subprocess.call(command, shell=True)
+        __create_and_save_keys()
+
+        command = 'sshpass -p \'%s\' ssh-copy-id -o ' \
+                  'StrictHostKeyChecking=no %s@%s' \
+                  % (password, user_name, target)
+
+        logger.info('Issuing following command - %s', command)
+        retval = subprocess.call(command, shell=True)
+
+        if retval != 0:
+            raise Exception('System command failed - ' + command)
+
         interfaces = host[i].get('interfaces')
-        backup_var="Y"
-        ansible_playbook_launcher.__launch_ansible_playbook(iplist,playbook_path_bak,{'target': target, 'bak': backup_var})
+        backup_var = "Y"
+        apl.__launch_ansible_playbook(
+            iplist, playbook_path_bak, {'target': target, 'bak': backup_var})
+
         # TODO/FIXME - why is the var 'i' being used in both the inner and
         # outer loops???
         for i in range(len(interfaces)):
@@ -554,7 +562,7 @@ def __static_ip_configure(static_dict, proxy_dict):
             dns = interfaces[i].get('dns')
             dn = interfaces[i].get('dn')
             intf_type = interfaces[i].get('type')
-            ansible_playbook_launcher.__launch_ansible_playbook(
+            apl.__launch_ansible_playbook(
                 iplist, playbook_path, {
                     'target': target,
                     'address': address,
@@ -566,6 +574,57 @@ def __static_ip_configure(static_dict, proxy_dict):
                     'type': intf_type,
                     'dns': dns,
                     'dn': dn})
+
+
+def __create_and_save_keys():
+
+    keys = rsa.generate_private_key(
+        backend=default_backend(), public_exponent=65537,
+        key_size=2048)
+
+    # Save Keys if not already exist
+    priv_key_path = os.path.expanduser('~/.ssh/id_rsa')
+    priv_key_file = None
+    if not os.path.isfile(priv_key_path):
+        # Save the keys
+        ssh_dir = os.path.expanduser('~/.ssh')
+        if not os.path.isdir(ssh_dir):
+            os.mkdir(ssh_dir)
+
+        # Save Private Key
+        try:
+            priv_key_file = open(priv_key_path, 'wb')
+            priv_key_file.write(keys.private_bytes(
+                encoding=serialization.Encoding.PEM,
+                format=serialization.PrivateFormat.TraditionalOpenSSL,
+                encryption_algorithm=serialization.NoEncryption()))
+            os.chmod(priv_key_path, 0o400)
+        except:
+            raise
+        finally:
+            if priv_key_file:
+                priv_key_file.close()
+
+    pub_key_path = os.path.expanduser('~/.ssh/id_rsa.pub')
+    pub_key_file = None
+    if not os.path.isfile(pub_key_path):
+        # Save the keys
+        ssh_dir = os.path.expanduser('~/.ssh')
+        if not os.path.isdir(ssh_dir):
+            os.mkdir(ssh_dir)
+
+        # Save Public Key
+        try:
+            pub_key_file = open(pub_key_path, 'wb')
+            pub_key_file.write(keys.public_key().public_bytes(
+                serialization.Encoding.OpenSSH,
+                serialization.PublicFormat.OpenSSH))
+            os.chmod(pub_key_path, 0o400)
+        except:
+            raise
+        finally:
+            if pub_key_file:
+                pub_key_file.close()
 
 
 def __static_ip_cleanup(static_dict):
@@ -602,11 +661,14 @@ def __static_ip_cleanup(static_dict):
             '/root/.ssh/id_rsa -q -N ""',
             shell=True)
         command = 'sshpass -p %s ssh-copy-id -o ' \
-                  'StrictHostKeyChecking=no %s@%s' % (password, user_name, target)
+                  'StrictHostKeyChecking=no %s@%s' \
+                  % (password, user_name, target)
         subprocess.call(command, shell=True)
         interfaces = host[i].get('interfaces')
-        backup_var="N"
-        ansible_playbook_launcher.__launch_ansible_playbook(iplist,playbook_path_bak,{'target': target, 'bak': backup_var})
+        backup_var = "N"
+        apl.__launch_ansible_playbook(
+            iplist, playbook_path_bak, {'target': target, 'bak': backup_var})
+
         # TODO/FIXME - why is the var 'i' being used in both the inner and
         # outer loops???
         for i in range(len(interfaces)):
@@ -617,7 +679,7 @@ def __static_ip_cleanup(static_dict):
             dns = interfaces[i].get('dns')
             dn = interfaces[i].get('dn')
             intf_type = interfaces[i].get('type')
-            ansible_playbook_launcher.__launch_ansible_playbook(
+            apl.__launch_ansible_playbook(
                 iplist, playbook_path, {
                     'target': target,
                     'address': address,
@@ -686,7 +748,7 @@ def __set_isol_cpus(cpu_core_dict):
                       'StrictHostKeyChecking=no %s@%s' % (
                           root_pass, user_name, target)
             subprocess.call(command, shell=True)
-            ansible_playbook_launcher.__launch_ansible_playbook(
+            apl.__launch_ansible_playbook(
                 iplist, playbook_path, {
                     'target': target,
                     'isolcpus': isolcpus,
@@ -733,7 +795,7 @@ def __del_isol_cpus(cpu_core_dict):
                       'StrictHostKeyChecking=no %s@%s' \
                       % (root_pass, user_name, target)
             subprocess.call(command, shell=True)
-            ansible_playbook_launcher.__launch_ansible_playbook(
+            apl.__launch_ansible_playbook(
                 iplist, playbook_path, {
                     'target': target,
                     'isolcpus': isolcpus,
