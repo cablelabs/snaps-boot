@@ -50,8 +50,6 @@ def main(arguments):
                        for relavant operations.
      :return: To the OS
     """
-    print 'Checking prerequisite depedencies . . . . .'
-    os.system('sudo python2 scripts/pre_requisites.py')
 
     log_level = logging.INFO
     if arguments.log_level != 'INFO':
