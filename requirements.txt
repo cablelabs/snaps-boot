@@ -1,3 +1,0 @@
-mock
-ansible<2.4,>=2.1.0
-pathlib
