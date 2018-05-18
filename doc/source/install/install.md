@@ -261,6 +261,7 @@ directory.
 
 #### Step 1
 
+##### PXE Bios Install
 Download `ubuntu16.04 server image` from internet and need to place it
 in folder `packages/images/`. Use this download
 link for ISO:
@@ -271,6 +272,19 @@ mkdir -p packages/images
 cd packages/images
 wget http://releases.ubuntu.com/16.04/ubuntu-16.04.4-server-amd64.iso
 ```
+
+##### PXE UEFI Install
+Download `grubnetx64` from internet and need to place it
+in folder `packages/images/`. Use this download
+link:
+    http://archive.ubuntu.com/ubuntu/dists/trusty/main/uefi/grub2-amd64/current/grubnetx64.efi.signed
+
+Download `netboot server image` from internet and need to place it
+in folder `packages/images/`. Use this download
+link:
+    http://archive.ubuntu.com/ubuntu/dists/xenial-updates/main/installer-amd64/current/images/netboot/netboot.tar.gz
+    
+
 
 #### Step 2
 
