@@ -100,6 +100,9 @@ def __pxe_server_installation(proxy_dict, pxe_dict, tftp_dict, subnet_list):
     logger.info("******************mountAndCopy************************")
     os.system('sh scripts/PxeInstall.sh mountAndCopy ' + tftp_dict["os"]
               + " " + pxe_dict["password"])
+    logger.info("******************mountAndCopyUefi************************")
+    os.system('sh scripts/PxeInstall.sh mountAndCopyUefi ' + 'grubnetx64.efi.signed'
+              + " " + "netboot.tar.gz" + " " + pxe_dict["password"])
     logger.info("*************defaultFileConfigure********************")
     os.system('sh scripts/PxeInstall.sh defaultFileConfigure ' + pxe_dict[
         "serverIp"] + " " + tftp_dict["seed"] + " " + pxe_dict["password"])

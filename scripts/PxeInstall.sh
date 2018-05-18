@@ -199,6 +199,32 @@ if [ -d "/var/lib/tftpboot/" ]
 
 }
 
+mountAndCopyUefi () {
+echo "++++++++++++++++++++++++++++++++++++++++++++++"
+echo "mountAndCopy  method "
+echo "++++++++++++++++++++++++++++++++++++++++++++++"
+pxeServerPass="$3"
+if [ -f packages/images/"$1" ] #if [ "$1" ] #
+then
+    echo "Grub file $1 exists."
+	echo "$pxeServerPass" | sudo -S  cp -fr packages/images/$1 /var/lib/tftpboot
+else
+    echo "Error: Grub file $1  does not exists."
+	exit 0
+fi
+
+if [ -f packages/images/"$2" ] #if [ "$1" ] #
+then
+    echo "Netboot file $2 exists."
+	echo "$pxeServerPass" | sudo -S  cp -fr packages/images/$2 /var/lib/tftpboot
+	echo "$pxeServerPass" | sudo -S  tar -xvf /var/lib/tftpboot/$2
+	sleep 10
+else
+    echo "Error: Netboot file $2  does not exists."
+	exit 0
+fi
+}
+
 
 defaultFileConfigure () {
 echo "++++++++++++++++++++++++++++++++++++++++++++++"
@@ -425,6 +451,10 @@ case "$1" in
       	mountAndCopy "$2"  "$3"
 	;;
 
+	mountAndCopyUefi)
+      	mountAndCopyUefi "$2"  "$3" "$4"
+	;;
+
 	defaultFileConfigure)
       	defaultFileConfigure "$2" "$3" "$4"
 	 ;;
@@ -434,7 +464,7 @@ case "$1" in
          ;;
 
 	defaultGrubConfigure)
-      	defaultGrubConfigureo "$2" "$3" "$4"
+      	defaultGrubConfigure "$2" "$3" "$4"
 	 ;;
 
 
