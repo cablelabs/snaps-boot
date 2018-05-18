@@ -16,34 +16,34 @@ PROVISION:
   DHCP:
     subnet:
       -
-        address: "10.197.121.0"
+        address: "10.30.5.0"
         bind_host:
           -
-            ip: "10.197.121.22"
-            mac: "ec:b1:d7:7f:5a:6c"
+            ip: "10.30.5.12"
+            mac: "3c:fd:fe:aa:b9:05"
           -
-            ip: "10.197.121.23"
-            mac: "ec:b1:d7:7f:8a:9c"
+            ip: "10.30.5.13"
+            mac: "3c:fd:fe:af:fa:c9"
           -
-            ip: "10.197.121.24"
-            mac: "ec:b1:d7:7f:4a:08"
+            ip: "10.30.5.14"
+            mac: "3c:fd:fe:b0:24:91"
           -
-            ip: "10.197.121.25"
-            mac: "ec:b1:d7:7f:5a:40"
+            ip: "10.30.5.15"
+            mac: "3c:fd:fe:af:fa:c5"
           -
-            ip: "10.197.121.26"
-            mac: "ec:b1:d7:7f:6a:14"
+            ip: "10.30.5.16"
+            mac: "3c:fd:fe:af:fa:15"
 
-        broadcast-address: "10.197.121.255"
+        broadcast-address: "10.30.5.255"
         default-lease: 7600
         dn: cablelabs.com
         dns: "8.8.8.8"
-        listen_iface: eno1
+        listen_iface: enp175s0f1
         max-lease: 7200
         name: Managment_SUBNET
         netmask: "255.255.255.0"
-        range: "10.197.121.22 10.197.121.26"
-        router: "10.197.121.1"
+        range: "10.30.5.17 10.30.5.19"
+        router: "10.30.5.1"
         type: management
 
   PROXY:
@@ -52,99 +52,131 @@ PROVISION:
     https_proxy: ""
   PXE:
     password: cable123
-    serverIp: "10.197.121.21"
+    serverIp: "10.30.5.11"
     user: ubuntu
   STATIC:
     host:
      -
-       access_ip: 10.197.121.23
+       access_ip: 10.30.5.12
        name: Controller
        interfaces:
          -
-           address: "10.197.122.23"
+           address: "10.30.5.12"
            dn: ""
            dns: ""
            gateway: "0.0.0.0"
-           iface: eno2
+           iface: enp175s0f1
+           name: Admin_Interface
+           netmask: "255.255.255.0"
+           type: management
+         -
+           address: "10.30.6.12"
+           dn: ""
+           dns: ""
+           gateway: "0.0.0.0"
+           iface: enp175s0f0
            name: Tenant_Interface
            netmask: "255.255.255.0"
            type: tenant
          -
-           address: "10.197.123.23"
+           address: "10.30.7.12"
            dn: ""
            dns: ""
-           gateway: "10.197.123.1"
-           iface: eno3
-           name: Tenant_Interface
+           gateway: "10.30.7.1"
+           iface: enp24s0f1
+           name: External_Interface
            netmask: "255.255.255.0"
            type: data
      -
-       access_ip: 10.197.121.24
-       name: Compute1
-       interfaces:
-         -
-           address: "10.197.122.24"
-           dn: ""
-           dns: ""
-           gateway: "0.0.0.0"
-           iface: eno2
-           name: Tenant_Interface
-           netmask: "255.255.255.0"
-           type: tenant
-         -
-           address: "10.197.123.24"
-           dn: ""
-           dns: ""
-           gateway: "10.197.123.1"
-           iface: eno3
-           name: Tenant_Interface
-           netmask: "255.255.255.0"
-           type: data
+        access_ip: 10.30.5.14
+        name: Compute1
+        interfaces:
+          -
+            address: "10.30.5.14"
+            dn: ""
+            dns: ""
+            gateway: "0.0.0.0"
+            iface: enp175s0f1
+            name: Admin_Interface
+            netmask: "255.255.255.0"
+            type: management
+          -
+            address: "10.30.6.14"
+            dn: ""
+            dns: ""
+            gateway: "0.0.0.0"
+            iface: enp175s0f0
+            name: Tenant_Interface
+            netmask: "255.255.255.0"
+            type: tenant
+          -
+            address: "10.30.7.14"
+            dn: ""
+            dns: ""
+            gateway: "10.30.7.1"
+            iface: enp24s0f1
+            name: External_Interface
+            netmask: "255.255.255.0"
+            type: data
      -
-       access_ip: 10.197.121.25
-       name: Compute2
-       interfaces:
-         -
-           address: "10.197.122.25"
-           dn: ""
-           dns: ""
-           gateway: "0.0.0.0"
-           iface: eno2
-           name: Tenant_Interface
-           netmask: "255.255.255.0"
-           type: tenant
-         -
-           address: "10.197.123.25"
-           dn: ""
-           dns: ""
-           gateway: "10.197.123.1"
-           iface: eno3
-           name: Tenant_Interface
-           netmask: "255.255.255.0"
-           type: data
+        access_ip: 10.30.5.15
+        name: Compute2
+        interfaces:
+          -
+            address: "10.30.5.15"
+            dn: ""
+            dns: ""
+            gateway: "0.0.0.0"
+            iface: enp175s0f1
+            name: Admin_Interface
+            netmask: "255.255.255.0"
+            type: management
+          -
+            address: "10.30.6.15"
+            dn: ""
+            dns: ""
+            gateway: "0.0.0.0"
+            iface: enp175s0f0
+            name: Tenant_Interface
+            netmask: "255.255.255.0"
+            type: tenant
+          -
+            address: "10.30.7.15"
+            dn: ""
+            dns: ""
+            gateway: "10.30.7.1"
+            iface: enp24s0f1
+            name: External_Interface
+            netmask: "255.255.255.0"
+            type: data
 
   BMC:
      host:
        -
          user: "admin"
          password: "cable123"
-         ip: "10.197.124.22"
-         mac: "ec:b1:d7:88:a8:be"
+         ip: "10.30.8.12"
+         mac: "a4:bf:01:3e:6d:9f"
        -
          user: "admin"
          password: "cable123"
-         ip: "10.197.124.23"
-         mac: "ec:b1:d7:88:49:d6"
+         ip: "10.30.8.13"
+         mac: "a4:bf:01:48:84:42"
        -
          user: "admin"
          password: "cable123"
-         ip: "10.197.124.24"
-         mac: "ec:b1:d7:88:d8:9a"
+         ip: "10.30.8.14"
+         mac: "a4:bf:01:48:84:42"
        -
          user: "admin"
          password: "cable123"
-         ip: "10.197.124.25"
-         mac: "ec:b1:d7:88:a8:aa"
+         ip: "10.30.8.15"
+         mac: "a4:bf:01:48:8b:11"
+       -
+         user: "admin"
+         password: "cable123"
+         ip: "10.30.8.16"
+         mac: "a4:bf:01:48:84:34"
   TFTP:
     os: ubuntu-16.04.4-server-amd64.iso
     password: cable123
@@ -152,10 +184,3 @@ PROVISION:
     timezone: America/Denver
     user: ubuntu
     fullname: ubuntu_user
-  CPUCORE:
-    host:
-       -
-         ip: "10.197.121.21"
-         isolcpus: "0-20,1-22"
-         hugepagesz: "2M"
-         hugepages: "2048"
