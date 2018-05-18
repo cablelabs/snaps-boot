@@ -236,6 +236,42 @@ checkStatus $command_status " writing data of local default  to  /var/lib/tftpbo
 
 
 
+defaultGrubConfigure () {
+echo "++++++++++++++++++++++++++++++++++++++++++++++"
+echo "defaultGrubConfigure  method "
+echo "++++++++++++++++++++++++++++++++++++++++++++++"
+temp_dir="$PWD"/conf/pxe_cluster
+pxeServerPass="$3"
+
+echo "defaultFileConfigure :: save backup  of file /var/lib/tftpboot/ "
+echo "$pxeServerPass" | sudo -S cp /var/lib/tftpboot/grub.cfg /var/lib/tftpboot/grub.bkp
+command_status=$?
+checkStatus $command_status "backup of /var/lib/tftpboot/grub.cfg  file"
+
+echo "defaultFileConfigure ::  create  local file grub.cfg"
+#echo "$1 is the pxeServerIp ip here
+#echo "$2 is the used seedFile name here
+
+cat <<EOF >$temp_dir/grub.cfg
+menuentry "Install Ubuntu" {
+set gfxpayload=keep
+linux ubuntu-installer/amd64/linux gfxpayload=800x600x16,800x600 live-installer/net-image=http://$1/ubuntu/install/filesystem.squashfs console=ttyS1,115200 console=ttyS0,115200 console=tty ramdisk_size=16432 root=/dev/rd/0 rw  --- auto=true url=http://$1/ubuntu/preseed/$2 quiet
+initrd ubuntu-installer/amd64/initrd.gz
+}
+EOF
+command_status=$?
+checkStatus $command_status " creation of grub file "
+
+
+#copy this local data  to the original file
+cp $temp_dir/grub.cfg  /var/lib/tftpboot/grub.cfg
+command_status=$?
+checkStatus $command_status " writing data of local grub  to  /var/lib/tftpboot/grub.cfg"
+
+}
+
+
+
 
 
 

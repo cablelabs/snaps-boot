@@ -255,15 +255,18 @@ memory pages are to be defined.
 
 ### 4.1 Server Provisioning
 
+Note:  All of the following steps are executed within the root directory of your 
+snaps-boot project.  This will usually be snaps-boot/, so it assumed you are in this 
+directory. 
+
 #### Step 1
 
 Download `ubuntu16.04 server image` from internet and need to place it
-in folder `snaps-boot/packages/images/`. Use this download
+in folder `packages/images/`. Use this download
 link for ISO:
  http://releases.ubuntu.com/16.04/ubuntu-16.04.4-server-amd64.iso.
 
 ```
-cd snaps-boot/
 mkdir -p packages/images
 cd packages/images
 wget http://releases.ubuntu.com/16.04/ubuntu-16.04.4-server-amd64.iso
@@ -271,7 +274,7 @@ wget http://releases.ubuntu.com/16.04/ubuntu-16.04.4-server-amd64.iso
 
 #### Step 2
 
-Go to directory `snaps-boot/conf/pxe_cluster`.
+Go to directory `conf/pxe_cluster`.
 
 Modify file `hosts.yaml` for provisioning of OS (Operating System) on
 cloud cluster host machines (controller node, compute nodes). Modify
@@ -279,7 +282,7 @@ this file according to your set up environment only.
 
 #### Step 3
 
-Go to directory `snaps-boot/`
+Go to root directory of the project (e.g. `snaps-boot`)
 
 Run `PreRequisite.sh` as shown below:
 
@@ -287,7 +290,7 @@ Run `PreRequisite.sh` as shown below:
 sudo ./scripts/PreRequisite.sh
 ```
 
-If you see failuers or errors.  Update your software, remove obsolete
+If you see failures or errors, update your software, remove obsolete
 packages and reboot your server.
 
 ```
@@ -301,7 +304,7 @@ sudo reboot
 
 Steps to configure PXE and DHCP server.
 
-Go to directory `snaps-boot/`.
+Go to the project root directory
 
 Run `iaas_launch.py` as shown below:
 
