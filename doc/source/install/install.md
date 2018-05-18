@@ -284,7 +284,12 @@ in folder `packages/images/`. Use this download
 link:
     http://archive.ubuntu.com/ubuntu/dists/xenial-updates/main/installer-amd64/current/images/netboot/netboot.tar.gz
     
-
+```
+mkdir -p packages/images
+cd packages/images
+wget http://archive.ubuntu.com/ubuntu/dists/trusty/main/uefi/grub2-amd64/current/grubnetx64.efi.signed
+wget http://archive.ubuntu.com/ubuntu/dists/xenial-updates/main/installer-amd64/current/images/netboot/netboot.tar.gz
+```
 
 #### Step 2
 

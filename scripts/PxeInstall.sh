@@ -433,5 +433,9 @@ case "$1" in
         bootMenuConfigure "$2" "$3" "$4"
          ;;
 
+	defaultGrubConfigure)
+      	defaultGrubConfigureo "$2" "$3" "$4"
+	 ;;
+
 
 esac
