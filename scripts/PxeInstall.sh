@@ -217,7 +217,7 @@ if [ -f packages/images/"$2" ] #if [ "$1" ] #
 then
     echo "Netboot file $2 exists."
 	echo "$pxeServerPass" | sudo -S  cp -fr packages/images/$2 /var/lib/tftpboot
-	echo "$pxeServerPass" | sudo -S  tar -xvf /var/lib/tftpboot/$2
+	echo "$pxeServerPass" | sudo -S  tar -xvf /var/lib/tftpboot/$2 -C /var/lib/tftpboot
 	sleep 10
 else
     echo "Error: Netboot file $2  does not exists."
