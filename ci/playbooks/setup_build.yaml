@@ -30,6 +30,15 @@
           - "--no-motd"
           - "--exclude=.git"
 
+    - name: Install python-pip
+      become: yes
+      become_method: sudo
+      become_user: root
+      apt: name=python-pip
+
+    - name: Install snaps-boot
+      command: pip install -e {{ src_copy_dir }}/snaps-boot
+
     - name: Make directory {{ src_copy_dir }}/snaps-boot/packages/images
       file:
         path: "{{ src_copy_dir }}/snaps-boot/packages/images"

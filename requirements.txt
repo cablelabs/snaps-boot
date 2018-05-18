@@ -1,3 +1,6 @@
-mock
+pbr
 ansible<2.4,>=2.1.0
-pathlib
+cryptography
+mock
+paramiko
+PyYAML
