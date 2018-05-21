@@ -18,7 +18,7 @@ listed and explained in below table.
 | Convention | Usage |
 | ---------- | ----- |
 | Host Machines | Machines to be used for Openstack deployment. Openstack node controller, compute, storage and network node will be deployed on these machines. |
-| Build Node | Machine running installation scripts, and hosting PXE, DHCP, TFTP services. |
+| Build Server | Machine running installation scripts, and hosting PXE, DHCP, TFTP services. |
 
 ### 1.2 Acronyms
 
@@ -59,7 +59,7 @@ The current release of SNAPS-Boot is tested on the following platform.
 | ----------------- |  ------------- |
 | Server machine with 64bit Intel AMD architecture. | 16GB RAM, 80+ GB Hard disk with 3 network interfaces. Server should be network boot Enabled and IPMI capable. |
 
-**Build Node**
+**Build Server**
 
 | Hardware Required | Configuration |
 | ----------------- | ------------- |
@@ -82,22 +82,22 @@ deployments and the other is used for VNF traffic.
  - When three physical networks are used, the external and tenant
  traffic are separated.
 - Each NIC needs to be on a separate VLAN.
-- The first NIC is the admin network.  This is used to install Linux
+- The first NIC is the management network.  This is used to install Linux
 on the host machines.
-- All host machines are connected to build node (machine
+- All host machines are connected to Build Server (machine
 running SNAPS-Boot) and have Internet access connectivity via data
 interface.
 
-> Note: Build node should have http/https and ftp proxy if
+> Note: Build Server should have http/https and ftp proxy if
 node is behind corporate firewall. Set the http/https proxy for apt.
 
-### 2.4 Build Node Setup
+### 2.4 Build Server Setup
 
-The Build Node is where you run SNAPS-Boot. You will need to install
+The Build Server is where you run SNAPS-Boot. You will need to install
 Ubuntu 16.04 Xenial as host OS. This host needs to be able to reach the Internet
 to download the software.
 
-1. Install Ubuntu on the Build Node
+1. Install Ubuntu on the Build Server
 2. Download SNAPS-boot from GitHub
 ```
 wget https://github.com/cablelabs/snaps-boot/archive/master.zip
@@ -111,7 +111,7 @@ unzip master.zip
 
 ## 3 Configuration
 
-### 3.1 conf/pxi-cluster/hosts.yaml
+### 3.1 conf/pxe-cluster/hosts.yaml
 
 Save a copy of hosts.yaml before modifying it.
 `cp hosts.yaml origional-hosts.yaml`
@@ -126,15 +126,15 @@ Configuration file used for hardware provisioning. Options defined here
 Configurations defined here are used to discover host machines and
 dynamically allocate IPs to them.
 
-Deployment layer installs a DHCP server on the Build Node and
+Deployment layer installs a DHCP server on the Build Server and
 configures it to allocate IPs to host machine. This DHCP server can be
 configured to support multiple subnets. For each subnet, DHCP parameters
 and fixed IPs must be defined.
 
-The DHCP section of the hosts.yaml file is only used for the management / admin 
+The DHCP section of the hosts.yaml file is only used for the management 
 network to install the servers. After the servers are installed the networking 
 information in the hosts section can be configured statically on all interfaces 
-including the management / admin network.
+including the management network.
 
 The management and data networks are mandatory.  The tenant network is recommended, but is optional.
 
@@ -147,11 +147,11 @@ Configuration parameters for the subnet section are explained below.
 | address | Y | Subnet address e.g. 10.10.10.0 |
 | bind_host | Y | This section defines group of mac and ip address. One such group is required for each host machine. The ip addresses defined here are allocated by the SNAPS-Boot during OS provisioning. The ip addresses defined here should be from the subnet defined by parameter ‘address’. |
 | broadcast-address | N | Broadcast address for the subnet |
-| default-lease | Y | Lease time (in seconds) to be used by DHCP server on Build Node. |
-| dn | Y | Domain name of Build Node. |
+| default-lease | Y | Lease time (in seconds) to be used by DHCP server on Build Server. |
+| dn | Y | Domain name of Build Server. |
 | dns | Y | IP of domain name server. |
 | listen_iface | Y | Name of interface to which DHCP server will bind for IP requests. |
-| max-lease | Y | Maximum lease time (in seconds) for DHCP server running on Build Node. |
+| max-lease | Y | Maximum lease time (in seconds) for DHCP server running on Build Server. |
 | Name | Y | Human readable name for this subnet. |
 | netmask | Y | Netmask of the subnet. |
 | range | Y | IP range to be used on this subnet. User is required to define a string of first and last ip address, see example below "172.16.109.210 172.16.109.224" |
@@ -162,7 +162,7 @@ Configuration parameters for the subnet section are explained below.
 
 #### PROXY:
 
-Build Node and all other host machines requires internet
+Build Server and all other host machines requires internet
 connectivity to download open source tools (python, Ansible etc.) and
 OpenStack services. User is required to set FTP, HTTP and HTTPs proxies
 on these machines if internet access is restricted by firewall.
@@ -180,12 +180,12 @@ for each of the parameters.  Do not remove the line from the file.
 
 #### PXE:
 
-Configuration parameter defined here are used by PXE server, usually the Build Node.
+Configuration parameter defined here are used by PXE server, usually the Build Server.
 
 | Parameter | Required | Description |
 | --------- | ----------- | ----------- |
-| serverIp | Y | IP of Build Node where PXE server is running. |
-| user | Y | User of PXE server (User of Build Node). |
+| serverIp | Y | IP of Build Server where PXE server is running. |
+| user | Y | User of PXE server (User of Build Server). |
 | password | Y | Password for user of PXE server. |
 
 #### STATIC:
@@ -427,4 +427,4 @@ This will modify etc/network/interfaces file to remove static entries of the int
 sudo -i python $PWD/iaas_launch.py -f $PWD/conf/pxe_cluster/hosts.yaml -pc
 ```
 
-This will stop DHCP, PXE and TFTP services on Build Node.
+This will stop DHCP, PXE and TFTP services on Build Server.
