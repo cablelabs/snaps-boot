@@ -281,7 +281,7 @@ echo "defaultFileConfigure ::  create  local file grub.cfg"
 cat <<EOF >$temp_dir/grub.cfg
 menuentry "Install Ubuntu" {
 set gfxpayload=keep
-linux ubuntu-installer/amd64/linux gfxpayload=800x600x16,800x600 live-installer/net-image=http://$1/ubuntu/install/filesystem.squashfs console=ttyS1,115200 console=ttyS0,115200 console=tty ramdisk_size=16432 root=/dev/rd/0 rw  --- auto=true url=http://$1/ubuntu/preseed/$2 quiet
+linux ubuntu-installer/amd64/linux gfxpayload=800x600x16,800x600 live-installer/net-image=http://$1/ubuntu/install/filesystem.squashfs console=ttyS1,115200 console=ttyS0,115200 console=tty ramdisk_size=16432 root=/dev/rd/0 rw  --- auto=true url=http://$1/ubuntu/preseed/$2
 initrd ubuntu-installer/amd64/initrd.gz
 }
 EOF
