@@ -21,14 +21,11 @@
         state: absent
         dest: "{{ src_copy_dir }}/snaps-boot"
 
-    - name: Copy this source tree from local {{ local_snaps_boot_dir }} to {{ src_copy_dir }}/snaps-boot
+    - name: Copy this source tree from local {{ src_snaps_boot_dir }} to {{ src_copy_dir }}/snaps-boot
       synchronize:
-        src: "{{ local_snaps_boot_dir }}"
+        src: "{{ src_snaps_boot_dir }}"
         dest: "{{ src_copy_dir }}"
         dirs: yes
-        rsync_opts:
-          - "--no-motd"
-          - "--exclude=.git"
 
     - name: Install python-pip
       become: yes
@@ -47,8 +44,11 @@
     - name: Download PXE image - ubuntu-16.04.4-server-amd64.iso
       get_url:
         url: http://releases.ubuntu.com/16.04/ubuntu-16.04.4-server-amd64.iso
-        dest: "{{ src_copy_dir }}/snaps-boot/packages/images/ubuntu-16.04.4-server-amd64.iso"
+        dest: "{{ src_copy_dir }}/ubuntu-16.04.4-server-amd64.iso"
         timeout: 1000
+
+    - name: Copy PXE image to - {{ src_copy_dir }}/snaps-boot/packages/images/ubuntu-16.04.4-server-amd64.iso
+      command: "cp {{ src_copy_dir }}/ubuntu-16.04.4-server-amd64.iso {{ src_copy_dir }}/snaps-boot/packages/images/ubuntu-16.04.4-server-amd64.iso"
 
     - name: Apply template and copy hosts.yaml to {{ hosts_yaml_path }}
       action: template src=templates/hosts.yaml.tmplt dest={{ hosts_yaml_path }}

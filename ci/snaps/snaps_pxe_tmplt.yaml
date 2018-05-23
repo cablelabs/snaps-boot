@@ -332,7 +332,7 @@ ansible:
     variables:
       src_snaps_boot_dir:
         type: string
-        value: {{ src_snaps_boot_dir }}
+        value: {{ local_snaps_boot_dir }}
       src_copy_dir:
         type: string
         value: {{ src_copy_dir }}
