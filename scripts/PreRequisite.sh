@@ -92,14 +92,6 @@ checkStatus $command_status "ssh-keygen "
 sleep 5
 
 echo "++++++++++++++++++++++++++++++++++++++++++++++"
-echo "apt-get install openjdk"
-echo "++++++++++++++++++++++++++++++++++++++++++++++"
-sudo apt-get install -y openjdk-8-jdk
-command_status=$?
-checkStatus $command_status "install  openjdk using apt-get"
-sleep 5
-
-echo "++++++++++++++++++++++++++++++++++++++++++++++"
 echo "pip install cryptography"
 echo "++++++++++++++++++++++++++++++++++++++++++++++"
 sudo pip install cryptography
