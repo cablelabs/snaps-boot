@@ -30,7 +30,7 @@ def read_yaml(config_file_path):
     :return: a dictionary
     """
     logger.debug('Loading configuration file - ' + config_file_path)
-    with open(config_file_path) as config_file:
+    with open(config_file_path, 'r') as config_file:
         config = yaml.safe_load(config_file)
         logger.info('Configuration Loaded')
     config_file.close()
