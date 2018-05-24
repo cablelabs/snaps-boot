@@ -1,0 +1,42 @@
+---
+- name: Update package cache
+  apt: update_cache=yes
+
+- name: Install python packages
+  apt: name={{ item }} state=present
+  with_items:
+    - python
+    - python-pip
+    - python-dev
+    - python-pathlib
+
+- name: Install apt-cacher-ng
+  apt: apt-cacher-ng state=present
+
+- name: Install python-yaml
+  apt: name=python-yaml state=present
+
+- name: Install ansible
+  apt: name=ansible
+
+- name: Install dos2unix
+  apt: name=dos2unix state=present
+
+- name: Install ipmitool
+  apt: name=ipmitool state=present
+
+- name: Install sshpass
+  apt: name=sshpass state=present
+
+- name: Install OpenJDK
+  apt: name=openjdk-8-jdk state=present
+
+- name: Install cryptography
+  pip: name=cryptography state=latest
+
+- name: Update and upgrade all packages
+  become: true
+  apt:
+    upgrade: yes
+    update_cache: yes
+    cahce_valid_time: 86400
