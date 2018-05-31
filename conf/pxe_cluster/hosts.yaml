@@ -48,7 +48,7 @@ PROVISION:
 
   PROXY:
     ftp_proxy: ""
-    http_proxy: "http://10.197.121.21:3142"
+    http_proxy: ""
     https_proxy: ""
     #user to provide ngcacher_proxy only in case when servers are behind company 
     #firewall, else left blank.
