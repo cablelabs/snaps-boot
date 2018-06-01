@@ -24,14 +24,6 @@ fi
 
 
 echo "++++++++++++++++++++++++++++++++++++++++++++++"
-echo "apt-get install python"
-echo "++++++++++++++++++++++++++++++++++++++++++++++"
-apt-get install -y  python python-pip python-dev python-pathlib
-command_status=$?
-checkStatus $command_status "install python  using apt-get"
-sleep 5
-
-echo "++++++++++++++++++++++++++++++++++++++++++++++"
 echo "apt-get install apt-cacher-ng"
 echo "++++++++++++++++++++++++++++++++++++++++++++++"
 apt-get install -y apt-cacher-ng
@@ -54,15 +46,6 @@ apt-get install -y ansible
 command_status=$?
 checkStatus $command_status "install  ansible  using apt-get"
 sleep 5
-
-echo "++++++++++++++++++++++++++++++++++++++++++++++"
-echo "apt-get install dos2unix"
-echo "++++++++++++++++++++++++++++++++++++++++++++++"
-apt-get install -y dos2unix
-command_status=$?
-checkStatus $command_status "install  dos2unix using apt-get"
-sleep 5
-
 
 
 echo "++++++++++++++++++++++++++++++++++++++++++++++"
