@@ -115,14 +115,14 @@ def __pxe_server_installation(proxy_dict, pxe_dict, tftp_dict, subnet_list):
     os.system('sh scripts/PxeInstall.sh defaultGrubConfigure ' + pxe_dict[
     "serverIp"] + " " + str(listen_iface) + " " + pxe_dict["password"])
     logger.info("*********validateAndCreateconfigKsCfg****************")
-    __create_ks_config(pxe_dict, tftp_dict, proxy_dict)
+    __create_ks_config(pxe_dict, tftp_dict, proxy_dict, str(listen_iface))
     logger.info("****************configureAnsibleFile*****************")
     __config_ansible_file()
     __config_ntp_server_file(pxe_dict)
     __restart_ntp_server(pxe_dict)
 
 
-def __create_ks_config(pxe_dict, tftp_dict, proxy_dict):
+def __create_ks_config(pxe_dict, tftp_dict, proxy_dict, boot_interface):
     """
     used to configure ks.cfg from hosts.yaml file
     :param pxe_dict:
@@ -154,6 +154,11 @@ def __create_ks_config(pxe_dict, tftp_dict, proxy_dict):
     logger.debug("configuring ntp server ip  in ks.cfg")
     ntp_server = "server " + pxe_dict["serverIp"] + " iburst"
     __find_and_replace('conf/pxe_cluster/ks.cfg', "server", ntp_server)
+
+    print" "
+    logger.debug("configuring boot interface in ks.cfg")
+    boot_iface = "network --bootproto=dhcp --device=" + boot_interface
+    __find_and_replace('conf/pxe_cluster/ks.cfg', "network", boot_iface)
 
     print" "
     logger.debug("configuring http proxy  in ks.cfg")
