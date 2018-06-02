@@ -274,7 +274,11 @@ def __add_dhcpd_file(subnet_list):
  option option-128 code 128 = string;
  option option-129 code 129 = text;
  #next-server X.X.X.X;
- filename "pxelinux.0";  """
+ if option arch = 00:07 {
+      filename “grubnetx64.efi.signed”;
+ } else {
+      filename “pxelinux.0";
+ } """
 
     file_path = "conf/pxe_cluster/dhcpd.conf"
     os.system('dos2unix ' + file_path)
