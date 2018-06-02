@@ -212,17 +212,6 @@ else
     echo "Error: Grub file $1  does not exists."
 	exit 0
 fi
-
-if [ -f packages/images/"$2" ] #if [ "$1" ] #
-then
-    echo "Netboot file $2 exists."
-	echo "$pxeServerPass" | sudo -S  cp -fr packages/images/$2 /var/lib/tftpboot
-	echo "$pxeServerPass" | sudo -S  tar -xvf /var/lib/tftpboot/$2 -C /var/lib/tftpboot
-	sleep 10
-else
-    echo "Error: Netboot file $2  does not exists."
-	exit 0
-fi
 }
 
 
@@ -279,10 +268,13 @@ echo "defaultFileConfigure ::  create  local file grub.cfg"
 #echo "$2 is the used seedFile name here
 
 cat <<EOF >$temp_dir/grub.cfg
-menuentry "Install Ubuntu" {
+set default 0
+set timeout=10
+
+menuentry "Install Ubuntu 16" {
 set gfxpayload=keep
-linux ubuntu-installer/amd64/linux gfxpayload=800x600x16,800x600 live-installer/net-image=http://$1/ubuntu/install/filesystem.squashfs console=ttyS1,115200 console=ttyS0,115200 console=tty ramdisk_size=16432 root=/dev/rd/0 rw  --- auto=true url=http://$1/ubuntu/preseed/$2
-initrd ubuntu-installer/amd64/initrd.gz
+linux /ubuntu-installer/amd64/linux gfxpayload=800x600x16,800x600 netcfg/choose_interface=$2 live-installer/net-image=http://$1/ubuntu/install/filesystem.squashfs console=ttyS1,115200 console=ttyS0,115200 console=tty ramdisk_size=16432 root=/dev/rd/0 rw  --  ks=http://$1/ubuntu/ks.cfg
+initrd /ubuntu-installer/amd64/initrd.gz
 }
 EOF
 command_status=$?
@@ -290,9 +282,9 @@ checkStatus $command_status " creation of grub file "
 
 
 #copy this local data  to the original file
-cp $temp_dir/grub.cfg  /var/lib/tftpboot/grub.cfg
+cp $temp_dir/grub.cfg  /var/lib/tftpboot/grub/grub.cfg
 command_status=$?
-checkStatus $command_status " writing data of local grub  to  /var/lib/tftpboot/grub.cfg"
+checkStatus $command_status " writing data of local grub  to  /var/lib/tftpboot/grub/grub.cfg"
 
 }
 

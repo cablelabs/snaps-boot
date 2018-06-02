@@ -110,8 +110,10 @@ def __pxe_server_installation(proxy_dict, pxe_dict, tftp_dict, subnet_list):
     os.system('sh scripts/PxeInstall.sh bootMenuConfigure ' + pxe_dict[
         "serverIp"] + " " + tftp_dict["seed"] + " " + pxe_dict["password"])
     logger.info("*************defaultGrubConfigure********************")
+    for subnet in subnet_list:
+        listen_iface = subnet.get('listen_iface')
     os.system('sh scripts/PxeInstall.sh defaultGrubConfigure ' + pxe_dict[
-    "serverIp"] + " " + tftp_dict["seed"] + " " + pxe_dict["password"])
+    "serverIp"] + " " + str(listen_iface) + " " + pxe_dict["password"])
     logger.info("*********validateAndCreateconfigKsCfg****************")
     __create_ks_config(pxe_dict, tftp_dict, proxy_dict)
     logger.info("****************configureAnsibleFile*****************")
