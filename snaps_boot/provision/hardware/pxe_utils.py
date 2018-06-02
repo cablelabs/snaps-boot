@@ -280,15 +280,16 @@ def __add_dhcpd_file(subnet_list):
  option option-129 code 129 = text;
  option vendor-class code 60 = string;
  option arch code 93 = unsigned integer 16;
- set boot-type = "pxelinux.0";
  #next-server X.X.X.X;
  class "pxeclient" {
     match if substring (option vendor-class-identifier, 0, 9) = "PXEClient";
     if option arch = 00:07 {
-        set boot-type = "grubnetx64.efi.signed";
+        filename "grubnetx64.efi.signed";
+    }
+    else {
+        filename "pxelinux.0";
     }
  }
- filename boot-type;
  """
 
     file_path = "conf/pxe_cluster/dhcpd.conf"
