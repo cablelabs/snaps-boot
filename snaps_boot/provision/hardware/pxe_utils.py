@@ -278,7 +278,7 @@ def __add_dhcpd_file(subnet_list):
  allow bootp;
  option option-128 code 128 = string;
  option option-129 code 129 = text;
- option vendor-class code 60 = text;
+ option vendor-class code 60 = string;
  option arch code 93 = unsigned integer 16;
  #next-server X.X.X.X;
  if substring (vendor-class, 0, 9)="PXEClient" {
