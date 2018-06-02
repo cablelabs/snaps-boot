@@ -258,10 +258,20 @@ echo "++++++++++++++++++++++++++++++++++++++++++++++"
 temp_dir="$PWD"/conf/pxe_cluster
 pxeServerPass="$3"
 
+if [ ! -d "/var/lib/tftpboot/grub" ]
+	then
+	echo "Creating Grub Config Directory "
+	# un comment below lines
+	echo "$pxeServerPass" | sudo -S  mkdir  /var/lib/tftpboot/grub
+	command_status=$?
+	checkStatus $command_status " making directory /var/lib/tftpboot/grub  "
+   fi
+
+
 echo "defaultFileConfigure :: save backup  of file /var/lib/tftpboot/ "
-echo "$pxeServerPass" | sudo -S cp /var/lib/tftpboot/grub.cfg /var/lib/tftpboot/grub.bkp
+echo "$pxeServerPass" | sudo -S cp /var/lib/tftpboot/grub/grub.cfg /var/lib/tftpboot/grub.bkp
 command_status=$?
-checkStatus $command_status "backup of /var/lib/tftpboot/grub.cfg  file"
+checkStatus $command_status "backup of /var/lib/tftpboot/grub/grub.cfg  file"
 
 echo "defaultFileConfigure ::  create  local file grub.cfg"
 #echo "$1 is the pxeServerIp ip here
