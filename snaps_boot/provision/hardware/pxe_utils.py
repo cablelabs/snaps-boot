@@ -281,10 +281,11 @@ def __add_dhcpd_file(subnet_list):
  option vendor-class code 60 = string;
  option arch code 93 = unsigned integer 16;
  #next-server X.X.X.X;
- if substring (vendor-class, 0, 9)="PXEClient" {
-     if option arch = 00:07 {
-          filename "grubnetx64.efi.signed";
-     } else {
+ class "pxeclient" {
+    match if substring (option vendor-class-identifier, 0, 9) = "PXEClient";
+    if option arch = 00:07 {
+        filename "grubnetx64.efi.signed";
+    } else {
           filename "pxelinux.0";
      } 
  }
