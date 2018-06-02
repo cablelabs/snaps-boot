@@ -268,10 +268,15 @@ if [ ! -d "/var/lib/tftpboot/grub" ]
    fi
 
 
-echo "defaultFileConfigure :: save backup  of file /var/lib/tftpboot/ "
-echo "$pxeServerPass" | sudo -S cp /var/lib/tftpboot/grub/grub.cfg /var/lib/tftpboot/grub.bkp
-command_status=$?
-checkStatus $command_status "backup of /var/lib/tftpboot/grub/grub.cfg  file"
+if [ -f "/var/lib/tftpboot/grub/grub.cfg" ]
+	then
+    echo "defaultFileConfigure :: save backup  of file /var/lib/tftpboot/ "
+    echo "$pxeServerPass" | sudo -S cp /var/lib/tftpboot/grub/grub.cfg /var/lib/tftpboot/grub.bkp
+    command_status=$?
+    checkStatus $command_status "backup of /var/lib/tftpboot/grub/grub.cfg  file"
+   fi
+
+
 
 echo "defaultFileConfigure ::  create  local file grub.cfg"
 #echo "$1 is the pxeServerIp ip here
