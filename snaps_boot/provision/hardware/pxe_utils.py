@@ -273,13 +273,17 @@ def __add_dhcpd_file(subnet_list):
  allow bootp;
  option option-128 code 128 = string;
  option option-129 code 129 = text;
+ option vendor-class code 60 = text;
  option arch code 93 = unsigned integer 16;
  #next-server X.X.X.X;
- if option arch = 00:07 {
-      filename "grubnetx64.efi.signed";
- } else {
-      filename "pxelinux.0";
- } """
+ if substring (vendor-class, 0, 9)="PXEClient" {
+     if option arch = 00:07 {
+          filename "grubnetx64.efi.signed";
+     } else {
+          filename "pxelinux.0";
+     } 
+ }
+ """
 
     file_path = "conf/pxe_cluster/dhcpd.conf"
     os.system('dos2unix ' + file_path)
