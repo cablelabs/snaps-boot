@@ -532,7 +532,6 @@ def __static_ip_configure(static_dict, proxy_dict):
     for i in range(len(host)):
         target = host[i].get('access_ip')
         iplist.append(target)
-    consts.KEY_IP_LIST = iplist
     for i in range(len(host)):
         target = host[i].get('access_ip')
         __create_and_save_keys()
