@@ -256,7 +256,7 @@ echo "++++++++++++++++++++++++++++++++++++++++++++++"
 echo "defaultGrubConfigure  method "
 echo "++++++++++++++++++++++++++++++++++++++++++++++"
 temp_dir="$PWD"/conf/pxe_cluster
-pxeServerPass="$3"
+pxeServerPass="$5"
 
 if [ ! -d "/var/lib/tftpboot/grub" ]
 	then
@@ -270,7 +270,7 @@ if [ ! -d "/var/lib/tftpboot/grub" ]
 
 if [ -f "/var/lib/tftpboot/grub/grub.cfg" ]
 	then
-    echo "defaultFileConfigure :: save backup  of file /var/lib/tftpboot/ "
+    echo "defaultGrubConfigure :: save backup  of file /var/lib/tftpboot/ "
     echo "$pxeServerPass" | sudo -S cp /var/lib/tftpboot/grub/grub.cfg /var/lib/tftpboot/grub.bkp
     command_status=$?
     checkStatus $command_status "backup of /var/lib/tftpboot/grub/grub.cfg  file"
@@ -278,9 +278,11 @@ if [ -f "/var/lib/tftpboot/grub/grub.cfg" ]
 
 
 
-echo "defaultFileConfigure ::  create  local file grub.cfg"
+echo "defaultGrubConfigure ::  create  local file grub.cfg"
 #echo "$1 is the pxeServerIp ip here
 #echo "$2 is the used seedFile name here
+#echo "$3 is the hostname
+#echo "$4 is the interface
 
 cat <<EOF >$temp_dir/grub.cfg
 set default 0
@@ -288,8 +290,8 @@ set timeout=10
 
 menuentry "Install Ubuntu 16" {
 set gfxpayload=keep
-linux /ubuntu-installer/amd64/linux gfxpayload=800x600x16,800x600 netcfg/choose_interface=$2 live-installer/net-image=http://$1/ubuntu/install/filesystem.squashfs console=ttyS1,115200 console=ttyS0,115200 console=tty ramdisk_size=16432 root=/dev/rd/0 rw  --  ks=http://$1/ubuntu/ks.cfg
-initrd /ubuntu-installer/amd64/initrd.gz
+linux ubuntu-installer/amd64/linux gfxpayload=800x600x16,800x600 hostname=$3 netcfg/choose_interface=$4 live-installer/net-image=http://$1/ubuntu/install/filesystem.squashfs --- auto=true url=http://$1/ubuntu/preseed/$2 ks=http://$1/ubuntu/ks.cfg
+initrd ubuntu-installer/amd64/initrd.gz
 }
 EOF
 command_status=$?
@@ -464,7 +466,7 @@ case "$1" in
          ;;
 
 	defaultGrubConfigure)
-      	defaultGrubConfigure "$2" "$3" "$4"
+      	defaultGrubConfigure "$2" "$3" "$4" "$5" "$6"
 	 ;;
 
 

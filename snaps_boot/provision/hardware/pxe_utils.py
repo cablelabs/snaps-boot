@@ -112,12 +112,14 @@ def __pxe_server_installation(proxy_dict, pxe_dict, tftp_dict, subnet_list):
     logger.info("*************defaultGrubConfigure********************")
     for subnet in subnet_list:
         listen_iface = subnet.get('listen_iface')
-    os.system('sh scripts/PxeInstall.sh defaultGrubConfigure ' + pxe_dict[
-    "serverIp"] + " " + str(listen_iface) + " " + pxe_dict["password"])
+        name = subnet.get('name')
+    os.system('sh scripts/PxeInstall.sh defaultGrubConfigure ' + pxe_dict["serverIp"]
+              + " " + tftp_dict["seed"] + " " + str(name) + " " + str(listen_iface)
+              + " " + pxe_dict["password"])
     logger.info("*********validateAndCreateconfigKsCfg****************")
     __create_ks_config(pxe_dict, tftp_dict, proxy_dict, str(listen_iface))
     logger.info("*********validateAndCreateconfigSeedIfUEFI****************")
-    if 'firmware' in tftp_dict and tftp_dict['firmware'] is 'UEFI':
+    if 'server_type' in tftp_dict and tftp_dict['server_type'] is 'UEFI':
         __create_seed_config(pxe_dict, tftp_dict, proxy_dict, str(listen_iface))
     logger.info("****************configureAnsibleFile*****************")
     __config_ansible_file()

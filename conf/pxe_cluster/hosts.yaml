@@ -151,7 +151,7 @@ PROVISION:
     timezone: America/Denver
     user: ubuntu
     fullname: ubuntu_user
-    firmware: UEFI
+    server_type: UEFI
 
   CPUCORE:
     host:
