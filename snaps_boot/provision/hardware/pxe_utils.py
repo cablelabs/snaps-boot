@@ -119,7 +119,7 @@ def __pxe_server_installation(proxy_dict, pxe_dict, tftp_dict, subnet_list):
     logger.info("*********validateAndCreateconfigKsCfg****************")
     __create_ks_config(pxe_dict, tftp_dict, proxy_dict, str(listen_iface))
     logger.info("*********validateAndCreateconfigSeedIfUEFI****************")
-    if 'server_type' in tftp_dict and tftp_dict['server_type'] is 'UEFI':
+    if 'server_type' in tftp_dict and tftp_dict['server_type'] == 'UEFI':
         __create_seed_config(pxe_dict, tftp_dict, proxy_dict, str(listen_iface))
     logger.info("****************configureAnsibleFile*****************")
     __config_ansible_file()
