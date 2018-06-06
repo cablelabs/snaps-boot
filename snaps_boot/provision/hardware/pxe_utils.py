@@ -211,11 +211,6 @@ def __create_seed_config(pxe_dict, tftp_dict, proxy_dict, boot_interface):
     boot_iface = "d-i   netcfg/choose_interface select " + boot_interface
     __find_and_replace('conf/pxe_cluster/ubuntu-uefi-server.seed', "netcfg/choose_interface", boot_iface)
 
-    print" "
-    logger.debug("configuring dhcp timeout interface in ubuntu-uefi-server.seed")
-    boot_iface = "d-i   netcfg/choose_interface select " + boot_interface
-    __find_and_replace('conf/pxe_cluster/ubuntu-uefi-server.seed', "netcfg/choose_interface", boot_iface)
-
     print " "
     logger.debug("configuring client user fullname in ubuntu-uefi-server.seed")
     user_creds = "d-i   passwd/user-fullname string " + tftp_dict["fullname"]

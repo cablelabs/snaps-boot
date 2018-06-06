@@ -39,6 +39,7 @@ d-i 	mirror/http/proxy string
 
 # Select correct ethernet intefce
 d-i     netcfg/choose_interface select en0
+d-i     netcfg/dhcp_timeout string 120
 
 # User Accounts
 d-i 	debian-installer/locale string en_US
