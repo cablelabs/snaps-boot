@@ -204,42 +204,42 @@ def __create_seed_config(pxe_dict, tftp_dict, proxy_dict, boot_interface):
     print" "
     logger.debug("configuring server url  in ubuntu-uefi-server.seed")
     my_url = "d-i 	mirror/http/hostname string " + pxe_dict["serverIp"]
-    __find_and_replace('conf/pxe_cluster/ubuntu-uefi-server.seed', "mirror/http/hostname", my_url)
+    __find_and_replace('conf/pxe_cluster/ubuntu-uefi-server.seed', "d-i 	mirror/http/hostname string 192.168.0.1", my_url)
 
     print" "
     logger.debug("configuring boot interface in ubuntu-uefi-server.seed")
     boot_iface = "d-i   netcfg/choose_interface select " + boot_interface
-    __find_and_replace('conf/pxe_cluster/ubuntu-uefi-server.seed', "netcfg/choose_interface", boot_iface)
+    __find_and_replace('conf/pxe_cluster/ubuntu-uefi-server.seed', "d-i     netcfg/choose_interface select en0", boot_iface)
 
     print " "
     logger.debug("configuring client user fullname in ubuntu-uefi-server.seed")
     user_creds = "d-i   passwd/user-fullname string " + tftp_dict["fullname"]
-    __find_and_replace('conf/pxe_cluster/ubuntu-uefi-server.seed', "passwd/user-fullname", user_creds)
+    __find_and_replace('conf/pxe_cluster/ubuntu-uefi-server.seed', "d-i 	passwd/user-fullname string Ubuntu User", user_creds)
 
     print " "
     logger.debug("configuring client username in ubuntu-uefi-server.seed")
     user_creds = "d-i   passwd/username string " + tftp_dict["user"]
-    __find_and_replace('conf/pxe_cluster/ubuntu-uefi-server.seed', "passwd/username", user_creds)
+    __find_and_replace('conf/pxe_cluster/ubuntu-uefi-server.seed', "d-i 	passwd/username string ubuntu", user_creds)
 
     print " "
     logger.debug("configuring client user password in ubuntu-uefi-server.seed")
     user_creds = "d-i 	passwd/user-password password " + tftp_dict["password"]
-    __find_and_replace('conf/pxe_cluster/ubuntu-uefi-server.seed', "passwd/user-password ", user_creds)
+    __find_and_replace('conf/pxe_cluster/ubuntu-uefi-server.seed', "d-i 	passwd/user-password password fake", user_creds)
 
     print " "
     logger.debug("configuring client user password verify in ubuntu-uefi-server.seed")
     user_creds = "d-i 	passwd/user-password-again password " + tftp_dict["password"]
-    __find_and_replace('conf/pxe_cluster/ubuntu-uefi-server.seed', "passwd/user-password-again", user_creds)
+    __find_and_replace('conf/pxe_cluster/ubuntu-uefi-server.seed', "d-i 	passwd/user-password-again password fake", user_creds)
 
     print " "
     logger.debug("configuring client root password in ubuntu-uefi-server.seed")
     user_creds = "d-i 	passwd/root-password password " + tftp_dict["password"]
-    __find_and_replace('conf/pxe_cluster/ubuntu-uefi-server.seed', "passwd/root-password ", user_creds)
+    __find_and_replace('conf/pxe_cluster/ubuntu-uefi-server.seed', "d-i 	passwd/root-password password fake", user_creds)
 
     print " "
     logger.debug("configuring client root password verify in ubuntu-uefi-server.seed")
     user_creds = "d-i 	passwd/root-password-again password " + tftp_dict["password"]
-    __find_and_replace('conf/pxe_cluster/ubuntu-uefi-server.seed', "passwd/root-password-again", user_creds)
+    __find_and_replace('conf/pxe_cluster/ubuntu-uefi-server.seed', "d-i 	passwd/root-password-again password fake", user_creds)
 
 
     print" "

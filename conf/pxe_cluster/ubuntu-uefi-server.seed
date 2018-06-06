@@ -33,7 +33,7 @@ d-i 	partman-efi/non_efi_system boolean true
 
 # Equivalent to url --url=http://<> in ks.cfg
 d-i 	mirror/country string manual
-d-i 	mirror/http/hostname string 10.30.5.11
+d-i 	mirror/http/hostname string 192.168.0.1
 d-i 	mirror/http/directory string /ubuntu
 d-i 	mirror/http/proxy string
 
@@ -44,8 +44,8 @@ d-i     netcfg/dhcp_timeout string 120
 # User Accounts
 d-i 	debian-installer/locale string en_US
 d-i 	passwd/root-login boolean true
-d-i 	passwd/root-password password cable123
-d-i 	passwd/root-password-again password cable123
+d-i 	passwd/root-password password fake
+d-i 	passwd/root-password-again password fake
 
 #Localization
 d-i     debian-installer/locale string en_US.UTF-8
@@ -60,8 +60,8 @@ d-i netcfg/get_hostname string ubuntu
 # Create new user
 d-i 	passwd/user-fullname string Ubuntu User
 d-i 	passwd/username string ubuntu
-d-i 	passwd/user-password password cable123
-d-i 	passwd/user-password-again password cable123
+d-i 	passwd/user-password password fake
+d-i 	passwd/user-password-again password fake
 
 # Don't encrypt the home directory
 d-i     user-setup/encrypt-home boolean false
