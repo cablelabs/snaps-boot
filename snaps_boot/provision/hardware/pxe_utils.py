@@ -116,6 +116,9 @@ def __pxe_server_installation(proxy_dict, pxe_dict, tftp_dict, subnet_list):
     "serverIp"] + " " + str(listen_iface) + " " + pxe_dict["password"])
     logger.info("*********validateAndCreateconfigKsCfg****************")
     __create_ks_config(pxe_dict, tftp_dict, proxy_dict, str(listen_iface))
+    logger.info("*********validateAndCreateconfigSeedIfUEFI****************")
+    if 'firmware' in tftp_dict and tftp_dict['firmware'] is 'UEFI':
+        __create_seed_config(pxe_dict, tftp_dict, proxy_dict, str(listen_iface))
     logger.info("****************configureAnsibleFile*****************")
     __config_ansible_file()
     __config_ntp_server_file(pxe_dict)
@@ -128,6 +131,7 @@ def __create_ks_config(pxe_dict, tftp_dict, proxy_dict, boot_interface):
     :param pxe_dict:
     :param tftp_dict:
     :param proxy_dict:
+    :param boot_interface:
     """
     os.system('dos2unix conf/pxe_cluster/ks.cfg')
     logger.info("configuring   timezone in ks.cfg")
@@ -183,6 +187,67 @@ def __create_ks_config(pxe_dict, tftp_dict, proxy_dict, boot_interface):
     print" "
     logger.debug("copy local ks.cfg to location /var/www/html/ubuntu/")
     os.system('cp conf/pxe_cluster/ks.cfg /var/www/html/ubuntu/')
+
+
+def __create_seed_config(pxe_dict, tftp_dict, proxy_dict, boot_interface):
+    """
+    used to configure seed file from hosts.yaml file
+    :param pxe_dict:
+    :param tftp_dict:
+    :param proxy_dict:
+    :param boot_interface:
+    """
+    os.system('dos2unix conf/pxe_cluster/ubuntu-uefi-server.seed')
+
+    print" "
+    logger.debug("configuring server url  in ubuntu-uefi-server.seed")
+    my_url = "d-i 	mirror/http/hostname string " + pxe_dict["serverIp"]
+    __find_and_replace('conf/pxe_cluster/ubuntu-uefi-server.seed', "mirror/http/hostname", my_url)
+
+    print" "
+    logger.debug("configuring boot interface in ubuntu-uefi-server.seed")
+    boot_iface = "d-i   netcfg/choose_interface select " + boot_interface
+    __find_and_replace('conf/pxe_cluster/ubuntu-uefi-server.seed', "netcfg/choose_interface", boot_iface)
+
+    print" "
+    logger.debug("configuring dhcp timeout interface in ubuntu-uefi-server.seed")
+    boot_iface = "d-i   netcfg/choose_interface select " + boot_interface
+    __find_and_replace('conf/pxe_cluster/ubuntu-uefi-server.seed', "netcfg/choose_interface", boot_iface)
+
+    print " "
+    logger.debug("configuring client user fullname in ubuntu-uefi-server.seed")
+    user_creds = "d-i   passwd/user-fullname string " + tftp_dict["fullname"]
+    __find_and_replace('conf/pxe_cluster/ubuntu-uefi-server.seed', "passwd/user-fullname", user_creds)
+
+    print " "
+    logger.debug("configuring client username in ubuntu-uefi-server.seed")
+    user_creds = "d-i   passwd/username string " + tftp_dict["user"]
+    __find_and_replace('conf/pxe_cluster/ubuntu-uefi-server.seed', "passwd/username", user_creds)
+
+    print " "
+    logger.debug("configuring client user password in ubuntu-uefi-server.seed")
+    user_creds = "d-i 	passwd/user-password password " + tftp_dict["password"]
+    __find_and_replace('conf/pxe_cluster/ubuntu-uefi-server.seed', "passwd/user-password ", user_creds)
+
+    print " "
+    logger.debug("configuring client user password verify in ubuntu-uefi-server.seed")
+    user_creds = "d-i 	passwd/user-password-again password " + tftp_dict["password"]
+    __find_and_replace('conf/pxe_cluster/ubuntu-uefi-server.seed', "passwd/user-password-again", user_creds)
+
+    print " "
+    logger.debug("configuring client root password in ubuntu-uefi-server.seed")
+    user_creds = "d-i 	passwd/root-password password " + tftp_dict["password"]
+    __find_and_replace('conf/pxe_cluster/ubuntu-uefi-server.seed', "passwd/root-password ", user_creds)
+
+    print " "
+    logger.debug("configuring client root password verify in ubuntu-uefi-server.seed")
+    user_creds = "d-i 	passwd/root-password-again password " + tftp_dict["password"]
+    __find_and_replace('conf/pxe_cluster/ubuntu-uefi-server.seed', "passwd/root-password-again", user_creds)
+
+
+    print" "
+    logger.debug("copy local ubuntu-uefi-server.seed to location /var/www/html/ubuntu/preseed")
+    os.system('cp conf/pxe_cluster/ubuntu-uefi-server.seed /var/www/html/ubuntu/preseed')
 
 
 def __find_and_replace(fname, pat, s_after):

@@ -1,0 +1,93 @@
+d-i 	debconf/priority string critical
+d-i 	partman-auto/disk string /dev/sda
+d-i 	partman-auto/method regular
+
+# The presently available methods are:
+# - regular: use the usual partition types for your architecture
+# - lvm:     use LVM to partition the disk
+# - crypto:  use LVM within an encrypted partition
+d-i     partman-auto/method string regular
+d-i     partman-auto/choose_recipe select atomic
+
+# If one of the disks that are going to be automatically partitioned
+# contains an old LVM configuration, the user will normally receive a
+# warning. This can be preseeded away...
+d-i 	partman-lvm/device_remove_lvm boolean true
+
+# The same applies to pre-existing software RAID array:
+d-i 	partman-md/device_remove_md boolean true
+
+# And the same goes for the confirmation to write the lvm partitions.
+d-i 	partman-lvm/confirm boolean true
+d-i 	partman-lvm/confirm_nooverwrite boolean true
+
+# This makes partman automatically partition without confirmation, provided
+# that you told it what to do using one of the methods above.
+d-i 	partman-partitioning/confirm_write_new_label boolean true
+d-i 	partman/choose_partition select finish
+d-i 	partman/confirm boolean true
+d-i 	partman/confirm_nooverwrite boolean true
+
+#If there is a non-efi os on the system, install anyway
+d-i 	partman-efi/non_efi_system boolean true
+
+# Equivalent to url --url=http://<> in ks.cfg
+d-i 	mirror/country string manual
+d-i 	mirror/http/hostname string 10.30.5.11
+d-i 	mirror/http/directory string /ubuntu
+d-i 	mirror/http/proxy string
+
+# Select correct ethernet intefce
+d-i     netcfg/choose_interface select en0
+
+# User Accounts
+d-i 	debian-installer/locale string en_US
+d-i 	passwd/root-login boolean true
+d-i 	passwd/root-password password cable123
+d-i 	passwd/root-password-again password cable123
+
+#Localization
+d-i     debian-installer/locale string en_US.UTF-8
+
+#Keyboard selection
+d-i console-setup/ask_detect boolean false
+d-i keyboard-configuration/layoutcode string us
+
+# Set hostname
+d-i netcfg/get_hostname string ubuntu
+
+# Create new user
+d-i 	passwd/user-fullname string Ubuntu User
+d-i 	passwd/username string ubuntu
+d-i 	passwd/user-password password cable123
+d-i 	passwd/user-password-again password cable123
+
+# Don't encrypt the home directory
+d-i     user-setup/encrypt-home boolean false
+
+
+# Install the Ubuntu Server seed.
+tasksel	tasksel/force-tasks	string server
+
+# Only install basic language packs. Let tasksel ask about tasks.
+d-i 	pkgsel/language-pack-patterns	string
+
+# No language support packages.
+d-i 	pkgsel/install-language-support	boolean false
+
+# Only ask the UTC question if there are other operating systems installed.
+d-i 	clock-setup/utc-auto	boolean true
+
+# Verbose output and no boot splash screen.
+d-i 	debian-installer/quiet	boolean false
+d-i 	debian-installer/splash	boolean false
+
+# Install the debconf oem-config frontend (if in OEM mode).
+d-i 	oem-config-udeb/frontend	string debconf
+
+# Wait for two seconds in grub
+d-i 	grub-installer/timeout	string 2
+
+# Add the network and tasks oem-config steps by default.
+oem-config	oem-config/steps	multiselect language, timezone, keyboard, user, network, tasks
+d-i     base-installer/kernel/altmeta   string hwe-16.04

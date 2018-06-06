@@ -45,7 +45,6 @@ PROVISION:
         range: "10.197.121.22 10.197.121.26"
         router: "10.197.121.1"
         type: management
-
   PROXY:
     ftp_proxy: ""
     http_proxy: "http://10.197.121.21:3142"
@@ -148,10 +147,12 @@ PROVISION:
   TFTP:
     os: ubuntu-16.04.4-server-amd64.iso
     password: cable123
-    seed: hwe-ubuntu-server.seed
+    seed: ubuntu-uefi-server.seed
     timezone: America/Denver
     user: ubuntu
     fullname: ubuntu_user
+    firmware: UEFI
+
   CPUCORE:
     host:
        -
