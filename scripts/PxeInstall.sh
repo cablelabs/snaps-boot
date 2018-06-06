@@ -295,18 +295,11 @@ EOF
 command_status=$?
 checkStatus $command_status " creation of grub file "
 
-
 #copy this local data  to the original file
 cp $temp_dir/grub.cfg  /var/lib/tftpboot/grub/grub.cfg
 command_status=$?
 checkStatus $command_status " writing data of local grub  to  /var/lib/tftpboot/grub/grub.cfg"
-
 }
-
-
-
-
-
 
 bootMenuConfigure () {
 echo "++++++++++++++++++++++++++++++++++++++++++++++"
