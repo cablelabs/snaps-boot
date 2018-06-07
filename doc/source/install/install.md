@@ -33,10 +33,13 @@ The acronyms expanded in below are fundamental to the information in this docume
 | OS | OpenStack |
 | DHCP | Dynamic Host Configuration Protocol |
 | TFTP | Trivial FTP |
+| UEFI | Unified Extensible Firmware Interface |
+| BIOS | Basic Input Output System |
 
 ### 1.3 References
 
-[1] OpenStack Installation guide: https://docs.openstack.org/newton/install-guide-ubuntu/
+1. OpenStack Installation Guide: https://docs.openstack.org/newton/install-guide-ubuntu/
+2. UEFI PXE Netboot/Install Procedure: https://wiki.ubuntu.com/UEFI/PXE-netboot-install
 
 ## 2 Environment Prerequisites
 
@@ -109,6 +112,11 @@ unzip master.zip
 
 > Note: Git can also be used to clone the repository.
 
+```
+git clone https://github.com/cablelabs/snaps-boot.git
+```
+
+>:warning: Note:  If you use git, make sure not to push your changes back to the reporsitory.
 ## 3 Configuration
 
 ### 3.1 conf/pxe-cluster/hosts.yaml
@@ -206,7 +214,10 @@ SNAPS-Boot can be configured to allocate static IPs to host machines. This secti
 | netmask | Y | Netmask of the subnet (IP is allocated from this subnet). |
 | type | Y | Type of network this subnet will serve. Possible values are: **management**, **ipmi**, **tenant**, **data**. |
 
-> Note: For optional parameters, use null value **“”** if not required. For **‘data’** interface it is mandatory to define **‘dn’** and **‘dns’**.
+> :warning: Note: For all **‘data’** interfaces it is mandatory to define **‘dn’** and **‘dns’**.
+
+> For optional parameters, use null value **“”** if not required. 
+
 
 #### BMC:
 
@@ -231,6 +242,9 @@ This section defines parameters to specify the host OS image and SEED file to be
 | user | Y | Default user for all host machines. SNAPS-Boot creates this user. |
 | password | Y | Password for the default user created by SNAPS-Boot. |
 | fullname | N | Description of user created by SNAPS-Boot. |
+| server_type | N | Tells the bootloader the type of the target system, UEFI or BIOS.  Defaults to BIOS. |
+
+>:exclamation: Note: If you installing to a UEFI system, make sure your seed file is `ubuntu-uefi-server.seed`.
 
 #### CPUCORE:
 
@@ -261,10 +275,10 @@ directory.
 
 #### Step 1
 
-##### PXE Bios Install
+##### PXE BIOS Install
 Download `ubuntu16.04 server image` from internet and need to place it
-in folder `packages/images/`. Use this download
-link for ISO:
+in folder `packages/images/`.  
+Use this download link for ISO:  
  http://releases.ubuntu.com/16.04/ubuntu-16.04.4-server-amd64.iso.
 
 ```
@@ -274,21 +288,21 @@ wget http://releases.ubuntu.com/16.04/ubuntu-16.04.4-server-amd64.iso
 ```
 
 ##### PXE UEFI Install
-Download `grubnetx64` from internet and need to place it
-in folder `packages/images/`. Use this download
-link:
-    http://archive.ubuntu.com/ubuntu/dists/trusty/main/uefi/grub2-amd64/current/grubnetx64.efi.signed
+Download `grubnetx64.efi.signed` from internet and need to place it
+in folder `packages/images/`.  
+Use this download link:  
+    http://archive.ubuntu.com/ubuntu/dists/xenial/main/uefi/grub2-amd64/current/grubnetx64.efi.signed
 
-Download `netboot server image` from internet and need to place it
-in folder `packages/images/`. Use this download
-link:
-    http://archive.ubuntu.com/ubuntu/dists/xenial-updates/main/installer-amd64/current/images/netboot/netboot.tar.gz
+Download `ubuntu16.04 server image` from internet and need to place it
+in folder `packages/images/`.  
+Use this download link for ISO:  
+    http://releases.ubuntu.com/16.04/ubuntu-16.04.4-server-amd64.iso.
     
 ```
 mkdir -p packages/images
 cd packages/images
-wget http://archive.ubuntu.com/ubuntu/dists/trusty/main/uefi/grub2-amd64/current/grubnetx64.efi.signed
-wget http://archive.ubuntu.com/ubuntu/dists/xenial-updates/main/installer-amd64/current/images/netboot/netboot.tar.gz
+wget http://archive.ubuntu.com/ubuntu/dists/xenial/main/uefi/grub2-amd64/current/grubnetx64.efi.signed
+wget http://releases.ubuntu.com/16.04/ubuntu-16.04.4-server-amd64.iso
 ```
 
 #### Step 2
@@ -333,6 +347,29 @@ sudo -i python $PWD/iaas_launch.py -f $PWD/conf/pxe_cluster/hosts.yaml -p
 
 Note: This updates the networking on the server and may cause your
 ssh session to be terminated.
+
+##### Step 4a
+>:warning: This step is only if you require custom or proprietary drivers, such as ethernet.  If not you should skip this step. 
+
+If your target servers require custom or proprietary drivers, you will need to provide your own initrd.gz file
+for both the installer and the installation. 
+
+For more on injecting driver modules into an initrd.gz file see
+
+>http://www.linux-admins.net/2014/02/injecting-kernel-modules-in-initrdgz.html
+
+Once you have a customized initrd.gz, make a backup of the existing initrd.gz
+
+```
+sudo cp <tftpdirectory>/ubuntu-installer/amd64/initrd.gz <tftpdirectory>/ubuntu-installer/amd64/initrd.gz.backup
+sudo cp <www/html directory>/ubuntu/install/netboot/ubuntu-installer/amd64/initrd.gz <www/html directory>/ubuntu/install/netboot/ubuntu-installer/amd64/initrd.gz.backup
+```
+
+Now copy your initrd.gz file to each location
+```
+sudo cp initrd.gz <tftpdirectory>/ubuntu-installer/amd64/initrd.gz 
+sudo cp initrd.gz <www/html directory>/ubuntu/install/netboot/ubuntu-installer/amd64/initrd.gz 
+```
 
 #### Step 5
 
@@ -387,6 +424,9 @@ Run `iaas_launch.py` as shown below:
 ```
 sudo -i python $PWD/iaas_launch.py -f $PWD/conf/pxe_cluster/hosts.yaml -s
 ```
+>:warning: This step will reboot each target server when it is done.  
+Wait a few minutes then ping and/or ssh each management server to verify  
+it is back up. 
 
 #### Step 8
 
