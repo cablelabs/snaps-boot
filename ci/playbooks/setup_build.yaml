@@ -35,6 +35,9 @@
 
     - name: Install snaps-boot
       command: pip install -e {{ src_copy_dir }}/snaps-boot
+      become: yes
+      become_method: sudo
+      become_user: root
 
     - name: Make directory {{ src_copy_dir }}/snaps-boot/packages/images
       file:
