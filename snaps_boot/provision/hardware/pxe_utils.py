@@ -558,7 +558,7 @@ def __provision_clean(proxy_dict):
     logger.info("unmount mount point")
     os.system('umount  /mnt')
     
-    if (proxy_dict["ngcacher_proxy"] <> ""):
+    if proxy_dict.get('ngcacher_proxy'):
       __clean_ngcacher_proxy(proxy_dict)
 
 def __static_ip_configure(static_dict, proxy_dict):
