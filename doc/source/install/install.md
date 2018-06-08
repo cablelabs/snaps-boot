@@ -116,7 +116,7 @@ unzip master.zip
 git clone https://github.com/cablelabs/snaps-boot.git
 ```
 
->:warning: Note:  If you use git, make sure not to push your changes back to the reporsitory.
+>:warning: Note:  If you use git, make sure not to push your changes back to the repository.
 ## 3 Configuration
 
 ### 3.1 conf/pxe-cluster/hosts.yaml
