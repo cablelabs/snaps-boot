@@ -264,278 +264,18 @@ memory pages are to be defined.
 
 ## 4 Installation Steps
 
-### 4.1 Server Provisioning - UBUNTU
+### 4.1 Server Provisioning
 
 #### Step 1
 
-Download `ubuntu16.04 server image` from internet and need to place it
-in folder `snaps-boot/packages/images/`. Use this download
-link for ISO:
- http://releases.ubuntu.com/16.04/ubuntu-16.04.4-server-amd64.iso.
-
-```
-cd snaps-boot/
-mkdir -p packages/images
-cd packages/images
-wget http://releases.ubuntu.com/16.04/ubuntu-16.04.4-server-amd64.iso
-```
-
-#### Step 2
-
-Go to directory `snaps-boot/conf/pxe_cluster`.
-
-Modify file `hosts.yaml` for provisioning of OS (Operating System) on
-cloud cluster host machines (controller node, compute nodes). Modify
-this file according to your set up environment only.
-
-Note: Keep only ubuntu list under TFTP section in hosts.yaml. 
-
-#### Step 3
-
-Go to directory `snaps-boot/`
-
-Run `PreRequisite.sh` as shown below:
-
-```
-sudo ./scripts/PreRequisite.sh
-```
-
-If you see failures or errors.  Update your software, remove obsolete
-packages and reboot your server.
-
-```
-sudo apt-get update
-sudo apt-get upgrade
-sudo apt-get auto-remove
-sudo reboot
-```
-
-#### Step 4
-
-Steps to configure PXE and DHCP server.
-
-Go to directory `snaps-boot/`.
-
-Run `iaas_launch.py` as shown below:
-
-```
-sudo -i python $PWD/iaas_launch.py -f $PWD/conf/pxe_cluster/hosts.yaml -p
-```
-
-Note: This updates the networking on the server and may cause your
-ssh session to be terminated.
-
-#### Step 5
-
-Manually verify DHCP server is running or not, using the given command below:
-
-```
-sudo systemctl status isc-dhcp-server.service
-```
-
-State should be active running.
-If it is not running, then double check the hosts.yaml file and look
-at /var/log/syslog for error messages.
-
-Manually verify tftp-hpa service is running or not, using the given
-command below:
-
-```
-sudo systemctl status tftpd-hpa
-```
-
-State should be active running.
-
-Manually verify apache2 service is running or not, using the given
-command below:
-
-```
-sudo systemctl status apache2
-```
-
-State should be active running.
-
-#### Step 6
-
-Run `iaas_launch.py` as shown below:
-
-```
-sudo -i python $PWD/iaas_launch.py -f $PWD/conf/pxe_cluster/hosts.yaml -b
-```
-
-This will boot host machines (controller/compute nodes), select
-NIC Controller (PXE client enabled) to use network booting.
-
-This will provision ubuntu OS on host machines.
-
-Your OS provisioning will start and will get completed in about 20
-minutes.  The time will vary depending on your network speed and
-server boot times.
-
-#### Step 7
-
-Execute this step only if static IPs to be assigned to host machines.
-
-Run `iaas_launch.py` as shown below:
-```
-sudo -i python $PWD/iaas_launch.py -f $PWD/conf/pxe_cluster/hosts.yaml -s
-```
-
-#### Step 8
-
-Execute this step either for defining large memory pages or for
-isolating CPUs between host and guest OS.
-
-```
-sudo -i python $PWD/iaas_launch.py -f $PWD/conf/pxe_cluster/hosts.yaml -i
-```
-
-> Note: This step is optional and should be executed only if CPU
-isolation or large memory page provisioning is required.
-
-
-### 4.2 Server Provisioning - CENTOS
-
-#### Step 1
-
-Download `CentOS-7 server image` from internet and need to place it
-in folder `snaps-boot/packages/images/`. Use this download
-link for ISO:
- http://centos.excellmedia.net/7/isos/x86_64/CentOS-7-x86_64-DVD-1708.iso.
-
-```
-cd snaps-boot/
-mkdir -p packages/images
-cd packages/images
-wget http://centos.excellmedia.net/7/isos/x86_64/CentOS-7-x86_64-DVD-1708.iso
-```
-
-#### Step 2
-
-Go to directory `snaps-boot/conf/pxe_cluster`.
-
-Modify file `hosts.yaml` for provisioning of OS (Operating System) on
-cloud cluster host machines (controller node, compute nodes). Modify
-this file according to your set up environment only.
-
-Note: Keep only centos list under TFTP section in hosts.yaml. 
-
-#### Step 3
-
-Go to directory `snaps-boot/`
-
-Run `PreRequisite.sh` as shown below:
-
-```
-sudo ./scripts/PreRequisite.sh
-```
-
-If you see failures or errors.  Update your software, remove obsolete
-packages and reboot your server.
-
-```
-sudo apt-get update
-sudo apt-get upgrade
-sudo apt-get auto-remove
-sudo reboot
-```
-
-#### Step 4
-
-Steps to configure PXE and DHCP server.
-
-Go to directory `snaps-boot/`.
-
-Run `iaas_launch.py` as shown below:
-
-```
-sudo -i python $PWD/iaas_launch.py -f $PWD/conf/pxe_cluster/hosts.yaml -p
-```
-
-Note: This updates the networking on the server and may cause your
-ssh session to be terminated.
-
-#### Step 5
-
-Manually verify DHCP server is running or not, using the given command below: 
-
-```
-sudo systemctl status isc-dhcp-server.service
-```
-
-State should be active running.
-If it is not running, then double check the hosts.yaml file and look
-at /var/log/syslog for error messages.
-
-Manually verify tftp-hpa service is running or not, using the given
-command below:
-
-```
-sudo systemctl status tftpd-hpa
-```
-
-State should be active running.
-
-Manually verify apache2 service is running or not, using the given
-command below:
-
-```
-sudo systemctl status apache2
-```
-
-State should be active running.
-
-#### Step 6
-
-Run `iaas_launch.py` as shown below:
-
-```
-sudo -i python $PWD/iaas_launch.py -f $PWD/conf/pxe_cluster/hosts.yaml -b
-```
-
-This will boot host machines (controller/compute nodes), select
-NIC Controller (PXE client enabled) to use network booting.
-
-This will provision centos OS on host machines.
-
-Your OS provisioning will start and will get completed in about 20
-minutes.  The time will vary depending on your network speed and
-server boot times.
-
-#### Step 7
-
-Execute this step only if static IPs to be assigned to host machines.
-
-Run `iaas_launch.py` as shown below:
-```
-sudo -i python $PWD/iaas_launch.py -f $PWD/conf/pxe_cluster/hosts.yaml -s
-```
-
-#### Step 8
-
-Execute this step either for defining large memory pages or for
-isolating CPUs between host and guest OS.
-
-```
-sudo -i python $PWD/iaas_launch.py -f $PWD/conf/pxe_cluster/hosts.yaml -i
-```
-
-> Note: This step is optional and should be executed only if CPU
-isolation or large memory page provisioning is required.
-
-
-### 4.3 Server Provisioning - UBUNTU + CENTOS
-
-#### Step 1
-
-Download `ubuntu16.04 and CentOS-7 server image` from internet and need to place it
-in folder `snaps-boot/packages/images/`.
-Use this download link for ISO:
-
- http://releases.ubuntu.com/16.04/ubuntu-16.04.4-server-amd64.iso.
+Download `ubuntu16.04` or `CentOS-7` server image from internet and need to place it
+in folder `snaps-boot/packages/images/`. 
+Use following download links for ISO:
+##### For ubuntu
+ http://releases.ubuntu.com/16.04/ubuntu-16.04.4-server-amd64.iso
+##### For centos
+ http://centos.excellmedia.net/7/isos/x86_64/CentOS-7-x86_64-DVD-1708.iso
  
- http://centos.excellmedia.net/7/isos/x86_64/CentOS-7-x86_64-DVD-1708.iso.
-
 ```
 cd snaps-boot/
 mkdir -p packages/images
@@ -543,6 +283,7 @@ cd packages/images
 wget http://releases.ubuntu.com/16.04/ubuntu-16.04.4-server-amd64.iso
 wget http://centos.excellmedia.net/7/isos/x86_64/CentOS-7-x86_64-DVD-1708.iso
 ```
+Note: Please ensure that Ubuntu 16.04 server will be used to configure CentOS 7 PXE Server.
 
 #### Step 2
 
@@ -552,8 +293,11 @@ Modify file `hosts.yaml` for provisioning of OS (Operating System) on
 cloud cluster host machines (controller node, compute nodes). Modify
 this file according to your set up environment only.
 
-Note: Keep both ubuntu and centos list under TFTP section in hosts.yaml. 
-
+Note:  
+For provisioning only ubuntu PXE Server, Keep ubuntu list under TFTP section in hosts.yaml.  
+For provisioning only centos PXE Server, Keep centos list under TFTP section in hosts.yaml.  
+For provisioning both, Keep both ubuntu and centos lists under TFTP section in hosts.yaml.
+      
 #### Step 3
 
 Go to directory `snaps-boot/`
@@ -620,20 +364,24 @@ sudo systemctl status apache2
 State should be active running.
 
 #### Step 6
-
+##### When PXE Server is either ubuntu or centos
 Run `iaas_launch.py` as shown below:
+```
+sudo -i python $PWD/iaas_launch.py -f $PWD/conf/pxe_cluster/hosts.yaml -b
+```
+This will provision either ubuntu or centos OS on host machines, depending on the PXE Server.
 
+##### When PXE Server is both ubuntu and centos
+To provision ubuntu OS on host machines, Run `iaas_launch.py` as shown below:
 ```
 sudo -i python $PWD/iaas_launch.py -f $PWD/conf/pxe_cluster/hosts.yaml -b ubuntu
 ```
+or  
 
-This will provision ubuntu OS on host machines. 
-
+To provision ubuntu OS on host machines, Run `iaas_launch.py` as shown below:
 ```
 sudo -i python $PWD/iaas_launch.py -f $PWD/conf/pxe_cluster/hosts.yaml -b centos
 ```
-
-This will provision centos OS on host machines. 
 
 This will boot host machines (controller/compute nodes), select
 NIC Controller (PXE client enabled) to use network booting.
