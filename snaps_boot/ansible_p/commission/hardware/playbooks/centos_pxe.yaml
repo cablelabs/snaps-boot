@@ -1,0 +1,346 @@
+# This playbook creates a Centos PXE server.
+---
+- hosts: localhost
+  become: yes
+  become_user: root
+  vars:
+    - iso_name: "{{ isoName }}"
+    - pxe_server: "{{ pxeServer }}"
+  tasks:
+    ##
+    # Apt package installation of required software.
+    #
+    - name: General | Install required packages.
+      action: apt pkg={{ item }} state=installed
+      tags: common
+      with_items:
+        - syslinux
+        - syslinux-common
+        - xinetd
+        - pxelinux
+
+    - name: Unmount the image
+      mount:
+        name: /mnt/ 
+        src: "packages/images/{{iso_name}}"
+        fstype: iso9660
+        opts: ro
+        state: unmounted
+    
+    - name: Mount the image
+      mount:
+        name: /mnt/ 
+        src: "{{playbook_dir}}/../../../../../packages/images/{{iso_name}}"
+        fstype: iso9660
+        opts: ro
+        state: mounted
+
+    - name: create the /var/www/centos7 directory 
+      file: path=/var/www/centos7
+            mode=0755
+            state=directory
+      
+    - name: create the /var/lib/tftpboot/centos7 directory
+      file: path=/var/lib/tftpboot/centos7
+            mode=0755
+            state=directory
+ 
+    - name: copy iso file in /var/www/centos7/
+      action: synchronize src="/mnt/" dest="/var/www/centos7/"
+
+    - name: copy pxelinux.0 from PXELINUX
+      copy: src=/usr/lib/PXELINUX/pxelinux.0 dest=/var/lib/tftpboot/centos7/pxelinux.0
+
+    - name: create the /var/lib/tftpboot/centos7/pxelinux.cfg directory
+      file: path=/var/lib/tftpboot/centos7/pxelinux.cfg
+        mode=0755
+        state=directory
+
+    - name: create /var/lib/tftpboot/centos7/pxelinux.cfg/default file
+      file: path=/var/lib/tftpboot/centos7/pxelinux.cfg/default state=touch
+        mode=0644
+
+    - name: write data in /var/lib/tftpboot/centos7/pxelinux.cfg/default file                                                                        
+      blockinfile:                                                                                              
+        dest: /var/lib/tftpboot/centos7/pxelinux.cfg/default
+        block: |
+          default menu.c32
+          prompt 
+          timeout 100
+          ONTIMEOUT 1
+
+          menu hshift 13
+          menu width 70
+          menu margin 8
+          menu tabmsg
+
+          menu title ####### Automated CentOS 7 PXE Boot Menu #######
+
+          label 1
+          menu label ^1) Install CentOS 7 X64
+          kernel centos7/vmlinuz
+          append initrd=centos7/initrd.img ks=http://172.16.141.18:/centos7/ks.cfg
+
+          label 2
+          menu label ^2) Boot from local drive
+          localboot 0 
+
+    - name: create the link
+      file: src=centos7/pxelinux.0 dest=/var/lib/tftpboot/pxelinux.0 state=link owner=root group=root mode=0644 force=true
+      when: pxe_server == "centos" 
+
+    - name: create the link
+      file: src=centos7/pxelinux.cfg dest=/var/lib/tftpboot/pxelinux.cfg state=link owner=root group=root mode=0644 force=true
+      when: pxe_server == "centos"
+ 
+    - name: copy vmlinuz from syslinux installation
+      copy: src=/mnt/images/pxeboot/vmlinuz  dest=/var/lib/tftpboot/centos7/vmlinuz
+    
+    - name: copy initrd.img from syslinux installation
+      copy: src=/mnt/images/pxeboot/initrd.img  dest=/var/lib/tftpboot/centos7/initrd.img
+
+    - name: copy vesamenu.c32 from syslinux installation
+      copy: src=/usr/lib/syslinux/modules/bios/vesamenu.c32 dest=/var/lib/tftpboot/centos7/vesamenu.c32
+
+    - name: copy memdisk from syslinux installation
+      copy: src=/usr/lib/syslinux/memdisk dest=/var/lib/tftpboot/centos7/memdisk
+
+    - name: copy mboot.c32 from syslinux installation
+      copy: src=/usr/lib/syslinux/modules/efi64/mboot.c32 dest=/var/lib/tftpboot/centos7/mboot.c32
+
+    - name: copy menu.c32 from syslinux installation
+      copy: src=/usr/lib/syslinux/modules/efi64/menu.c32 dest=/var/lib/tftpboot/centos7/menu.c32
+
+    - name: copy chain.c32 from syslinux installation
+      copy: src=/usr/lib/syslinux/modules/efi64/chain.c32 dest=/var/lib/tftpboot/centos7/chain.c32
+
+    - name: copy bios files from syslinux installation
+      copy: src=/usr/lib/syslinux/modules/bios/ dest=/var/lib/tftpboot/centos7/
+
+    - name: copy ldlinux.c32 from syslinux installation
+      copy: src=/var/lib/tftpboot/centos7/ldlinux.c32  dest=/var/lib/tftpboot/ldlinux.c32
+      when: pxe_server == "centos"
+         
+    - name: copy libmenu.c32 from syslinux installation
+      copy: src=/var/lib/tftpboot/centos7/libmenu.c32  dest=/var/lib/tftpboot/libmenu.c32
+      when: pxe_server == "centos"
+
+    - name: copy libutil.c32 from syslinux installation
+      copy: src=/var/lib/tftpboot/centos7/libutil.c32  dest=/var/lib/tftpboot/libutil.c32
+      when: pxe_server == "centos"
+
+    - name: copy menu.c32 from syslinux installation
+      copy: src=/var/lib/tftpboot/centos7/menu.c32  dest=/var/lib/tftpboot/menu.c32
+      when: pxe_server == "centos"
+
+    - name: Update /etc/apache2/apache2.conf
+      blockinfile:
+        dest: /etc/apache2/apache2.conf
+        marker: "## {mark} added by ansible"
+        block: |
+           Alias /centos7 /var/www/centos7/
+
+           <Directory /var/www/centos7/>
+           Options Indexes FollowSymLinks
+           Options Indexes FollowSymLinks
+           Order Deny,Allow
+           Allow from all
+           </Directory>
+
+    - name: create tftp file
+      file: path=/etc/xinetd.d/tftp state=touch
+        mode=0644
+    
+    - name: write data in /etc/xinetd.d/tftp file                                                                        
+      blockinfile:                                                                                              
+        dest: /etc/xinetd.d/tftp
+        block: |
+          service tftp
+          {
+                 socket_type             = dgram
+                 protocol                = udp
+                 wait                    = yes
+                 user                    = root
+                 server                  = /usr/sbin/in.tftpd
+                 server_args             = -s /var/lib/tftpboot --verbose
+                 disable                 = no
+                 per_source              = 11
+                 cps                     = 100 2
+                 flags                   = IPv4
+          }
+    
+    - name: create ks file
+      file: path=/var/www/centos7/ks.cfg state=touch
+        mode=0644
+
+    - name: write data in ks file                                                                        
+      blockinfile:                                                                                              
+        dest: /var/www/centos7/ks.cfg
+        block: |
+          #version=DEVEL
+          # System authorization information
+          auth --enableshadow --passalgo=sha512
+
+          # Use network installation
+          url --url="http://172.16.141.18:/centos7"
+
+          #Use graphical install
+          graphical
+
+          # Run the Setup Agent on first boot
+          firstboot --enable
+          ignoredisk --only-use=sda
+
+          # Keyboard layouts
+          keyboard --vckeymap=us --xlayouts='us'
+
+          # System language
+          lang en_US.UTF-8
+
+          # Network information
+          network  --bootproto=dhcp --device=eno1 --onboot=off --ipv6=auto --no-activate
+          network  --bootproto=dhcp --device=enp2s0 --onboot=off --ipv6=auto
+          network  --hostname=localhost.localdomain
+
+          # Root password
+          #rootpw --iscrypted $6$Smc88RfFuEaqgGXz$iILoja8t9ga4yWrSKEBr8av3fvO/a9GfSBXPsw3zigbbv8MM6MCN8P4gsPj6NqEEWsErZe4LD7D5PC1GbCQkT.
+          rootpw 
+
+          # System services
+          services --enabled="chronyd"
+          # System timezone
+          timezone Asia/Kolkata --isUtc --nontp
+          #user --name=centos --password=$6$Q19S8U1dw5QcXM2D$jfPtY9X6oJ2Bv7fjcsBDRTML5p9cpEsXyrviaXFTu7xMRDWcOSBWHyqScbMkIKeUEvSLu0Z.N6yb/FZ.hS.C11 --iscrypted --gecos="centos"
+          user --name=centos --password= --gecos="centos"
+
+          # System bootloader configuration
+          bootloader --append=" crashkernel=auto" --location=mbr --boot-drive=sda
+          #autopart --type=lvm
+          # Partition clearing information
+          #clearpart --all --initlabel --drives=sda
+          clearpart --all --initlabel --drives=sda
+
+          # Disk partitioning information
+          #part / --fstype="ext4" --size 1 --grow --asprimary
+          part /boot --fstype="ext4" --size=476
+          part pv.749 --fstype="lvmpv" --ondisk=sda --size=22896
+          volgroup centVG --pesize=4096 pv.749
+          logvol swap  --fstype="swap" --size=3814 --name=swap --vgname=centVG
+          logvol /  --fstype="ext4" --size=19072 --name=root --vgname=centVG
+
+          #Disk partitioning information
+          #part / --fstype ext4 --size 1 --grow --asprimary
+          # Disk Partitioning
+          #autopart --type=plain --fstype=ext4
+
+          # list of packages to be installed
+          %packages
+          @^infrastructure-server-environment
+          @base
+          @core
+          chrony
+          kexec-tools
+          openssh-server
+          wget
+          curl
+          dos2unix
+          expect
+          ksh
+          libhbaapi
+          nfs-utils
+          python-devel
+          perl
+          %end
+
+          %addon com_redhat_kdump --enable --reserve-mb='auto'
+          %end
+
+          %anaconda
+          pwpolicy root --minlen=6 --minquality=1 --notstrict --nochanges --notempty
+          pwpolicy user --minlen=6 --minquality=1 --notstrict --nochanges --emptyok
+          pwpolicy luks --minlen=6 --minquality=1 --notstrict --nochanges --notempty
+          %end
+
+          %post --interpreter=/bin/bash
+          echo "Executing post installation scripts"
+          cat > /etc/yum.conf <<EOF
+          # This is the default, if you make this bigger yum won't see if the metadata
+          # is newer on the remote and so you'll "gain" the bandwidth of not having to
+          # download the new metadata and "pay" for it by yum not having correct
+          # information.
+          # It is esp. important, to have correct metadata, for distributions like
+          # Fedora which don't keep old packages around. If you don't like this checking
+          # interupting your command line usage, it's much better to have something
+          # manually check the metadata once an hour (yum-updatesd will do this).
+          # metadata_expire=90m
+          [main]
+          cachedir=/var/cache/yum/$basearch/$releasever
+          keepcache=0
+          debuglevel=2
+          logfile=/var/log/yum.log
+          exactarch=1
+          obsoletes=1
+          gpgcheck=1
+          plugins=1
+          installonly_limit=5
+          sslverify=false
+          #proxy=http://
+          #proxy=https://
+          #proxy=ftp://
+          bugtracker_url=http://bugs.centos.org/set_project.php?project_id=23&ref=http://bugs.centos.org/bug_report_page.php?category=yum
+          distroverpkg=centos-release
+          EOF
+
+          %end
+
+          %post
+          sed -i 's/prohibit-password/yes/' /etc/ssh/sshd_config
+          service ssh restart
+          %end
+
+          %post
+          yum -y install ntp
+          cat >> /etc/ntp.conf <<EOF
+          server 172.16.141.18 iburst
+          EOF
+
+          %end
+
+          reboot
+
+    - name: ensure apache2 is running
+      service: name=apache2 state=restarted
+
+    - name: ensure tftpd-hpa is running
+      service: name=tftpd-hpa state=restarted
+
+    - name: ensure isc-dhcp-server is running
+      service: name=isc-dhcp-server state=restarted
+
+    - name: ensure xinetd is running
+      service: name=xinetd state=restarted
+
+# handles ufw
+    - name: is ufw already running?
+      shell: service ufw status warn=false
+      register: _svc_ufw
+      failed_when: _svc_ufw.rc != 0 and ("unrecognized service" not in _svc_ufw.stderr)
+      ignore_errors: true
+
+    - name: disable ufw if running
+      service: name=ufw state=stopped enabled=false
+      when: "_svc_ufw.rc == 0"
+
+# handles firewalld
+    - name: is firewalld already running?
+      shell: service firewalld status warn=false
+      register: _svc_firewalld
+      failed_when: _svc_firewalld.rc != 0 and ("unrecognized service" not in _svc_firewalld.stderr)
+      ignore_errors: true
+
+    - name: disable firewalld if running
+      service: name=firewalld state=stopped enabled=false
+      when: "_svc_firewalld.rc == 0"
+
+
+
