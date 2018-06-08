@@ -276,6 +276,8 @@ directory.
 #### Step 1
 
 ##### PXE BIOS Install
+Go to root directory of the project (e.g. `snaps-boot`)
+
 Download `ubuntu16.04 server image` from internet and need to place it
 in folder `packages/images/`.  
 Use this download link for ISO:  
@@ -288,6 +290,8 @@ wget http://releases.ubuntu.com/16.04/ubuntu-16.04.4-server-amd64.iso
 ```
 
 ##### PXE UEFI Install
+Go to root directory of the project (e.g. `snaps-boot`)
+
 Download `grubnetx64.efi.signed` from internet and need to place it
 in folder `packages/images/`.  
 Use this download link:  
@@ -306,6 +310,7 @@ wget http://releases.ubuntu.com/16.04/ubuntu-16.04.4-server-amd64.iso
 ```
 
 #### Step 2
+Go to root directory of the project (e.g. `snaps-boot`)
 
 Go to directory `conf/pxe_cluster`.
 
@@ -337,7 +342,8 @@ sudo reboot
 
 Steps to configure PXE and DHCP server.
 
-Go to the project root directory
+Go to root directory of the project (e.g. `snaps-boot`)
+
 
 Run `iaas_launch.py` as shown below:
 
@@ -402,6 +408,7 @@ sudo systemctl status apache2
 State should be active running.
 
 #### Step 6
+Go to root directory of the project (e.g. `snaps-boot`)
 
 Run `iaas_launch.py` as shown below:
 
@@ -414,9 +421,10 @@ NIC Controller (PXE client enabled) to use network booting.
 
 Your OS provisioning will start and will get completed in about 20
 minutes.  The time will vary depending on your network speed and
-server boot times.
+ip aserver boot times.
 
 #### Step 7
+Go to root directory of the project (e.g. `snaps-boot`)
 
 Execute this step only if static IPs to be assigned to host machines.
 
@@ -429,6 +437,7 @@ Wait a few minutes then ping and/or ssh each management server to verify
 it is back up. 
 
 #### Step 8
+Go to root directory of the project (e.g. `snaps-boot`)
 
 Execute this step either for defining large memory pages or for
 isolating CPUs between host and guest OS.
