@@ -44,15 +44,70 @@ def __main(config, operation):
     bmc_dict = prov_dict.get('BMC')
     subnet_list = dhcp_dict.get('subnet')
     cpu_core_dict = prov_dict.get('CPUCORE')
+    pxe_server_configuration_listmap = tftp_dict.get('pxe_server_configuration')
+    buildPxeServer = None
+    ubuntuPxeServer = False
+    centosPxeServer = False
+    ubuntu_dict = {}
+    if pxe_server_configuration_listmap is None:
+        ubuntuPxeServer = True
+        buildPxeServer = "ubuntu"
+        ubuntu_dict = tftp_dict
+        logger.warn("host.yaml is using a deprecated format.  Please update ASAP")
+    else:
+        for item in pxe_server_configuration_listmap:
+          for key in item:
+            if ("ubuntu" == key):
+               ubuntuPxeServer = True
+               buildPxeServer = "ubuntu"
+               ubuntu_dict = item.get("ubuntu")
+            if ("centos" == key):
+               centosPxeServer = True
+               buildPxeServer = "centos"
+               centos_dict = item.get("centos")
 
+    if(True == ubuntuPxeServer and True == centosPxeServer):
+      buildPxeServer = "ubuntu + centos"
+
+    logger.info("buildPxeServer is :"+str(buildPxeServer))
+   
     if operation == "hardware":
-        __pxe_server_installation(proxy_dict, pxe_dict, tftp_dict, subnet_list)
+       __pxe_server_installation(proxy_dict, pxe_dict, ubuntu_dict, subnet_list, buildPxeServer)
+       if (buildPxeServer == "centos" or buildPxeServer == "ubuntu + centos"):
+        __centos_pxe_installation(pxe_dict,centos_dict,proxy_dict,buildPxeServer)
+        __validateAndModifyCentosKsCfg(pxe_dict,centos_dict,proxy_dict,buildPxeServer)
+       if (proxy_dict["ngcacher_proxy"] <> ""):
+         __update_ng_cacher_proxy(proxy_dict)
     elif operation == "boot":
+        if (buildPxeServer == "ubuntu + centos"):
+            operation = "ubuntu"
+            __modify_file_for_os(operation)
         __pxe_boot(bmc_dict)
+    
+    elif operation == "ubuntu":
+         if (buildPxeServer == "ubuntu + centos"):
+            __modify_file_for_os(operation)
+            __pxe_boot(bmc_dict)
+         elif (buildPxeServer == "ubuntu"):
+            __pxe_boot(bmc_dict)
+         else:
+            logger.error('PXE SERVER IS CENTOS. UBUNTU CANNOT BE INSTALLED ON HOST MACHINES')
+            exit(1)
+
+    elif operation == "centos":
+         if (buildPxeServer == "ubuntu + centos"):
+            __modify_file_for_os(operation)
+            __pxe_boot(bmc_dict)
+         elif (buildPxeServer == "centos"):
+            __pxe_boot(bmc_dict)
+         else:
+            logger.error('PXE SERVER IS UBUNTU. CENTOS CANNOT BE INSTALLED ON HOST MACHINES')
+            exit(1)
+    
     elif operation == "bootd":
         __pxe_bootd(bmc_dict)
     elif operation == "provisionClean":
-        __provision_clean()
+        __provision_clean(proxy_dict)
     elif operation == "staticIPConfigure":
         __static_ip_configure(static_dict, proxy_dict)
     elif operation == "staticIPCleanup":
@@ -65,7 +120,7 @@ def __main(config, operation):
         print "Cannot read configuration"
 
 
-def __pxe_server_installation(proxy_dict, pxe_dict, tftp_dict, subnet_list):
+def __pxe_server_installation(proxy_dict, pxe_dict, ubuntu_dict, subnet_list, buildPxeServer):
     """
     This will launch the shell script to  install and configure dhcp , tftp
     and apache server.
@@ -97,58 +152,70 @@ def __pxe_server_installation(proxy_dict, pxe_dict, tftp_dict, subnet_list):
     os.system(
         'sh scripts/PxeInstall.sh tftpdHpaRestart' + " "
         + pxe_dict["password"])
-    logger.info("******************mountAndCopy************************")
-    os.system('sh scripts/PxeInstall.sh mountAndCopy ' + tftp_dict["os"]
-              + " " + pxe_dict["password"])
-    logger.info("******************mountAndCopyUefi************************")
-    os.system('sh scripts/PxeInstall.sh mountAndCopyUefi ' + 'grubnetx64.efi.signed'
+    if buildPxeServer == "ubuntu" or buildPxeServer == "ubuntu + centos":
+        
+        logger.info("******************mountAndCopy************************")
+        os.system('sh scripts/PxeInstall.sh mountAndCopy ' + ubuntu_dict["os"]
+              + " " + pxe_dict["password"])         
+        logger.info("******************mountAndCopyUefi************************")
+        os.system('sh scripts/PxeInstall.sh mountAndCopyUefi ' + 'grubnetx64.efi.signed'
               + " " + "netboot.tar.gz" + " " + pxe_dict["password"])
-    logger.info("*************defaultFileConfigure********************")
-    os.system('sh scripts/PxeInstall.sh defaultFileConfigure ' + pxe_dict[
-        "serverIp"] + " " + tftp_dict["seed"] + " " + pxe_dict["password"])
-    logger.info("*************bootMenuConfigure********************")
-    os.system('sh scripts/PxeInstall.sh bootMenuConfigure ' + pxe_dict[
-        "serverIp"] + " " + tftp_dict["seed"] + " " + pxe_dict["password"])
-    logger.info("*************defaultGrubConfigure********************")
-    for subnet in subnet_list:
-        listen_iface = subnet.get('listen_iface')
-        name = subnet.get('name')
-    os.system('sh scripts/PxeInstall.sh defaultGrubConfigure ' + pxe_dict["serverIp"]
-              + " " + tftp_dict["seed"] + " " + str(name) + " " + str(listen_iface)
-              + " " + pxe_dict["password"])
-    logger.info("*********validateAndCreateconfigKsCfg****************")
-    __create_ks_config(pxe_dict, tftp_dict, proxy_dict, str(listen_iface))
-    logger.info("*********validateAndCreateconfigSeedIfUEFI****************")
-    if 'server_type' in tftp_dict and tftp_dict['server_type'] == 'UEFI':
-        __create_seed_config(pxe_dict, tftp_dict, proxy_dict, str(listen_iface))
+        if buildPxeServer == "ubuntu + centos":
+            logger.info("*************defaultFileConfigure********************")
+            os.system('sh scripts/PxeInstall.sh defaultFileConfigure ' +
+                      pxe_dict["serverIp"] + " " + ubuntu_dict["seed"] + " " + pxe_dict["password"])
+        if buildPxeServer == "ubuntu":
+            logger.info("*************defaultFileConfigureUbuntu********************")
+            os.system('sh scripts/PxeInstall.sh defaultFileConfigureUbuntu ' +
+                      pxe_dict["serverIp"] + " " + ubuntu_dict["seed"] + " " + pxe_dict["password"])
+
+        logger.info("*************bootMenuConfigure********************")
+        os.system('sh scripts/PxeInstall.sh bootMenuConfigure ' + pxe_dict[
+            "serverIp"] + " " + ubuntu_dict["seed"] + " " + pxe_dict["password"])
+        
+        logger.info("*********validateAndCreateconfigKsCfg****************")
+        __create_ks_config(pxe_dict, ubuntu_dict, proxy_dict)
+    
+        logger.info("*************defaultGrubConfigure********************")
+        for subnet in subnet_list:
+            listen_iface = subnet.get('listen_iface')
+            name = subnet.get('name')
+        os.system('sh scripts/PxeInstall.sh defaultGrubConfigure ' + pxe_dict["serverIp"]
+                  + " " + ubuntu_dict["seed"] + " " + str(name) + " " + str(listen_iface)
+                  + " " + pxe_dict["password"])
+     
+        logger.info("*********validateAndCreateconfigSeedIfUEFI****************")
+        if 'server_type' in ubuntu_dict and ubuntu_dict['server_type'] == 'UEFI':
+            __create_seed_config(pxe_dict, ubuntu_dict, proxy_dict, str(listen_iface))
+
     logger.info("****************configureAnsibleFile*****************")
     __config_ansible_file()
     __config_ntp_server_file(pxe_dict)
     __restart_ntp_server(pxe_dict)
 
 
-def __create_ks_config(pxe_dict, tftp_dict, proxy_dict, boot_interface):
+def __create_ks_config(pxe_dict, ubuntu_dict, proxy_dict, boot_interface):
     """
     used to configure ks.cfg from hosts.yaml file
     :param pxe_dict:
-    :param tftp_dict:
+    :param ubuntu_dict:
     :param proxy_dict:
     :param boot_interface:
     """
     os.system('dos2unix conf/pxe_cluster/ks.cfg')
     logger.info("configuring   timezone in ks.cfg")
     __find_and_replace('conf/pxe_cluster/ks.cfg', "timezone",
-                       "timezone  " + tftp_dict["timezone"])
+                       "timezone  " + ubuntu_dict["timezone"])
 
     print " "
     logger.debug("configuring   client user password   name in ks.cfg")
-    user_creds = "user " + tftp_dict["user"] + " --fullname " + tftp_dict[
-        "fullname"] + " --password " + tftp_dict["password"]
+    user_creds = "user " + ubuntu_dict["user"] + " --fullname " + ubuntu_dict[
+        "fullname"] + " --password " + ubuntu_dict["password"]
     __find_and_replace('conf/pxe_cluster/ks.cfg', "user", user_creds)
 
     print " "
     logger.debug("configuring   client root password   name in ks.cfg")
-    user_creds = "rootpw " + tftp_dict["password"]
+    user_creds = "rootpw " + ubuntu_dict["password"]
     __find_and_replace('conf/pxe_cluster/ks.cfg', "rootpw", user_creds)
 
     print" "
@@ -191,11 +258,11 @@ def __create_ks_config(pxe_dict, tftp_dict, proxy_dict, boot_interface):
     os.system('cp conf/pxe_cluster/ks.cfg /var/www/html/ubuntu/')
 
 
-def __create_seed_config(pxe_dict, tftp_dict, proxy_dict, boot_interface):
+def __create_seed_config(pxe_dict, ubuntu_dict, proxy_dict, boot_interface):
     """
     used to configure seed file from hosts.yaml file
     :param pxe_dict:
-    :param tftp_dict:
+    :param ubuntu_dict:
     :param proxy_dict:
     :param boot_interface:
     """
@@ -213,32 +280,32 @@ def __create_seed_config(pxe_dict, tftp_dict, proxy_dict, boot_interface):
 
     print " "
     logger.debug("configuring client user fullname in ubuntu-uefi-server.seed")
-    user_creds = "d-i   passwd/user-fullname string " + tftp_dict["fullname"]
+    user_creds = "d-i   passwd/user-fullname string " + ubuntu_dict["fullname"]
     __find_and_replace('conf/pxe_cluster/ubuntu-uefi-server.seed', "d-i 	passwd/user-fullname string Ubuntu User", user_creds)
 
     print " "
     logger.debug("configuring client username in ubuntu-uefi-server.seed")
-    user_creds = "d-i   passwd/username string " + tftp_dict["user"]
+    user_creds = "d-i   passwd/username string " + ubuntu_dict["user"]
     __find_and_replace('conf/pxe_cluster/ubuntu-uefi-server.seed', "d-i 	passwd/username string ubuntu", user_creds)
 
     print " "
     logger.debug("configuring client user password in ubuntu-uefi-server.seed")
-    user_creds = "d-i 	passwd/user-password password " + tftp_dict["password"]
+    user_creds = "d-i 	passwd/user-password password " + ubuntu_dict["password"]
     __find_and_replace('conf/pxe_cluster/ubuntu-uefi-server.seed', "d-i 	passwd/user-password password fake", user_creds)
 
     print " "
     logger.debug("configuring client user password verify in ubuntu-uefi-server.seed")
-    user_creds = "d-i 	passwd/user-password-again password " + tftp_dict["password"]
+    user_creds = "d-i 	passwd/user-password-again password " + ubuntu_dict["password"]
     __find_and_replace('conf/pxe_cluster/ubuntu-uefi-server.seed', "d-i 	passwd/user-password-again password fake", user_creds)
 
     print " "
     logger.debug("configuring client root password in ubuntu-uefi-server.seed")
-    user_creds = "d-i 	passwd/root-password password " + tftp_dict["password"]
+    user_creds = "d-i 	passwd/root-password password " + ubuntu_dict["password"]
     __find_and_replace('conf/pxe_cluster/ubuntu-uefi-server.seed', "d-i 	passwd/root-password password fake", user_creds)
 
     print " "
     logger.debug("configuring client root password verify in ubuntu-uefi-server.seed")
-    user_creds = "d-i 	passwd/root-password-again password " + tftp_dict["password"]
+    user_creds = "d-i 	passwd/root-password-again password " + ubuntu_dict["password"]
     __find_and_replace('conf/pxe_cluster/ubuntu-uefi-server.seed', "d-i 	passwd/root-password-again password fake", user_creds)
 
 
@@ -556,7 +623,7 @@ def __pxe_bootd(bmc_dict):
         __ipmi_reboot_system(ip, user, password)
 
 
-def __provision_clean():
+def __provision_clean(proxy_dict):
     """
     to clean the pxe server installation
     """
@@ -580,7 +647,9 @@ def __provision_clean():
     os.system('apt-get  -y remove isc-dhcp-server')
     logger.info("unmount mount point")
     os.system('umount  /mnt')
-
+    
+    if (proxy_dict["ngcacher_proxy"] <> ""):
+      __clean_ngcacher_proxy(proxy_dict)
 
 def __static_ip_configure(static_dict, proxy_dict):
     playbook_path = pkg_resources.resource_filename(
@@ -618,7 +687,6 @@ def __static_ip_configure(static_dict, proxy_dict):
     for i in range(len(host)):
         target = host[i].get('access_ip')
         iplist.append(target)
-    consts.KEY_IP_LIST = iplist
     for i in range(len(host)):
         target = host[i].get('access_ip')
         __create_and_save_keys()
@@ -887,3 +955,102 @@ def __del_isol_cpus(cpu_core_dict):
                     'isolcpus': isolcpus,
                     'hugepagesz': hugepagesz,
                     'hugepages': hugepages})
+
+def __centos_pxe_installation(pxe_dict,centos_dict,proxy_dict,build_pxe_server):
+    iplist = []
+    root_pass = None
+    playbook_path = pkg_resources.resource_filename(
+        'snaps_boot.ansible_p.commission.hardware.playbooks',
+        'centos_pxe.yaml')
+    iso_name=centos_dict.get('os')
+    print iso_name
+    print build_pxe_server
+    iplist = pxe_dict.get('serverIp')
+    apl.__launch_ansible_playbook(
+            iplist , playbook_path, {
+            'isoName': iso_name,
+            'pxeServer': build_pxe_server})
+
+def __validateAndModifyCentosKsCfg(pxe_dict,centos_dict,proxy_dict,build_pxe_server):
+    """
+    used to configure ks.cfg file
+    :param config : pxe_dict , tftp_dict ,proxy_dict (dictionary data from hosts.yaml file) 
+    :return 
+    """
+ 
+    print " "
+    logger.info("configuring   timezone in ks.cfg")
+    __find_and_replace('/var/www/centos7/ks.cfg',"timezone","timezone "+centos_dict["timezone"])
+
+    print " "
+    logger.debug("configuring   client user password   name in ks.cfg")
+    user_credentials="user --name="+centos_dict["user"]+" --password="+centos_dict["user_password"]+" --gecos="+"\""+centos_dict["user"]+"\""
+    __find_and_replace('/var/www/centos7/ks.cfg',"user",user_credentials)
+
+    print " "
+    logger.debug("configuring   client root password   name in ks.cfg")
+    user_credentials="rootpw "+centos_dict["root_password"]
+    __find_and_replace('/var/www/centos7/ks.cfg',"rootpw",user_credentials)
+ 
+    print" "
+    logger.debug("configuring server url  in ks.cfg")
+    my_url="url --url="+"\"http://"+pxe_dict["serverIp"]+":/centos7"+"\""
+    __find_and_replace('/var/www/centos7/ks.cfg',"url",my_url)
+ 
+    print" "
+    logger.debug("configuring ntp server ip  in ks.cfg")
+    ntp_server="server "+pxe_dict["serverIp"]+" iburst"
+    __find_and_replace('/var/www/centos7/ks.cfg',"server",ntp_server)
+
+    print" "
+    logger.debug("configuring http proxy  in ks.cfg")
+    httpProxy="proxy="+proxy_dict["http_proxy"]
+    __find_and_replace('/var/www/centos7/ks.cfg',"#proxy=http:",httpProxy)
+ 
+    print" "
+    if (proxy_dict["https_proxy"] <> ""):
+       logger.debug("configuring https proxy  in ks.cfg")
+       httpsProxy="proxy="+proxy_dict["https_proxy"]
+       __find_and_replace('/var/www/centos7/ks.cfg',"#proxy=https:",httpsProxy) 
+ 
+    print" "
+    if (proxy_dict["ftp_proxy"] <> ""):
+       logger.debug("configuring ftp proxy  in ks.cfg")
+       ftpProxy="proxy="+proxy_dict["ftp_proxy"]
+       __find_and_replace('/var/www/centos7/ks.cfg',"#proxy=ftp",ftpProxy)
+
+    if (build_pxe_server == "centos"):
+      __modify_ip_in_pxelinux(pxe_dict)
+  
+def __modify_file_for_os(operation):
+    osToBeInstalled = operation
+    if osToBeInstalled == "centos":
+     print" "
+     logger.debug("configuring ftp proxy  in ks.cfg")
+     value="ONTIMEOUT centos"
+     __find_and_replace('/var/lib/tftpboot/ubuntu-installer/amd64/pxelinux.cfg/default',"ONTIMEOUT",value)
+    elif osToBeInstalled == "ubuntu":
+     print" "
+     logger.debug("configuring ftp proxy  in ks.cfg")
+     value="ONTIMEOUT ubuntu"
+     __find_and_replace('/var/lib/tftpboot/ubuntu-installer/amd64/pxelinux.cfg/default',"ONTIMEOUT",value)
+    
+def __modify_ip_in_pxelinux(pxe_dict):
+    value="append initrd=centos7/initrd.img ks=http://"+pxe_dict["serverIp"]+":/centos7/ks.cfg"
+    __find_and_replace('/var/lib/tftpboot/pxelinux.cfg/default',"append initrd",value)
+
+def __update_ng_cacher_proxy(proxy_dict):
+    value1="Proxy: "+proxy_dict["ngcacher_proxy"]
+    value2="VfilePatternEx: ^(/\?release=[0-9]+&arch=.*|.*/RPM-GPG-KEY-.*|/metalink\?repo=epel\-[0-9]+&arch=.*)$"
+    __find_and_replace('/etc/apt-cacher-ng/acng.conf',"# Proxy: https://username:proxypassword@proxy.example.net:3129",value1)
+    __find_and_replace('/etc/apt-cacher-ng/acng.conf',"#VfilePatternEx: /centos/treeinfo",value2)
+    os.system(' systemctl restart  apt-cacher-ng')
+
+
+
+def __clean_ngcacher_proxy(proxy_dict):
+    value1="Proxy: "+proxy_dict["ngcacher_proxy"]
+    __find_and_replace('/etc/apt-cacher-ng/acng.conf',value1,"# Proxy: https://username:proxypassword@proxy.example.net:3129")
+    __find_and_replace('/etc/apt-cacher-ng/acng.conf',"VfilePatternEx:","#VfilePatternEx: /centos/treeinfo")
+    os.system(' systemctl restart  apt-cacher-ng')
+

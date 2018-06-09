@@ -172,7 +172,7 @@ Configuration parameters for the subnet section are explained below.
 
 Build Server and all other host machines requires internet
 connectivity to download open source tools (python, Ansible etc.) and
-OpenStack services. User is required to set FTP, HTTP and HTTPs proxies
+OpenStack services. User is required to set FTP, HTTP, HTTPs and NG-CACHER  proxies
 on these machines if internet access is restricted by firewall.
 
 Configuration parameter defined in this section are explained below.
@@ -182,6 +182,8 @@ Configuration parameter defined in this section are explained below.
 | ftp_proxy | N | Proxy to be used for FTP. |
 | http_proxy | N | Proxy to be used for HTTP traffic. |
 | https_proxy | N | Proxy to be used for HTTPS traffic. |
+| ngcacher_proxy | N | Proxy should be set in case the servers are behind corporate firewalls. |
+
 
 > Note: If proxy configuration is not required use null value **“”**
 for each of the parameters.  Do not remove the line from the file.
@@ -236,15 +238,32 @@ This section defines parameters to specify the host OS image and SEED file to be
 
 | Parameter | Required | Description |
 | --------- | ----------- | ----------- |
-| os | Y | ISO of OS image to be installed on host machines. |
-| seed | Y | Seed file to be used for host OS installation. |
-| timezone | Y | Time zone configuration for host machines. |
-| user | Y | Default user for all host machines. SNAPS-Boot creates this user. |
-| password | Y | Password for the default user created by SNAPS-Boot. |
+| pxe_server_configuration |  | Details of OS to be used in PXE server installation.  |
+
+##### Ubuntu
+| Parameter | Required | Description |
+| --------- | ----------- | ----------- |
+| ubuntu |  | Details of Ubuntu OS. |
+| os | N | ISO of ubuntu OS image to be installed on host machines. |
+| password | N | Password for the default user created by SNAPS-Boot. |
+| seed | N | Seed file to be used for host OS installation. |
+| timezone | N | Time zone configuration for host machines. |
+| user | N | Default user for all host machines. SNAPS-Boot creates this user. |
 | fullname | N | Description of user created by SNAPS-Boot. |
-| server_type | N | Tells the bootloader the type of the target system, UEFI or BIOS.  Defaults to BIOS. |
+| server_type | N | Tells the bootloader the type of the target system, UEFI or BIOS.  Defaults to BIOS. 
+
+##### CentOS
+| Parameter | Required | Description |
+| --------- | ----------- | ----------- |
+| centos |  | Details of Centos OS. |
+| os | N | ISO of centos OS image to be installed on host machines. |
+| root_password | N | Password for the root user created by SNAPS-Boot. |
+| user | N | Default user for all host machines. SNAPS-Boot creates this user. |
+| user_password | N | Password for the default user created by SNAPS-Boot. |
+| timezone | N | Time zone configuration for host machines. |
 
 >:exclamation: Note: If you installing to a UEFI system, make sure your seed file is `ubuntu-uefi-server.seed`.
+> Note: User has to give details of at least one OS(either Ubuntu OS or Centos OS or Both) as per the PXE requirement.
 
 #### CPUCORE:
 
@@ -278,18 +297,25 @@ directory.
 ##### PXE BIOS Install
 Go to root directory of the project (e.g. `snaps-boot`)
 
-Download `ubuntu16.04 server image` from internet and need to place it
-in folder `packages/images/`.  
-Use this download link for ISO:  
- http://releases.ubuntu.com/16.04/ubuntu-16.04.4-server-amd64.iso.
+Download `ubuntu16.04` or `CentOS-7` server image from internet and need to place it
+in folder `snaps-boot/packages/images/`. 
+Use following download links for ISO:
+##### For ubuntu
+ http://releases.ubuntu.com/16.04/ubuntu-16.04.4-server-amd64.iso
+##### For centos
+ http://centos.excellmedia.net/7/isos/x86_64/CentOS-7-x86_64-DVD-1708.iso
 
 ```
 mkdir -p packages/images
 cd packages/images
 wget http://releases.ubuntu.com/16.04/ubuntu-16.04.4-server-amd64.iso
+wget http://centos.excellmedia.net/7/isos/x86_64/CentOS-7-x86_64-DVD-1708.iso
 ```
+Note: Please ensure that Ubuntu 16.04 server will be used to configure CentOS 7 PXE Server.
 
 ##### PXE UEFI Install
+>:exclamation:CentOS is not yet supported for UEFI Installs
+ 
 Go to root directory of the project (e.g. `snaps-boot`)
 
 Download `grubnetx64.efi.signed` from internet and need to place it
@@ -318,6 +344,11 @@ Modify file `hosts.yaml` for provisioning of OS (Operating System) on
 cloud cluster host machines (controller node, compute nodes). Modify
 this file according to your set up environment only.
 
+Note:  
+For provisioning only ubuntu PXE Server, Keep ubuntu list under TFTP section in hosts.yaml.  
+For provisioning only centos PXE Server, Keep centos list under TFTP section in hosts.yaml.  
+For provisioning both, Keep both ubuntu and centos lists under TFTP section in hosts.yaml.
+      
 #### Step 3
 
 Go to root directory of the project (e.g. `snaps-boot`)
@@ -379,7 +410,7 @@ sudo cp initrd.gz <www/html directory>/ubuntu/install/netboot/ubuntu-installer/a
 
 #### Step 5
 
-Manually verify DHCP server is running or not, using below given command:
+Manually verify DHCP server is running or not, using the given command below:
 
 ```
 sudo systemctl status isc-dhcp-server.service
@@ -389,8 +420,8 @@ State should be active running.
 If it is not running, then double check the hosts.yaml file and look
 at /var/log/syslog for error messages.
 
-Manually verify tftp-hpa service is running or not, using below given
-command:
+Manually verify tftp-hpa service is running or not, using the given
+command below:
 
 ```
 sudo systemctl status tftpd-hpa
@@ -398,8 +429,8 @@ sudo systemctl status tftpd-hpa
 
 State should be active running.
 
-Manually verify apache2 service is running or not, using below given
-command:
+Manually verify apache2 service is running or not, using the given
+command below:
 
 ```
 sudo systemctl status apache2
@@ -410,10 +441,23 @@ State should be active running.
 #### Step 6
 Go to root directory of the project (e.g. `snaps-boot`)
 
+##### When PXE Server is either ubuntu or centos
 Run `iaas_launch.py` as shown below:
-
 ```
 sudo -i python $PWD/iaas_launch.py -f $PWD/conf/pxe_cluster/hosts.yaml -b
+```
+This will provision either ubuntu or centos OS on host machines, depending on the PXE Server.
+
+##### When PXE Server is both ubuntu and centos
+To provision ubuntu OS on host machines, Run `iaas_launch.py` as shown below:
+```
+sudo -i python $PWD/iaas_launch.py -f $PWD/conf/pxe_cluster/hosts.yaml -b ubuntu
+```
+or  
+
+To provision ubuntu OS on host machines, Run `iaas_launch.py` as shown below:
+```
+sudo -i python $PWD/iaas_launch.py -f $PWD/conf/pxe_cluster/hosts.yaml -b centos
 ```
 
 This will boot host machines (controller/compute nodes), select

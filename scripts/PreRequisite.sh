@@ -24,45 +24,12 @@ fi
 
 
 echo "++++++++++++++++++++++++++++++++++++++++++++++"
-echo "apt-get install python"
-echo "++++++++++++++++++++++++++++++++++++++++++++++"
-apt-get install -y  python python-pip python-dev python-pathlib
-command_status=$?
-checkStatus $command_status "install python  using apt-get"
-sleep 5
-
-echo "++++++++++++++++++++++++++++++++++++++++++++++"
 echo "apt-get install apt-cacher-ng"
 echo "++++++++++++++++++++++++++++++++++++++++++++++"
 apt-get install -y apt-cacher-ng
 command_status=$?
 checkStatus $command_status "install apt-cache-eng  using apt-get"
 sleep 5
-
-echo "++++++++++++++++++++++++++++++++++++++++++++++"
-echo "apt-get install python-yaml "
-echo "++++++++++++++++++++++++++++++++++++++++++++++"
-apt-get install python-yaml
-command_status=$?
-checkStatus $command_status "install  yaml  using apt-get"
-sleep 5
-
-echo "++++++++++++++++++++++++++++++++++++++++++++++"
-echo "apt-get install ansible "
-echo "++++++++++++++++++++++++++++++++++++++++++++++"
-apt-get install -y ansible
-command_status=$?
-checkStatus $command_status "install  ansible  using apt-get"
-sleep 5
-
-echo "++++++++++++++++++++++++++++++++++++++++++++++"
-echo "apt-get install dos2unix"
-echo "++++++++++++++++++++++++++++++++++++++++++++++"
-apt-get install -y dos2unix
-command_status=$?
-checkStatus $command_status "install  dos2unix using apt-get"
-sleep 5
-
 
 
 echo "++++++++++++++++++++++++++++++++++++++++++++++"
@@ -82,27 +49,3 @@ checkStatus $command_status "install sshpass  using apt-get"
 sleep 5
 
 
-echo "++++++++++++++++++++++++++++++++++++++++++++++"
-echo "ssh-keygen   generation "
-echo "++++++++++++++++++++++++++++++++++++++++++++++"
-#ssh-keygen -t rsa -N "" -f ssh.key
-#ssh-copy-id -i ssh.key.pub YOUR-REMOTE-HOST-IP
-command_status=$?
-checkStatus $command_status "ssh-keygen "
-sleep 5
-
-echo "++++++++++++++++++++++++++++++++++++++++++++++"
-echo "apt-get install openjdk"
-echo "++++++++++++++++++++++++++++++++++++++++++++++"
-sudo apt-get install -y openjdk-8-jdk
-command_status=$?
-checkStatus $command_status "install  openjdk using apt-get"
-sleep 5
-
-echo "++++++++++++++++++++++++++++++++++++++++++++++"
-echo "pip install cryptography"
-echo "++++++++++++++++++++++++++++++++++++++++++++++"
-sudo pip install cryptography
-command_status=$?
-checkStatus $command_status "install cryptography using pip"
-sleep 5

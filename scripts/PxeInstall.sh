@@ -232,11 +232,34 @@ echo "defaultFileConfigure ::  create  local file default"
 #echo "$2 is the used seedFile name here
 
 cat <<EOF >$temp_dir/default
+default menu.c32
+prompt
+timeout 100
+ONTIMEOUT ubuntu
+
+menu hshift 13
+menu width 70
+menu margin 8
+menu tabmsg
+
+menu title ####### Automated PXE Boot Menu #######
+
+label ubuntu
+menu label ^1) Install Ubuntu
 path ubuntu-installer/amd64/boot-screens/
 include ubuntu-installer/amd64/boot-screens/menu.cfg
 default ubuntu-installer/amd64/boot-screens/vesamenu.c32
 prompt 0
 timeout 100
+
+label centos
+menu label ^2) Install CentOS
+kernel centos7/vmlinuz
+append initrd=centos7/initrd.img ks=http://$1:/centos7/ks.cfg
+
+label local_drive
+menu label ^3) Boot from local drive
+localboot 0
 EOF
 command_status=$?
 checkStatus $command_status " creation of default file "
@@ -322,7 +345,6 @@ menu hshift 13
 menu width 49
 menu margin 8
 menu title installer boot menu
-label linux
         kernel ubuntu-installer/amd64/linux
         append ks=http://$1/ubuntu/ks.cfg vga=normal initrd=ubuntu-installer/amd64/initrd.gz  url=http://$1/ubuntu/preseed/$2 live-installer/net-image=http://$1/ubuntu/install/filesystem.squashfs console=ttyS1,115200 console=ttyS0,115200 console=tty ramdisk_size=16432 root=/dev/rd/0 rw  --
 
@@ -338,10 +360,56 @@ checkStatus $command_status " writing data of local menu.cfg  to  /var/lib/tftpb
 
 }
 
+defaultFileConfigureUbuntu () {
+echo "++++++++++++++++++++++++++++++++++++++++++++++"
+echo "defaultFileConfigureUbuntu method "
+echo "++++++++++++++++++++++++++++++++++++++++++++++"
+temp_dir="$PWD"/conf/pxe_cluster
+pxeServerPass="$3"
 
+echo "defaultFileConfigureUbuntu :: save backup  of file /var/lib/tftpboot/pxelinux.cfg/default "
+echo "$pxeServerPass" | sudo -S cp /var/lib/tftpboot/pxelinux.cfg/default /var/lib/tftpboot/pxelinux.cfg/default.bkp
+command_status=$?
+checkStatus $command_status "backup of /var/lib/tftpboot/pxelinux.cfg/default  file"
 
+echo "defaultFileConfigureUbuntu ::  create  local file default"
+#echo "$1 is the pxeServerIp ip here
+#echo "$2 is the used seedFile name here
 
+cat <<EOF >$temp_dir/default
+default menu.c32
+prompt
+timeout 100
+ONTIMEOUT ubuntu
 
+menu hshift 13
+menu width 70
+menu margin 8
+menu tabmsg
+
+menu title ####### Automated PXE Boot Menu #######
+
+label ubuntu
+menu label ^1) Install Ubuntu
+path ubuntu-installer/amd64/boot-screens/
+include ubuntu-installer/amd64/boot-screens/menu.cfg
+default ubuntu-installer/amd64/boot-screens/vesamenu.c32
+prompt 0
+timeout 100
+
+label local_drive
+menu label ^2) Boot from local drive
+localboot 0
+EOF
+command_status=$?
+checkStatus $command_status " creation of default file "
+
+#copy this local data  to the original file
+cp $temp_dir/default  /var/lib/tftpboot/pxelinux.cfg/
+command_status=$?
+checkStatus $command_status " writing data of local default  to  /var/lib/tftpboot/pxelinux.cfg/default"
+
+}
 
 
 #main function execution
@@ -459,6 +527,10 @@ case "$1" in
 
 	defaultFileConfigure)
       	defaultFileConfigure "$2" "$3" "$4"
+	 ;;
+
+	defaultFileConfigureUbuntu)
+      	defaultFileConfigureUbuntu "$2" "$3" "$4"
 	 ;;
 
         bootMenuConfigure)
