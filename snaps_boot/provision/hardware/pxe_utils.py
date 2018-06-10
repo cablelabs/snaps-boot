@@ -49,6 +49,7 @@ def __main(config, operation):
     ubuntuPxeServer = False
     centosPxeServer = False
     ubuntu_dict = {}
+    centos_dict = {}
     if pxe_server_configuration_listmap is None:
         ubuntuPxeServer = True
         buildPxeServer = "ubuntu"
@@ -57,16 +58,15 @@ def __main(config, operation):
     else:
         for item in pxe_server_configuration_listmap:
             for key in item:
-                if ("ubuntu" == key):
+                if "ubuntu" == key:
                     ubuntuPxeServer = True
                     buildPxeServer = "ubuntu"
                     ubuntu_dict = item.get("ubuntu")
-                if ("centos" == key):
+                if "centos" == key:
                     centosPxeServer = True
                     buildPxeServer = "centos"
                     centos_dict = item.get("centos")
-
-    if True == ubuntuPxeServer and True == centosPxeServer:
+    if ubuntuPxeServer is True and centosPxeServer is True:
         buildPxeServer = "ubuntu + centos"
 
     logger.info("buildPxeServer is :" + str(buildPxeServer))
@@ -76,7 +76,11 @@ def __main(config, operation):
         if buildPxeServer == "centos" or buildPxeServer == "ubuntu + centos":
             __centos_pxe_installation(pxe_dict, centos_dict, proxy_dict, buildPxeServer)
             __validateAndModifyCentosKsCfg(pxe_dict, centos_dict, proxy_dict, buildPxeServer)
-        if proxy_dict.get("ngcacher_proxy") is not None and proxy_dict.get("ngcacher_proxy") != "":
+        #Handle deprecated file formats
+        if proxy_dict.get("ngcacher_proxy") is None:
+            logger.warn("host.yaml is using a deprecated format.  Please update ASAP")
+            prov_dict['ngcacher_proxy'] = ""
+        if proxy_dict.get("ngcacher_proxy") != "":
             __update_ng_cacher_proxy(proxy_dict)
     elif operation == "boot":
         if buildPxeServer == "ubuntu + centos":
@@ -173,6 +177,8 @@ def __pxe_server_installation(proxy_dict, pxe_dict, ubuntu_dict, subnet_list, bu
         os.system('sh scripts/PxeInstall.sh bootMenuConfigure ' + pxe_dict[
             "serverIp"] + " " + ubuntu_dict["seed"] + " " + pxe_dict["password"])
 
+        listen_iface = ""
+        name = ""
         for subnet in subnet_list:
             listen_iface = subnet.get('listen_iface')
             name = subnet.get('name')
@@ -983,8 +989,11 @@ def __centos_pxe_installation(pxe_dict, centos_dict, proxy_dict, build_pxe_serve
 def __validateAndModifyCentosKsCfg(pxe_dict, centos_dict, proxy_dict, build_pxe_server):
     """
     used to configure ks.cfg file
-    :param config : pxe_dict , tftp_dict ,proxy_dict (dictionary data from hosts.yaml file) 
-    :return 
+    :param pxe_dict
+    :parma centos_dict
+    :proxy_dict
+    :build_build_pxe_server
+    :return
     """
 
     print " "
