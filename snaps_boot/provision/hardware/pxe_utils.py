@@ -51,12 +51,13 @@ def __main(config, operation):
     ubuntu_dict = {}
     centos_dict = {}
     deprecated = False
+    deprecated_info = {}
     if pxe_server_configuration_listmap is None:
         ubuntuPxeServer = True
         buildPxeServer = "ubuntu"
         ubuntu_dict = tftp_dict
-        logger.warn("host.yaml is using a deprecated format, missing pxe_server_configuration")
-        deprecated = True
+	deprecated = True
+	deprecated_info['tftp'] = 'Missing pxe_server_configuration'
     else:
         for item in pxe_server_configuration_listmap:
             for key in item:
@@ -80,8 +81,8 @@ def __main(config, operation):
             __validateAndModifyCentosKsCfg(pxe_dict, centos_dict, proxy_dict, buildPxeServer)
         # Handle deprecated file formats
         if proxy_dict.get("ngcacher_proxy") is None:
-            logger.warn("host.yaml is using a deprecated format, missing ngcacher_proxy")
             deprecated = True
+  	    deprecated_info['proxy'] = 'Missing ngcacher_proxy'
             proxy_dict['ngcacher_proxy'] = ""
         if proxy_dict.get("ngcacher_proxy") != "":
             __update_ng_cacher_proxy(proxy_dict)
@@ -127,7 +128,8 @@ def __main(config, operation):
         print "Cannot read configuration"
 
     if deprecated is True:
-        logger.error("The Host.yaml file is a deprecated format, please update ASAP")
+        logger.warn("The Host.yaml file is a deprecated format, please update ASAP")
+	logger.warn(deprecated_info)
 
 
 def __pxe_server_installation(proxy_dict, pxe_dict, ubuntu_dict, subnet_list, buildPxeServer):
