@@ -76,7 +76,7 @@ def __main(config, operation):
         if (buildPxeServer == "centos" or buildPxeServer == "ubuntu + centos"):
             __centos_pxe_installation(pxe_dict, centos_dict, proxy_dict, buildPxeServer)
             __validateAndModifyCentosKsCfg(pxe_dict, centos_dict, proxy_dict, buildPxeServer)
-        if (proxy_dict["ngcacher_proxy"] <> ""):
+        if (proxy_dict.get("ngcacher_proxy") <> ""):
             __update_ng_cacher_proxy(proxy_dict)
     elif operation == "boot":
         if (buildPxeServer == "ubuntu + centos"):
