@@ -66,39 +66,39 @@ def __main(config, operation):
                     buildPxeServer = "centos"
                     centos_dict = item.get("centos")
 
-    if (True == ubuntuPxeServer and True == centosPxeServer):
+    if True == ubuntuPxeServer and True == centosPxeServer:
         buildPxeServer = "ubuntu + centos"
 
     logger.info("buildPxeServer is :" + str(buildPxeServer))
 
     if operation == "hardware":
         __pxe_server_installation(proxy_dict, pxe_dict, ubuntu_dict, subnet_list, buildPxeServer)
-        if (buildPxeServer == "centos" or buildPxeServer == "ubuntu + centos"):
+        if buildPxeServer == "centos" or buildPxeServer == "ubuntu + centos":
             __centos_pxe_installation(pxe_dict, centos_dict, proxy_dict, buildPxeServer)
             __validateAndModifyCentosKsCfg(pxe_dict, centos_dict, proxy_dict, buildPxeServer)
-        if (proxy_dict.get("ngcacher_proxy") <> ""):
+        if proxy_dict.get("ngcacher_proxy") is not None and proxy_dict.get("ngcacher_proxy") != "":
             __update_ng_cacher_proxy(proxy_dict)
     elif operation == "boot":
-        if (buildPxeServer == "ubuntu + centos"):
+        if buildPxeServer == "ubuntu + centos":
             operation = "ubuntu"
             __modify_file_for_os(operation)
         __pxe_boot(bmc_dict)
 
     elif operation == "ubuntu":
-        if (buildPxeServer == "ubuntu + centos"):
+        if buildPxeServer == "ubuntu + centos":
             __modify_file_for_os(operation)
             __pxe_boot(bmc_dict)
-        elif (buildPxeServer == "ubuntu"):
+        elif buildPxeServer == "ubuntu":
             __pxe_boot(bmc_dict)
         else:
             logger.error('PXE SERVER IS CENTOS. UBUNTU CANNOT BE INSTALLED ON HOST MACHINES')
             exit(1)
 
     elif operation == "centos":
-        if (buildPxeServer == "ubuntu + centos"):
+        if buildPxeServer == "ubuntu + centos":
             __modify_file_for_os(operation)
             __pxe_boot(bmc_dict)
-        elif (buildPxeServer == "centos"):
+        elif buildPxeServer == "centos":
             __pxe_boot(bmc_dict)
         else:
             logger.error('PXE SERVER IS UBUNTU. CENTOS CANNOT BE INSTALLED ON HOST MACHINES')
@@ -1024,12 +1024,12 @@ def __validateAndModifyCentosKsCfg(pxe_dict, centos_dict, proxy_dict, build_pxe_
         __find_and_replace('/var/www/centos7/ks.cfg', "#proxy=https:", httpsProxy)
 
     print" "
-    if (proxy_dict["ftp_proxy"] <> ""):
+    if proxy_dict["ftp_proxy"] <> "":
         logger.debug("configuring ftp proxy  in ks.cfg")
         ftpProxy = "proxy=" + proxy_dict["ftp_proxy"]
         __find_and_replace('/var/www/centos7/ks.cfg', "#proxy=ftp", ftpProxy)
 
-    if (build_pxe_server == "centos"):
+    if build_pxe_server == "centos":
         __modify_ip_in_pxelinux(pxe_dict)
 
 
