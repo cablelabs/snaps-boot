@@ -50,11 +50,13 @@ def __main(config, operation):
     centosPxeServer = False
     ubuntu_dict = {}
     centos_dict = {}
+    deprecated = False
     if pxe_server_configuration_listmap is None:
         ubuntuPxeServer = True
         buildPxeServer = "ubuntu"
         ubuntu_dict = tftp_dict
         logger.warn("host.yaml is using a deprecated format.  Please update ASAP")
+        deprecated = True
     else:
         for item in pxe_server_configuration_listmap:
             for key in item:
@@ -79,7 +81,8 @@ def __main(config, operation):
         #Handle deprecated file formats
         if proxy_dict.get("ngcacher_proxy") is None:
             logger.warn("host.yaml is using a deprecated format.  Please update ASAP")
-            prov_dict['ngcacher_proxy'] = ""
+            deprecated = True
+        prov_dict['ngcacher_proxy'] = ""
         if proxy_dict.get("ngcacher_proxy") != "":
             __update_ng_cacher_proxy(proxy_dict)
     elif operation == "boot":
@@ -123,6 +126,8 @@ def __main(config, operation):
     else:
         print "Cannot read configuration"
 
+    if deprecated is True:
+        logger.error("The Host.yaml file is a deprecated format, please update ASAP")
 
 def __pxe_server_installation(proxy_dict, pxe_dict, ubuntu_dict, subnet_list, buildPxeServer):
     """
