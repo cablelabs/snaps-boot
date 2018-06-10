@@ -78,7 +78,7 @@ def __main(config, operation):
         if buildPxeServer == "centos" or buildPxeServer == "ubuntu + centos":
             __centos_pxe_installation(pxe_dict, centos_dict, proxy_dict, buildPxeServer)
             __validateAndModifyCentosKsCfg(pxe_dict, centos_dict, proxy_dict, buildPxeServer)
-        #Handle deprecated file formats
+        # Handle deprecated file formats
         if proxy_dict.get("ngcacher_proxy") is None:
             logger.warn("host.yaml is using a deprecated format.  Please update ASAP")
             deprecated = True
@@ -128,6 +128,7 @@ def __main(config, operation):
 
     if deprecated is True:
         logger.error("The Host.yaml file is a deprecated format, please update ASAP")
+
 
 def __pxe_server_installation(proxy_dict, pxe_dict, ubuntu_dict, subnet_list, buildPxeServer):
     """
