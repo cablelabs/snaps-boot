@@ -82,7 +82,7 @@ def __main(config, operation):
         if proxy_dict.get("ngcacher_proxy") is None:
             logger.warn("host.yaml is using a deprecated format.  Please update ASAP")
             deprecated = True
-        prov_dict['ngcacher_proxy'] = ""
+            proxy_dict['ngcacher_proxy'] = ""
         if proxy_dict.get("ngcacher_proxy") != "":
             __update_ng_cacher_proxy(proxy_dict)
     elif operation == "boot":
