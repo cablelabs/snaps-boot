@@ -47,12 +47,16 @@ openstack:
         ram: 4096
         disk: 80
         vcpus: 2
+        metadata:
+          hw:mem_page_size: large
     - flavor:
         os_creds_name: admin-creds
         name: pxe-flavor-{{ build_num }}
         ram: 1024
         disk: 10
         vcpus: 1
+        metadata:
+          hw:mem_page_size: large
   images:
     - image:
         os_creds_name: admin-creds
@@ -75,6 +79,7 @@ openstack:
           project_name: pxe-proj-{{ build_num }}
         name: ctrl-net-{{ build_num }}
         project_name: pxe-proj-{{ build_num }}
+        mtu: 1450
         subnets:
           - subnet:
               name: ctrl-subnet-{{ build_num }}
@@ -87,6 +92,7 @@ openstack:
           project_name: pxe-proj-{{ build_num }}
         name: admin-net-{{ build_num }}
         project_name: pxe-proj-{{ build_num }}
+        mtu: 1450
         subnets:
           - subnet:
               name: admin-subnet-{{ build_num }}
@@ -102,6 +108,7 @@ openstack:
           project_name: pxe-proj-{{ build_num }}
         name: priv-net-{{ build_num }}
         project_name: pxe-proj-{{ build_num }}
+        mtu: 1450
         subnets:
           - subnet:
               name: priv-subnet-{{ build_num }}
@@ -117,6 +124,7 @@ openstack:
           project_name: pxe-proj-{{ build_num }}
         name: public-net-{{ build_num }}
         project_name: pxe-proj-{{ build_num }}
+        mtu: 1450
         subnets:
           - subnet:
               name: public-subnet-{{ build_num }}
