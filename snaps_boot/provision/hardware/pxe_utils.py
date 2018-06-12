@@ -576,7 +576,9 @@ def __provision_clean(proxy_dict):
     logger.info("unmount mount point")
     os.system('umount  /mnt')
 
-    if proxy_dict.get('ngcacher_proxy'):
+    if (proxy_dict.get('ngcacher_proxy')
+            and isinstance(proxy_dict['ngcacher_proxy'], str)
+            and len(proxy_dict['ngcacher_proxy'] > 0)):
         __clean_ngcacher_proxy(proxy_dict)
 
 
