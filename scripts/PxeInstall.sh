@@ -199,6 +199,21 @@ if [ -d "/var/lib/tftpboot/" ]
 
 }
 
+mountAndCopyUefi () {
+echo "++++++++++++++++++++++++++++++++++++++++++++++"
+echo "mountAndCopy  method "
+echo "++++++++++++++++++++++++++++++++++++++++++++++"
+pxeServerPass="$3"
+if [ -f packages/images/"$1" ] #if [ "$1" ] #
+then
+    echo "Grub file $1 exists."
+	echo "$pxeServerPass" | sudo -S  cp -fr packages/images/$1 /var/lib/tftpboot
+else
+    echo "Error: Grub file $1  does not exists."
+	exit 0
+fi
+}
+
 
 defaultFileConfigure () {
 echo "++++++++++++++++++++++++++++++++++++++++++++++"
@@ -259,8 +274,57 @@ checkStatus $command_status " writing data of local default  to  /var/lib/tftpbo
 
 
 
+defaultGrubConfigure () {
+echo "++++++++++++++++++++++++++++++++++++++++++++++"
+echo "defaultGrubConfigure  method "
+echo "++++++++++++++++++++++++++++++++++++++++++++++"
+temp_dir="$PWD"/conf/pxe_cluster
+pxeServerPass="$5"
+
+if [ ! -d "/var/lib/tftpboot/grub" ]
+	then
+	echo "Creating Grub Config Directory "
+	# un comment below lines
+	echo "$pxeServerPass" | sudo -S  mkdir  /var/lib/tftpboot/grub
+	command_status=$?
+	checkStatus $command_status " making directory /var/lib/tftpboot/grub  "
+   fi
 
 
+if [ -f "/var/lib/tftpboot/grub/grub.cfg" ]
+	then
+    echo "defaultGrubConfigure :: save backup  of file /var/lib/tftpboot/ "
+    echo "$pxeServerPass" | sudo -S cp /var/lib/tftpboot/grub/grub.cfg /var/lib/tftpboot/grub.bkp
+    command_status=$?
+    checkStatus $command_status "backup of /var/lib/tftpboot/grub/grub.cfg  file"
+   fi
+
+
+
+echo "defaultGrubConfigure ::  create  local file grub.cfg"
+#echo "$1 is the pxeServerIp ip here
+#echo "$2 is the used seedFile name here
+#echo "$3 is the hostname
+#echo "$4 is the interface
+
+cat <<EOF >$temp_dir/grub.cfg
+set default 0
+set timeout=10
+
+menuentry "Install Ubuntu 16" {
+set gfxpayload=keep
+linux ubuntu-installer/amd64/linux gfxpayload=800x600x16,800x600 netcfg/choose_interface=$4 live-installer/net-image=http://$1/ubuntu/install/filesystem.squashfs --- auto=true url=http://$1/ubuntu/preseed/$2 ks=http://$1/ubuntu/ks.cfg
+initrd ubuntu-installer/amd64/initrd.gz
+}
+EOF
+command_status=$?
+checkStatus $command_status " creation of grub file "
+
+#copy this local data  to the original file
+cp $temp_dir/grub.cfg  /var/lib/tftpboot/grub/grub.cfg
+command_status=$?
+checkStatus $command_status " writing data of local grub  to  /var/lib/tftpboot/grub/grub.cfg"
+}
 
 bootMenuConfigure () {
 echo "++++++++++++++++++++++++++++++++++++++++++++++"
@@ -457,6 +521,10 @@ case "$1" in
       	mountAndCopy "$2"  "$3"
 	;;
 
+	mountAndCopyUefi)
+      	mountAndCopyUefi "$2"  "$3" "$4"
+	;;
+
 	defaultFileConfigure)
       	defaultFileConfigure "$2" "$3" "$4"
 	 ;;
@@ -468,6 +536,10 @@ case "$1" in
         bootMenuConfigure)
         bootMenuConfigure "$2" "$3" "$4"
          ;;
+
+	defaultGrubConfigure)
+      	defaultGrubConfigure "$2" "$3" "$4" "$5" "$6"
+	 ;;
 
 
 esac

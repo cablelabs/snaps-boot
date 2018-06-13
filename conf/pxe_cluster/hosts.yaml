@@ -45,7 +45,6 @@ PROVISION:
         range: "10.197.121.22 10.197.121.26"
         router: "10.197.121.1"
         type: management
-
   PROXY:
     ftp_proxy: ""
     http_proxy: ""
@@ -153,12 +152,13 @@ PROVISION:
      pxe_server_configuration:
        -
         ubuntu:
-           os: ubuntu-16.04.4-server-amd64.iso
-           password: ChangeMe
-           seed: hwe-ubuntu-server.seed
-           timezone: America/Denver
-           user: ubuntu
-           fullname: ubuntu_user
+          os: ubuntu-16.04.4-server-amd64.iso
+          password: ChangeME123
+          seed: ubuntu-uefi-server.seed
+          timezone: America/Denver
+          user: ubuntu
+          fullname: ubuntu_user
+          server_type: UEFI
        -
         centos:
            os: CentOS-7-x86_64-DVD-1708.iso

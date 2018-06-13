@@ -105,6 +105,8 @@ ENV/
 
 # IntelaJ
 .idea/
+/snaps-boot.iml
+snaps-boot.iml
 
 # Ansible rety files
 *.retry

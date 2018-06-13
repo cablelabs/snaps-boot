@@ -31,22 +31,6 @@ command_status=$?
 checkStatus $command_status "install apt-cache-eng  using apt-get"
 sleep 5
 
-echo "++++++++++++++++++++++++++++++++++++++++++++++"
-echo "apt-get install python-yaml "
-echo "++++++++++++++++++++++++++++++++++++++++++++++"
-apt-get install python-yaml
-command_status=$?
-checkStatus $command_status "install  yaml  using apt-get"
-sleep 5
-
-echo "++++++++++++++++++++++++++++++++++++++++++++++"
-echo "apt-get install ansible "
-echo "++++++++++++++++++++++++++++++++++++++++++++++"
-apt-get install -y ansible
-command_status=$?
-checkStatus $command_status "install  ansible  using apt-get"
-sleep 5
-
 
 echo "++++++++++++++++++++++++++++++++++++++++++++++"
 echo "apt-get install ipmitool"
@@ -65,19 +49,3 @@ checkStatus $command_status "install sshpass  using apt-get"
 sleep 5
 
 
-echo "++++++++++++++++++++++++++++++++++++++++++++++"
-echo "ssh-keygen   generation "
-echo "++++++++++++++++++++++++++++++++++++++++++++++"
-#ssh-keygen -t rsa -N "" -f ssh.key
-#ssh-copy-id -i ssh.key.pub YOUR-REMOTE-HOST-IP
-command_status=$?
-checkStatus $command_status "ssh-keygen "
-sleep 5
-
-echo "++++++++++++++++++++++++++++++++++++++++++++++"
-echo "pip install cryptography"
-echo "++++++++++++++++++++++++++++++++++++++++++++++"
-sudo pip install cryptography
-command_status=$?
-checkStatus $command_status "install cryptography using pip"
-sleep 5

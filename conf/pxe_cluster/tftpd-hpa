@@ -1,6 +1,6 @@
 TFTP_USERNAME="tftp"
 TFTP_DIRECTORY="/var/lib/tftpboot"
 TFTP_ADDRESS=":69"
-TFTP_OPTIONS="--secure"
+TFTP_OPTIONS="--secure  --verbose"
 RUN_DAEMON="yes"
 OPTIONS="-l -s /var/lib/tftpboot"
