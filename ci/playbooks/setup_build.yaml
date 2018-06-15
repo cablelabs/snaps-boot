@@ -78,7 +78,13 @@
       become_user: root
       command: "python {{ src_copy_dir }}/snaps-boot/iaas_launch.py -f {{ hosts_yaml_path }} -p"
       register: out
+      ignore_errors: True
     - debug: var=out.stderr_lines
+    - debug: var=out.stdout_lines
+
+    - name: Validating iaas_launch returned 0
+      fail: msg="iaas_launch.py -d command failed"
+      when: out.rc != 0
 
     - name: Make sure isc-dhcp-server is running
       become: yes
