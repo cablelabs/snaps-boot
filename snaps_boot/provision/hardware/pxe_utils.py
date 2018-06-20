@@ -246,6 +246,11 @@ def __create_ks_config(pxe_dict, ubuntu_dict, proxy_dict, boot_interface):
     __find_and_replace('conf/pxe_cluster/ks.cfg', "server", ntp_server)
 
     print" "
+    logger.debug("configuring cloud-init server ip  in ks.cfg")
+    cloud-init-ip = "CLOUD_INIT_IP=" + pxe_dict["serverIp"]
+    __find_and_replace('conf/pxe_cluster/ks.cfg', "CLOUD_INIT_IP=cloud-init-ip", cloud-init-ip)
+
+    print" "
     logger.debug("configuring boot interface in ks.cfg")
     boot_iface = "network --bootproto=dhcp --device=" + boot_interface
     __find_and_replace('conf/pxe_cluster/ks.cfg', "network", boot_iface)
