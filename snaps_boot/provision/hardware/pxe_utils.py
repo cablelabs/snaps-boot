@@ -27,7 +27,6 @@ import pkg_resources
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric import rsa
-from typing import List, Any
 
 from snaps_boot.ansible_p.ansible_utils import ansible_playbook_launcher as apl
 from snaps_boot.common.consts import consts
@@ -496,13 +495,15 @@ def __add_cloud_init_files(subnet_list):
       'create_cloud_config.yaml')
     for subnet in subnet_list:
         mac_ip_list = subnet.get('bind_host')
-        mac_list = []  # type: List[String]
+        mac_list = []
         for mac_ip in mac_ip_list:
             mac_list.append(mac_ip.get( 'mac' ))
 
-
+    ip_list = []
+    ip_list = ["localhost"]
     apl.__launch_ansible_playbook(
           ["localhost"], playbook_path, {
+              'target': ["localhost"],
               'target_macs': mac_list})
 
 

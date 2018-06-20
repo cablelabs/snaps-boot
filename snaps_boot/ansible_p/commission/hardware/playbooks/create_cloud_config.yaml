@@ -1,11 +1,12 @@
 ---
 
-- name: run the playbook tasks on the localhost
-  hosts: 127.0.0.1
-  connection: local
+- hosts: localhost
+  become: yes
+  become_user: root
   vars:
     public_key_file : "/root/.ssh/id_rsa.pub"
     meta_data_path : "/var/www/html/latest/meta-data"
+    meta_data_template : "../../../../../conf/pxe_cluster/cloud-config.yaml.tmplt"
 
   tasks:
   - name: Check that the public ssh key exists
@@ -30,6 +31,6 @@
       mode: 0755
 
   - name: Apply template and copy meta-data file
-    action: template src=meta-data.yaml.tmplt dest={{ meta_data_path }}/{{ item }}
+    action: template src={{ meta_data_template }} dest={{ meta_data_path }}/{{ item }}
     with_items:
       - "{{ target_macs }}"
