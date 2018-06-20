@@ -28,6 +28,8 @@
      when: (not(isolcpus == "") or not(hugepages == ""))
 
    - name: reboot the system
-     command: reboot
+     shell: sleep 2 && /sbin/shutdown -r now "Ansible system package upgraded"
+     async: 1
+     poll: 0
      ignore_errors: true
      when: (not(isolcpus == "") or not(hugepages == ""))
