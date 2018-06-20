@@ -157,7 +157,7 @@ def __pxe_server_installation(proxy_dict, pxe_dict, ubuntu_dict, subnet_list, bu
     os.system('sh scripts/PxeInstall.sh tftpAndApacheInstall ' + proxy_dict[
         "http_proxy"] + " " + pxe_dict["password"])
     logger.info("****************Create cloud-init files********************")
-    __add_cloud_init_files(subnet_list)
+    __add_cloud_init_files(pxe_dict, subnet_list)
     logger.info("**********tftpConfigure tftpdHpa***********************")
     os.system(
         'sh scripts/PxeInstall.sh tftpConfigure tftpdHpa' + " " + pxe_dict[
@@ -486,7 +486,7 @@ def __add_dhcpd_file(subnet_list):
                 text_file.write("\n")
 
 
-def __add_cloud_init_files(subnet_list):
+def __add_cloud_init_files(pxe_dict, subnet_list):
     """
     Create cloud init files on the web server for each traget node
     """
@@ -499,10 +499,10 @@ def __add_cloud_init_files(subnet_list):
         for mac_ip in mac_ip_list:
             mac_list.append(mac_ip.get( 'mac' ))
 
-    ip_list = []
-    ip_list = ["localhost"]
+    iplist = []
+    iplist = pxe_dict.get('serverIp')
     apl.__launch_ansible_playbook(
-          ["localhost"], playbook_path, {
+          iplist, playbook_path, {
               'target': ["localhost"],
               'target_macs': mac_list})
 
