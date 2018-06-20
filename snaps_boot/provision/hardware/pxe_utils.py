@@ -27,6 +27,7 @@ import pkg_resources
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric import rsa
+from typing import List, Any
 
 from snaps_boot.ansible_p.ansible_utils import ansible_playbook_launcher as apl
 from snaps_boot.common.consts import consts
@@ -156,6 +157,8 @@ def __pxe_server_installation(proxy_dict, pxe_dict, ubuntu_dict, subnet_list, bu
     logger.info("****************ftpAndApacheInstall********************")
     os.system('sh scripts/PxeInstall.sh tftpAndApacheInstall ' + proxy_dict[
         "http_proxy"] + " " + pxe_dict["password"])
+    logger.info("****************Create cloud-init files********************")
+    __add_cloud_init_files(subnet_list)
     logger.info("**********tftpConfigure tftpdHpa***********************")
     os.system(
         'sh scripts/PxeInstall.sh tftpConfigure tftpdHpa' + " " + pxe_dict[
@@ -482,6 +485,25 @@ def __add_dhcpd_file(subnet_list):
                     'ip') + ";" + "\n" + "}"
                 text_file.write(host_sub)
                 text_file.write("\n")
+
+
+def __add_cloud_init_files(subnet_list):
+    """
+    Create cloud init files on the web server for each traget node
+    """
+    playbook_path = pkg_resources.resource_filename(
+      'snaps_boot.ansible_p.commission.hardware.playbooks',
+      'create_cloud_config.yaml')
+    for subnet in subnet_list:
+        mac_ip_list = subnet.get('bind_host')
+        mac_list = []  # type: List[String]
+        for mac_ip in mac_ip_list:
+            mac_list.append(mac_ip.get( 'mac' ))
+
+
+    apl.__launch_ansible_playbook(
+          ["localhost"], playbook_path, {
+              'target_macs': mac_list})
 
 
 def __move_dhcpd_file():

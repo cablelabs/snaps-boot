@@ -1,0 +1,35 @@
+---
+
+- name: run the playbook tasks on the localhost
+  hosts: 127.0.0.1
+  connection: local
+  vars:
+    public_key_file : "/root/.ssh/id_rsa.pub"
+    meta_data_path : "/var/www/html/latest/meta-data"
+
+  tasks:
+  - name: Check that the public ssh key exists
+    stat:
+      path: "{{ public_key_file }}"
+    register: pub_key_exists
+
+  - name: Creates ssh keys if one does not exist
+    shell: "echo -e Y | ssh-keygen -b 2048 -t rsa -f /root/.ssh/id_rsa -q -N \"\""
+    when: pub_key_exists.stat.exists == False
+
+  - name: Read public key
+    command: cat {{ public_key_file }}
+    register: pub_key
+
+  - name: Creates directory
+    file:
+      path: "{{ meta_data_path }}"
+      state: directory
+      owner: root
+      group: root
+      mode: 0755
+
+  - name: Apply template and copy meta-data file
+    action: template src=meta-data.yaml.tmplt dest={{ meta_data_path }}/{{ item }}
+    with_items:
+      - "{{ target_macs }}"
