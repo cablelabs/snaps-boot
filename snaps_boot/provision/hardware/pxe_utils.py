@@ -245,6 +245,11 @@ def __create_ks_config(pxe_dict, ubuntu_dict, proxy_dict, boot_interface):
     ntp_server = "server " + pxe_dict["serverIp"] + " iburst"
     __find_and_replace('conf/pxe_cluster/ks.cfg', "server", ntp_server)
 
+    if 'server_type' in ubuntu_dict and ubuntu_dict['server_type'] == 'UEFI':
+	print" "
+    	logger.debug("removing partition from ks.cfg for UEFI")
+    	__find_and_replace('conf/pxe_cluster/ks.cfg', "part / --fstype ext4 --size 1 --grow --asprimary", "")
+
     print" "
     logger.debug("configuring cloud-init server ip  in ks.cfg")
     cloud_init_ip = "CLOUD_INIT_IP=" + pxe_dict["serverIp"]
