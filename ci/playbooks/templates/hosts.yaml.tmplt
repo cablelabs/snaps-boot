@@ -178,6 +178,8 @@ PROVISION:
            user: centos
            user_password: {{ pxe_pass }}
            timezone: America/Denver
+           boot_disk: vda
+
 {% else %}
        -
         ubuntu:

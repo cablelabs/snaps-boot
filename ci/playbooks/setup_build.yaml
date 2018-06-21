@@ -46,12 +46,9 @@
 
     - name: Download ISO image
       get_url:
-        url: {{ install_iso_url }}
-        dest: "{{ src_copy_dir }}/"
+        url: "{{ install_iso_url }}"
+        dest: "{{ src_copy_dir }}/snaps-boot/packages/images/"
         timeout: 1000
-
-    - name: Copy PXE image to - {{ src_copy_dir }}/snaps-boot/packages/images/
-      command: "cp {{ src_copy_dir }}/*.iso {{ src_copy_dir }}/snaps-boot/packages/images/"
 
     - name: Apply template and copy hosts.yaml to {{ hosts_yaml_path }}
       action: template src=templates/hosts.yaml.tmplt dest={{ hosts_yaml_path }}

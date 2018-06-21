@@ -261,6 +261,7 @@ This section defines parameters to specify the host OS image and SEED file to be
 | user | N | Default user for all host machines. SNAPS-Boot creates this user. |
 | user_password | N | Password for the default user created by SNAPS-Boot. |
 | timezone | N | Time zone configuration for host machines. |
+| boot_disk | N | The device name of the boot disk (default is sda) |
 
 >:exclamation: Note: If you installing to a UEFI system, make sure your seed file is `ubuntu-uefi-server.seed`.
 > Note: User has to give details of at least one OS(either Ubuntu OS or Centos OS or Both) as per the PXE requirement.

@@ -1013,6 +1013,9 @@ def __centos_pxe_installation(pxe_dict, centos_dict, proxy_dict, build_pxe_serve
         'snaps_boot.ansible_p.commission.hardware.playbooks',
         'centos_pxe.yaml')
     iso_name = centos_dict.get('os')
+    boot_disk = centos_dict.get('boot_disk')
+    if boot_disk is None:
+        boot_disk = "sda"
     print iso_name
     print build_pxe_server
     iplist.append(pxe_dict.get('serverIp'))
@@ -1020,6 +1023,7 @@ def __centos_pxe_installation(pxe_dict, centos_dict, proxy_dict, build_pxe_serve
         iplist, playbook_path, {
             'isoName': iso_name,
             'pxeServer': build_pxe_server,
+            'bootDisk': boot_disk,
             'cloudInitIp': iplist[0]})
 
 
