@@ -261,6 +261,7 @@ This section defines parameters to specify the host OS image and SEED file to be
 | user | N | Default user for all host machines. SNAPS-Boot creates this user. |
 | user_password | N | Password for the default user created by SNAPS-Boot. |
 | timezone | N | Time zone configuration for host machines. |
+| boot_disk | N | The device name of the boot disk (default is sda) |
 
 >:exclamation: Note: If you installing to a UEFI system, make sure your seed file is `ubuntu-uefi-server.seed`.
 > Note: User has to give details of at least one OS(either Ubuntu OS or Centos OS or Both) as per the PXE requirement.
@@ -303,13 +304,13 @@ Use following download links for ISO:
 ##### For ubuntu
  http://releases.ubuntu.com/16.04/ubuntu-16.04.4-server-amd64.iso
 ##### For centos
- http://centos.excellmedia.net/7/isos/x86_64/CentOS-7-x86_64-DVD-1708.iso
+ Download the latest "Everything ISO" from https://www.centos.org/download/
 
 ```
 mkdir -p packages/images
 cd packages/images
 wget http://releases.ubuntu.com/16.04/ubuntu-16.04.4-server-amd64.iso
-wget http://centos.excellmedia.net/7/isos/x86_64/CentOS-7-x86_64-DVD-1708.iso
+wget http://mirror.umd.edu/centos/7/isos/x86_64/CentOS-7-x86_64-Everything-1804.iso
 ```
 Note: Please ensure that Ubuntu 16.04 server will be used to configure CentOS 7 PXE Server.
 
@@ -344,7 +345,7 @@ Modify file `hosts.yaml` for provisioning of OS (Operating System) on
 cloud cluster host machines (controller node, compute nodes). Modify
 this file according to your set up environment only.
 
-Note:  
+Note:
 For provisioning only ubuntu PXE Server, Keep ubuntu list under TFTP section in hosts.yaml.  
 For provisioning only centos PXE Server, Keep centos list under TFTP section in hosts.yaml.  
 For provisioning both, Keep both ubuntu and centos lists under TFTP section in hosts.yaml.
