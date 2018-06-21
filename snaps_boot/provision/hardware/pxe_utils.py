@@ -20,16 +20,11 @@ Created By :Yashwant Bhandari
 import logging
 import os.path
 import re
-import subprocess
 
 import os
 import pkg_resources
-from cryptography.hazmat.backends import default_backend
-from cryptography.hazmat.primitives import serialization
-from cryptography.hazmat.primitives.asymmetric import rsa
 
 from snaps_boot.ansible_p.ansible_utils import ansible_playbook_launcher as apl
-from snaps_boot.common.consts import consts
 
 logger = logging.getLogger('deploy_venv')
 
@@ -498,14 +493,14 @@ def __add_cloud_init_files(pxe_dict, subnet_list):
     playbook_path = pkg_resources.resource_filename(
       'snaps_boot.ansible_p.commission.hardware.playbooks',
       'create_cloud_config.yaml')
+    mac_list = []
     for subnet in subnet_list:
         mac_ip_list = subnet.get('bind_host')
-        mac_list = []
         for mac_ip in mac_ip_list:
             mac_list.append(mac_ip.get( 'mac' ))
 
     iplist = []
-    iplist = pxe_dict.get('serverIp')
+    iplist.append(pxe_dict.get('serverIp'))
     apl.__launch_ansible_playbook(
           iplist, playbook_path, {
               'target': ["localhost"],
@@ -721,35 +716,12 @@ def __static_ip_configure(static_dict, proxy_dict):
     https_proxy = proxy_dict.get('https_proxy')
     print host[0]
     iplist = []
-    next_word = None
-    with open("conf/pxe_cluster/ks.cfg") as openfile:
-        for line in openfile:
-            list_word = line.split()
-            for part in line.split():
-                if "rootpw" in part:
-                    next_word = list_word[list_word.index("rootpw") + 1]
 
-    user_name = 'root'
-    password = next_word
-    check_dir = os.path.isdir(consts.SSH_PATH)
-    if not check_dir:
-        os.makedirs(consts.SSH_PATH)
     for i in range(len(host)):
         target = host[i].get('access_ip')
         iplist.append(target)
     for i in range(len(host)):
         target = host[i].get('access_ip')
-        __create_and_save_keys()
-
-        command = 'sshpass -p \'%s\' ssh-copy-id -o ' \
-                  'StrictHostKeyChecking=no %s@%s' \
-                  % (password, user_name, target)
-
-        logger.info('Issuing following command - %s', command)
-        retval = subprocess.call(command, shell=True)
-
-        if retval != 0:
-            raise Exception('System command failed - ' + command)
 
         interfaces = host[i].get('interfaces')
         backup_var = "Y"
@@ -779,57 +751,6 @@ def __static_ip_configure(static_dict, proxy_dict):
                     'dns': dns,
                     'dn': dn})
 
-
-def __create_and_save_keys():
-    keys = rsa.generate_private_key(
-        backend=default_backend(), public_exponent=65537,
-        key_size=2048)
-
-    # Save Keys if not already exist
-    priv_key_path = os.path.expanduser('~/.ssh/id_rsa')
-    priv_key_file = None
-    if not os.path.isfile(priv_key_path):
-        # Save the keys
-        ssh_dir = os.path.expanduser('~/.ssh')
-        if not os.path.isdir(ssh_dir):
-            os.mkdir(ssh_dir)
-
-        # Save Private Key
-        try:
-            priv_key_file = open(priv_key_path, 'wb')
-            priv_key_file.write(keys.private_bytes(
-                encoding=serialization.Encoding.PEM,
-                format=serialization.PrivateFormat.TraditionalOpenSSL,
-                encryption_algorithm=serialization.NoEncryption()))
-            os.chmod(priv_key_path, 0o400)
-        except:
-            raise
-        finally:
-            if priv_key_file:
-                priv_key_file.close()
-
-    pub_key_path = os.path.expanduser('~/.ssh/id_rsa.pub')
-    pub_key_file = None
-    if not os.path.isfile(pub_key_path):
-        # Save the keys
-        ssh_dir = os.path.expanduser('~/.ssh')
-        if not os.path.isdir(ssh_dir):
-            os.mkdir(ssh_dir)
-
-        # Save Public Key
-        try:
-            pub_key_file = open(pub_key_path, 'wb')
-            pub_key_file.write(keys.public_key().public_bytes(
-                serialization.Encoding.OpenSSH,
-                serialization.PublicFormat.OpenSSH))
-            os.chmod(pub_key_path, 0o400)
-        except:
-            raise
-        finally:
-            if pub_key_file:
-                pub_key_file.close()
-
-
 def __static_ip_cleanup(static_dict):
     playbook_path = pkg_resources.resource_filename(
         'snaps_boot.ansible_p.commission.hardware.playbooks',
@@ -840,33 +761,13 @@ def __static_ip_cleanup(static_dict):
 
     host = static_dict.get('host')
     iplist = []
-    next_word = None
-    with open("conf/pxe_cluster/ks.cfg") as openfile:
-        for line in openfile:
-            list_word = line.split()
-            for part in line.split():
-                if "rootpw" in part:
-                    next_word = list_word[list_word.index("rootpw") + 1]
 
-    user_name = 'root'
-    password = next_word
-    check_dir = os.path.isdir(consts.SSH_PATH)
-    if not check_dir:
-        os.makedirs(consts.SSH_PATH)
     for i in range(len(host)):
         target = host[i].get('access_ip')
         iplist.append(target)
     print iplist
     for i in range(len(host)):
         target = host[i].get('access_ip')
-        subprocess.call(
-            'echo -e y|ssh-keygen -b 2048 -t rsa -f '
-            '/root/.ssh/id_rsa -q -N ""',
-            shell=True)
-        command = 'sshpass -p %s ssh-copy-id -o ' \
-                  'StrictHostKeyChecking=no %s@%s' \
-                  % (password, user_name, target)
-        subprocess.call(command, shell=True)
         interfaces = host[i].get('interfaces')
         backup_var = "N"
         apl.__launch_ansible_playbook(
@@ -918,14 +819,6 @@ def __set_isol_cpus(cpu_core_dict):
     """
     logger.info("setIsolCpus function")
     iplist = []
-    root_pass = None
-    with open("conf/pxe_cluster/ks.cfg") as openfile:
-        for line in openfile:
-            list_word = line.split()
-            for part in line.split():
-                if "rootpw" in part:
-                    root_pass = list_word[list_word.index("rootpw") + 1]
-    user_name = 'root'
     playbook_path = pkg_resources.resource_filename(
         'snaps_boot.ansible_p.commission.hardware.playbooks',
         'setIsolCpus.yaml')
@@ -943,14 +836,6 @@ def __set_isol_cpus(cpu_core_dict):
             logger.info("isolate cpu's for " + target + " are " + isolcpus)
             logger.info("hugepagesz for " + target + "  " + hugepagesz)
             logger.info("hugepages for " + target + "  " + hugepages)
-            subprocess.call(
-                'echo -e y|ssh-keygen -b 2048 -t rsa -f '
-                '/root/.ssh/id_rsa -q -N ""',
-                shell=True)
-            command = 'sshpass -p %s ssh-copy-id -o ' \
-                      'StrictHostKeyChecking=no %s@%s' % (
-                          root_pass, user_name, target)
-            subprocess.call(command, shell=True)
             apl.__launch_ansible_playbook(
                 iplist, playbook_path, {
                     'target': target,
@@ -965,14 +850,6 @@ def __del_isol_cpus(cpu_core_dict):
     """
     logger.info("setIsolCpus function")
     iplist = []
-    root_pass = None
-    with open("conf/pxe_cluster/ks.cfg") as openfile:
-        for line in openfile:
-            list_word = line.split()
-            for part in line.split():
-                if "rootpw" in part:
-                    root_pass = list_word[list_word.index("rootpw") + 1]
-    user_name = 'root'
     playbook_path = pkg_resources.resource_filename(
         'snaps_boot.ansible_p.commission.hardware.playbooks',
         'delIsolCpus.yaml')
@@ -990,14 +867,6 @@ def __del_isol_cpus(cpu_core_dict):
             logger.info("isolate cpu's for " + target + " are " + isolcpus)
             logger.info("hugepagesz for " + target + "  " + hugepagesz)
             logger.info("hugepages for " + target + "  " + hugepages)
-            subprocess.call(
-                'echo -e y|ssh-keygen -b 2048 -t rsa -f '
-                '/root/.ssh/id_rsa -q -N ""',
-                shell=True)
-            command = 'sshpass -p %s ssh-copy-id -o ' \
-                      'StrictHostKeyChecking=no %s@%s' \
-                      % (root_pass, user_name, target)
-            subprocess.call(command, shell=True)
             apl.__launch_ansible_playbook(
                 iplist, playbook_path, {
                     'target': target,
