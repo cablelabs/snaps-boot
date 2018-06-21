@@ -23,6 +23,7 @@ import re
 
 import os
 import pkg_resources
+
 from snaps_boot.ansible_p.ansible_utils import ansible_playbook_launcher as apl
 
 logger = logging.getLogger('deploy_venv')
