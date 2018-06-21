@@ -7,6 +7,8 @@
     - iso_name: "{{ isoName }}"
     - pxe_server: "{{ pxeServer }}"
     - cloud_init_ip: "{{ cloudInitIp }}"
+    - boot_disk: "{{ bootDisk }}"
+
   tasks:
     ##
     # Apt package installation of required software.
@@ -190,7 +192,7 @@
 
           # Run the Setup Agent on first boot
           firstboot --enable
-          ignoredisk --only-use=sda
+          ignoredisk --only-use={{ boot_disk }}
 
           # Keyboard layouts
           keyboard --vckeymap=us --xlayouts='us'
@@ -215,16 +217,15 @@
           user --name=centos --password= --gecos="centos"
 
           # System bootloader configuration
-          bootloader --append=" crashkernel=auto" --location=mbr --boot-drive=sda
+          bootloader --append=" crashkernel=auto" --location=mbr --boot-drive={{ boot_disk }}
           #autopart --type=lvm
           # Partition clearing information
-          #clearpart --all --initlabel --drives=sda
-          clearpart --all --initlabel --drives=sda
+          clearpart --all --initlabel --drives={{ boot_disk }}
 
           # Disk partitioning information
           #part / --fstype="ext4" --size 1 --grow --asprimary
           part /boot --fstype="ext4" --size=476
-          part pv.749 --fstype="lvmpv" --ondisk=sda --size=22896
+          part pv.749 --fstype="lvmpv" --ondisk={{ boot_disk }} --size=22896
           volgroup centVG --pesize=4096 pv.749
           logvol swap  --fstype="swap" --size=3814 --name=swap --vgname=centVG
           logvol /  --fstype="ext4" --size=19072 --name=root --vgname=centVG
