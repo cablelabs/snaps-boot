@@ -169,16 +169,23 @@ PROVISION:
          ip: "10.197.124.25"
          mac: "ec:b1:d7:88:a8:aa"
   TFTP:
-    os: ubuntu-16.04.4-server-amd64.iso
-    password: {{ pxe_pass }}
-    seed: hwe-ubuntu-server.seed
-    timezone: America/Denver
-    user: ubuntu
-    fullname: ubuntu_user
-#  CPUCORE:
-#    host:
-#       -
-#         ip: {{ build_admin_ip }}
-#         isolcpus: "0-20,1-22"
-#         hugepagesz: "2M"
-#         hugepages: "2048"
+     pxe_server_configuration:
+{% if pxe_config == "centos" %}
+       -
+        centos:
+           os: CentOS-7-x86_64-Everything-1804.iso
+           root_password: {{ pxe_pass }}
+           user: centos
+           user_password: {{ pxe_pass }}
+           timezone: America/Denver
+{% else %}
+       -
+        ubuntu:
+          os: ubuntu-16.04.4-server-amd64.iso
+          password: {{ pxe_pass }}
+          seed: ubuntu-uefi-server.seed
+          timezone: America/Denver
+          user: ubuntu
+          fullname: ubuntu_user
+          server_type: BIOS
+{% endif %}

@@ -6,6 +6,7 @@
   vars:
     - iso_name: "{{ isoName }}"
     - pxe_server: "{{ pxeServer }}"
+    - cloud_init_ip: "{{ cloudInitIp }}"
   tasks:
     ##
     # Apt package installation of required software.
@@ -291,6 +292,14 @@
           bugtracker_url=http://bugs.centos.org/set_project.php?project_id=23&ref=http://bugs.centos.org/bug_report_page.php?category=yum
           distroverpkg=centos-release
           EOF
+
+          %end
+
+          %post --interpreter=/bin/bash
+          ADMIN_MAC=$(ip a | grep -v lo| awk 'f{print $2;f=0;exit} /UP/{f=1}')
+          CLOUD_INIT_IP={{ cloud_init_ip }}
+          echo -E "GRUB_CMDLINE_LINUX=\"\$GRUB_CMDLINE_LINUX console=ttyS1,115200  ds=nocloud-net cloud-config-url=http://$CLOUD_INIT_IP/latest/meta-data/$ADMIN_MAC \"" >> /etc/default/grub
+          grub2-mkconfig -o /boot/grub2/grub.cfg
 
           %end
 

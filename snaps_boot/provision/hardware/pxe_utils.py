@@ -1015,11 +1015,12 @@ def __centos_pxe_installation(pxe_dict, centos_dict, proxy_dict, build_pxe_serve
     iso_name = centos_dict.get('os')
     print iso_name
     print build_pxe_server
-    iplist = pxe_dict.get('serverIp')
+    iplist.append(pxe_dict.get('serverIp'))
     apl.__launch_ansible_playbook(
         iplist, playbook_path, {
             'isoName': iso_name,
-            'pxeServer': build_pxe_server})
+            'pxeServer': build_pxe_server,
+            'cloudInitIp': iplist[0]})
 
 
 def __validateAndModifyCentosKsCfg(pxe_dict, centos_dict, proxy_dict, build_pxe_server):

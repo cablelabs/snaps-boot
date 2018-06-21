@@ -15,12 +15,8 @@
     register: pub_key_exists
 
   - name: Creates ssh keys if one does not exist
-    shell: "echo -e Y | ssh-keygen -b 2048 -t rsa -f /root/.ssh/id_rsa -q -N \"\""
+    shell: "echo -e Y | ssh-keygen -b 2048 -t rsa -f {{ public_key_file }} -q -N \"\""
     when: pub_key_exists.stat.exists == False
-
-  - name: Read public key
-    command: cat {{ public_key_file }}
-    register: pub_key
 
   - name: Creates directory
     file:
@@ -32,5 +28,7 @@
 
   - name: Apply template and copy meta-data file
     action: template src={{ meta_data_template }} dest={{ meta_data_path }}/{{ item }}
+    vars:
+      pub_key : "{{ lookup('file', '{{ public_key_file }}') }}"
     with_items:
       - "{{ target_macs }}"
