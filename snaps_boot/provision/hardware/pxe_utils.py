@@ -51,8 +51,8 @@ def __main(config, operation):
         ubuntuPxeServer = True
         buildPxeServer = "ubuntu"
         ubuntu_dict = tftp_dict
-	deprecated = True
-	deprecated_info['tftp'] = 'Missing pxe_server_configuration'
+        deprecated = True
+        deprecated_info['tftp'] = 'Missing pxe_server_configuration'
     else:
         for item in pxe_server_configuration_listmap:
             for key in item:
@@ -72,12 +72,12 @@ def __main(config, operation):
     if operation == "hardware":
         __pxe_server_installation(proxy_dict, pxe_dict, ubuntu_dict, subnet_list, buildPxeServer)
         if buildPxeServer == "centos" or buildPxeServer == "ubuntu + centos":
-            __centos_pxe_installation(pxe_dict, centos_dict, proxy_dict, buildPxeServer)
-            __validateAndModifyCentosKsCfg(pxe_dict, centos_dict, proxy_dict, buildPxeServer)
+            __centos_pxe_installation(pxe_dict, centos_dict, buildPxeServer)
+            __validate_modify_centos_ks_cfg(pxe_dict, centos_dict, proxy_dict, buildPxeServer)
         # Handle deprecated file formats
         if proxy_dict.get("ngcacher_proxy") is None:
             deprecated = True
-  	    deprecated_info['proxy'] = 'Missing ngcacher_proxy'
+            deprecated_info['proxy'] = 'Missing ngcacher_proxy'
             proxy_dict['ngcacher_proxy'] = ""
         if proxy_dict.get("ngcacher_proxy") != "":
             __update_ng_cacher_proxy(proxy_dict)
@@ -124,7 +124,7 @@ def __main(config, operation):
 
     if deprecated is True:
         logger.warn("The Host.yaml file is a deprecated format, please update ASAP")
-	logger.warn(deprecated_info)
+    logger.warn(deprecated_info)
 
 
 def __pxe_server_installation(proxy_dict, pxe_dict, ubuntu_dict, subnet_list, buildPxeServer):
@@ -198,7 +198,7 @@ def __pxe_server_installation(proxy_dict, pxe_dict, ubuntu_dict, subnet_list, bu
 
         logger.info("*********validateAndCreateconfigSeedIfUEFI****************")
         if 'server_type' in ubuntu_dict and ubuntu_dict['server_type'] == 'UEFI':
-            __create_seed_config(pxe_dict, ubuntu_dict, proxy_dict, str(listen_iface))
+            __create_seed_config(pxe_dict, ubuntu_dict, str(listen_iface))
 
     logger.info("****************configureAnsibleFile*****************")
     __config_ansible_file()
@@ -280,12 +280,11 @@ def __create_ks_config(pxe_dict, ubuntu_dict, proxy_dict, boot_interface):
     os.system('cp conf/pxe_cluster/ks.cfg /var/www/html/ubuntu/')
 
 
-def __create_seed_config(pxe_dict, ubuntu_dict, proxy_dict, boot_interface):
+def __create_seed_config(pxe_dict, ubuntu_dict, boot_interface):
     """
     used to configure seed file from hosts.yaml file
     :param pxe_dict:
     :param ubuntu_dict:
-    :param proxy_dict:
     :param boot_interface:
     """
     os.system('dos2unix conf/pxe_cluster/ubuntu-uefi-server.seed')
@@ -502,10 +501,9 @@ def __add_cloud_init_files(pxe_dict, subnet_list):
     for subnet in subnet_list:
         mac_ip_list = subnet.get('bind_host')
         for mac_ip in mac_ip_list:
-            mac_list.append(mac_ip.get( 'mac' ))
+            mac_list.append(mac_ip.get('mac'))
 
-    iplist = []
-    iplist.append(pxe_dict.get('serverIp'))
+    iplist = [pxe_dict.get('serverIp')]
     apl.__launch_ansible_playbook(
           iplist, playbook_path, {
               'target': ["localhost"],
@@ -697,7 +695,7 @@ def __provision_clean(proxy_dict):
     logger.info("unmount mount point")
     os.system('umount  /mnt')
 
-    if (proxy_dict["ngcacher_proxy"] <> ""):
+    if proxy_dict["ngcacher_proxy"] != "":
         __clean_ngcacher_proxy(proxy_dict)
 
 
@@ -725,10 +723,10 @@ def __static_ip_configure(static_dict, proxy_dict):
     for i in range(len(host)):
         target = host[i].get('access_ip')
         iplist.append(target)
-    for i in range(len(host)):
-        target = host[i].get('access_ip')
+    for host_counter in range(len(host)):
+        target = host[host_counter].get('access_ip')
 
-        interfaces = host[i].get('interfaces')
+        interfaces = host[host_counter].get('interfaces')
         backup_var = "Y"
         apl.__launch_ansible_playbook(
             iplist, playbook_path_bak, {'target': target, 'bak': backup_var})
@@ -756,6 +754,7 @@ def __static_ip_configure(static_dict, proxy_dict):
                     'dns': dns,
                     'dn': dn})
 
+
 def __static_ip_cleanup(static_dict):
     playbook_path = pkg_resources.resource_filename(
         'snaps_boot.ansible_p.commission.hardware.playbooks',
@@ -771,9 +770,9 @@ def __static_ip_cleanup(static_dict):
         target = host[i].get('access_ip')
         iplist.append(target)
     print iplist
-    for i in range(len(host)):
-        target = host[i].get('access_ip')
-        interfaces = host[i].get('interfaces')
+    for host_counter in range(len(host)):
+        target = host[host_counter].get('access_ip')
+        interfaces = host[host_counter].get('interfaces')
         backup_var = "N"
         apl.__launch_ansible_playbook(
             iplist, playbook_path_bak, {'target': target, 'bak': backup_var})
@@ -880,9 +879,8 @@ def __del_isol_cpus(cpu_core_dict):
                     'hugepages': hugepages})
 
 
-def __centos_pxe_installation(pxe_dict, centos_dict, proxy_dict, build_pxe_server):
+def __centos_pxe_installation(pxe_dict, centos_dict, build_pxe_server):
     iplist = []
-    root_pass = None
     playbook_path = pkg_resources.resource_filename(
         'snaps_boot.ansible_p.commission.hardware.playbooks',
         'centos_pxe.yaml')
@@ -901,7 +899,7 @@ def __centos_pxe_installation(pxe_dict, centos_dict, proxy_dict, build_pxe_serve
             'cloudInitIp': iplist[0]})
 
 
-def __validateAndModifyCentosKsCfg(pxe_dict, centos_dict, proxy_dict, build_pxe_server):
+def __validate_modify_centos_ks_cfg(pxe_dict, centos_dict, proxy_dict, build_pxe_server):
     """
     used to configure ks.cfg file
     :param pxe_dict
@@ -942,13 +940,13 @@ def __validateAndModifyCentosKsCfg(pxe_dict, centos_dict, proxy_dict, build_pxe_
     __find_and_replace('/var/www/centos7/ks.cfg', "#proxy=http:", httpProxy)
 
     print" "
-    if (proxy_dict["https_proxy"] <> ""):
+    if proxy_dict["https_proxy"] != "":
         logger.debug("configuring https proxy  in ks.cfg")
         httpsProxy = "proxy=" + proxy_dict["https_proxy"]
         __find_and_replace('/var/www/centos7/ks.cfg', "#proxy=https:", httpsProxy)
 
     print" "
-    if proxy_dict["ftp_proxy"] <> "":
+    if proxy_dict["ftp_proxy"] != "":
         logger.debug("configuring ftp proxy  in ks.cfg")
         ftpProxy = "proxy=" + proxy_dict["ftp_proxy"]
         __find_and_replace('/var/www/centos7/ks.cfg', "#proxy=ftp", ftpProxy)
