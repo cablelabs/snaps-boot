@@ -40,6 +40,9 @@ def __main(config, operation):
     subnet_list = dhcp_dict.get('subnet')
     cpu_core_dict = prov_dict.get('CPUCORE')
     pxe_server_configuration_listmap = tftp_dict.get('pxe_server_configuration')
+    user_pass = None
+    root_pass = None
+    user_name = None
     buildPxeServer = None
     ubuntuPxeServer = False
     centosPxeServer = False
@@ -60,17 +63,22 @@ def __main(config, operation):
                     ubuntuPxeServer = True
                     buildPxeServer = "ubuntu"
                     ubuntu_dict = item.get("ubuntu")
+                    user_pass = root_pass = ubuntu_dict["password"]
+                    user_name = ubuntu_dict["user"]
                 if "centos" == key:
                     centosPxeServer = True
                     buildPxeServer = "centos"
                     centos_dict = item.get("centos")
+                    user_pass = centos_dict["user_password"]
+                    root_pass = centos_dict["root_password"]
+                    user_name = centos_dict["user"]
     if ubuntuPxeServer is True and centosPxeServer is True:
         buildPxeServer = "ubuntu + centos"
 
     logger.info("buildPxeServer is :" + str(buildPxeServer))
 
     if operation == "hardware":
-        __pxe_server_installation(proxy_dict, pxe_dict, ubuntu_dict, subnet_list, buildPxeServer)
+        __pxe_server_installation(proxy_dict, pxe_dict, ubuntu_dict, subnet_list, buildPxeServer, user_name, user_pass, root_pass)
         if buildPxeServer == "centos" or buildPxeServer == "ubuntu + centos":
             __centos_pxe_installation(pxe_dict, centos_dict, buildPxeServer)
             __validate_modify_centos_ks_cfg(pxe_dict, centos_dict, proxy_dict, buildPxeServer)
@@ -127,7 +135,7 @@ def __main(config, operation):
     logger.warn(deprecated_info)
 
 
-def __pxe_server_installation(proxy_dict, pxe_dict, ubuntu_dict, subnet_list, buildPxeServer):
+def __pxe_server_installation(proxy_dict, pxe_dict, ubuntu_dict, subnet_list, buildPxeServer, user_name, user_pass, root_pass):
     """
     This will launch the shell script to  install and configure dhcp , tftp
     and apache server.
@@ -152,7 +160,7 @@ def __pxe_server_installation(proxy_dict, pxe_dict, ubuntu_dict, subnet_list, bu
     os.system('sh scripts/PxeInstall.sh tftpAndApacheInstall ' + proxy_dict[
         "http_proxy"] + " " + pxe_dict["password"])
     logger.info("****************Create cloud-init files********************")
-    __add_cloud_init_files(pxe_dict, subnet_list)
+    __add_cloud_init_files(pxe_dict, subnet_list, user_name, user_pass, root_pass)
     logger.info("**********tftpConfigure tftpdHpa***********************")
     os.system(
         'sh scripts/PxeInstall.sh tftpConfigure tftpdHpa' + " " + pxe_dict[
@@ -167,7 +175,8 @@ def __pxe_server_installation(proxy_dict, pxe_dict, ubuntu_dict, subnet_list, bu
         os.system('sh scripts/PxeInstall.sh mountAndCopy ' + ubuntu_dict["os"]
                   + " " + pxe_dict["password"])
         logger.info("******************mountAndCopyUefi************************")
-        os.system('sh scripts/PxeInstall.sh mountAndCopyUefi ' + 'grubnetx64.efi.signed'
+        if ubuntu_dict["server_type"] == "UEFI":
+            os.system('sh scripts/PxeInstall.sh mountAndCopyUefi ' + 'grubnetx64.efi.signed'
                   + " " + "netboot.tar.gz" + " " + pxe_dict["password"])
         if buildPxeServer == "ubuntu + centos":
             logger.info("*************defaultFileConfigure********************")
@@ -241,9 +250,9 @@ def __create_ks_config(pxe_dict, ubuntu_dict, proxy_dict, boot_interface):
     __find_and_replace('conf/pxe_cluster/ks.cfg', "server", ntp_server)
 
     if 'server_type' in ubuntu_dict and ubuntu_dict['server_type'] == 'UEFI':
-	print" "
-    	logger.debug("removing partition from ks.cfg for UEFI")
-    	__find_and_replace('conf/pxe_cluster/ks.cfg', "part / --fstype ext4 --size 1 --grow --asprimary", "")
+        print" "
+        logger.debug("removing partition from ks.cfg for UEFI")
+        __find_and_replace('conf/pxe_cluster/ks.cfg', "part / --fstype ext4 --size 1 --grow --asprimary", "")
 
     print" "
     logger.debug("configuring cloud-init server ip  in ks.cfg")
@@ -490,7 +499,7 @@ def __add_dhcpd_file(subnet_list):
                 text_file.write("\n")
 
 
-def __add_cloud_init_files(pxe_dict, subnet_list):
+def __add_cloud_init_files(pxe_dict, subnet_list, user_name, user_pass, root_pass):
     """
     Create cloud init files on the web server for each traget node
     """
@@ -505,9 +514,12 @@ def __add_cloud_init_files(pxe_dict, subnet_list):
 
     iplist = [pxe_dict.get('serverIp')]
     apl.__launch_ansible_playbook(
-          iplist, playbook_path, {
-              'target': ["localhost"],
-              'target_macs': mac_list})
+        iplist, playbook_path, {
+            'target': ["localhost"],
+            'target_macs': mac_list,
+            'user_pass': user_pass,
+            'user_name': user_name,
+            'root_pass': root_pass})
 
 
 def __move_dhcpd_file():

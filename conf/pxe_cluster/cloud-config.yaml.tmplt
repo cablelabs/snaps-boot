@@ -3,14 +3,19 @@
 
 users:
   - name: root
+    ssh_pwauth: True
     ssh-authorized-keys:
       - {{ pub_key }}
-  - name: ubuntu
+    password: {{ root_pass }}
+  - name: {{ user_name }}
+    ssh_pwauth: True
     ssh-authorized-keys:
       - {{ pub_key }}
     sudo: ['ALL=(ALL) NOPASSWD:ALL']
     groups: sudo
     shell: /bin/bash
+    password: {{ user_pass }}
+
 
 #Disable cloud-init network settings
 #We are relying on ansible scripts to configure the network
