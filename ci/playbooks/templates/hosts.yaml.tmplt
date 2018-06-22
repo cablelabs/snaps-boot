@@ -185,7 +185,7 @@ PROVISION:
         ubuntu:
           os: ubuntu-16.04.4-server-amd64.iso
           password: {{ pxe_pass }}
-          seed: ubuntu-uefi-server.seed
+          seed: hwe-ubuntu-server.seed
           timezone: America/Denver
           user: ubuntu
           fullname: ubuntu_user
