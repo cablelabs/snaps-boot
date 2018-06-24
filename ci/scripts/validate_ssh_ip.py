@@ -17,11 +17,13 @@
 #
 # This script is responsible for deploying virtual environments
 import argparse
+import ast
 import logging
 
 import paramiko
 import os
 import time
+import yaml
 
 __author__ = 'spisarski'
 
@@ -47,7 +49,7 @@ def main(arguments):
     while timeout > time.time() - start:
         try:
             ssh_client = __ssh_client(
-                arguments.ip_addr, arguments.username, arguments.password, arguments.priv_key_file)
+                arguments.ip_addr, arguments.username, arguments.password)
             if ssh_client:
                 exit(0)
         except Exception as e:
@@ -64,24 +66,17 @@ def main(arguments):
     exit(1)
 
 
-def __ssh_client(ip, user, password, key_file):
+def __ssh_client(ip, user, password):
     """
     Retrieves and attemts an SSH connection
     :param ip: the IP of the host to connect
     :param user: the user with which to connect
     :param password: the password
-    :param key_file: the private key
     """
     logger.debug('Retrieving SSH client')
     ssh = paramiko.SSHClient()
     ssh.set_missing_host_key_policy(paramiko.MissingHostKeyPolicy())
-
-    if os.path.isfile(key_file):
-        logger.debug('Using SSH Key')
-        key = paramiko.RSAKey.from_private_key_file(key_file)
-        ssh.connect(ip, username=user, pkey=key)
-    else:
-        ssh.connect(ip, username=user, password=password)
+    ssh.connect(ip, username=user, password=password)
     return ssh
 
 
@@ -95,7 +90,7 @@ if __name__ == '__main__':
         '-u', '--username', dest='username', required=True,
         help='The username to the hosts to validate')
     parser.add_argument(
-        '-p', '--password', dest='password', required=False,
+        '-p', '--password', dest='password', required=True,
         help='The password to the hosts to validate')
     parser.add_argument(
         '-i', '--ip-addr', dest='ip_addr', required=True,
@@ -106,9 +101,6 @@ if __name__ == '__main__':
     parser.add_argument(
         '-pi', '--poll-interval', dest='poll_interval', default=10,
         help='The number of seconds before next retry')
-    parser.add_argument(
-        '-k', '--key', dest='priv_key_file', default="/root/.ssh/id_rsa",
-        help='Private key for key based access')
     args = parser.parse_args()
 
     main(args)
