@@ -169,12 +169,14 @@ PROVISION:
          ip: "10.197.124.25"
          mac: "ec:b1:d7:88:a8:aa"
   TFTP:
-    os: ubuntu-16.04.4-server-amd64.iso
-    password: {{ pxe_pass }}
-    seed: hwe-ubuntu-server.seed
-    timezone: America/Denver
-    user: ubuntu
-    fullname: ubuntu_user
+    pxe_server_configuration:
+      - ubuntu:
+          os: ubuntu-16.04.4-server-amd64.iso
+          password: {{ pxe_pass }}
+          seed: hwe-ubuntu-server.seed
+          timezone: America/Denver
+          user: ubuntu
+          fullname: ubuntu_user
 #  CPUCORE:
 #    host:
 #       -
