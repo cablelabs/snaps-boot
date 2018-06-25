@@ -39,5 +39,3 @@ apt-get install -y ipmitool
 command_status=$?
 checkStatus $command_status "install  ipmitool using apt-get"
 sleep 5
-
-

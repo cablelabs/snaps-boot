@@ -39,49 +39,53 @@ def __main(config, operation):
     bmc_dict = prov_dict.get('BMC')
     subnet_list = dhcp_dict.get('subnet')
     cpu_core_dict = prov_dict.get('CPUCORE')
-    pxe_server_configuration_listmap = tftp_dict.get('pxe_server_configuration')
+    pxe_config = tftp_dict.get('pxe_server_configuration')
     user_pass = None
     root_pass = None
     user_name = None
-    buildPxeServer = None
-    ubuntuPxeServer = False
-    centosPxeServer = False
+    build_pxe_server = None
+    ubuntu_pxe_server = False
+    centos_pxe_server = False
     ubuntu_dict = {}
     centos_dict = {}
     deprecated = False
     deprecated_info = {}
-    if pxe_server_configuration_listmap is None:
-        ubuntuPxeServer = True
-        buildPxeServer = "ubuntu"
+    if pxe_config is None:
+        ubuntu_pxe_server = True
+        build_pxe_server = "ubuntu"
         ubuntu_dict = tftp_dict
         deprecated = True
         deprecated_info['tftp'] = 'Missing pxe_server_configuration'
     else:
-        for item in pxe_server_configuration_listmap:
+        for item in pxe_config:
             for key in item:
                 if "ubuntu" == key:
-                    ubuntuPxeServer = True
-                    buildPxeServer = "ubuntu"
+                    ubuntu_pxe_server = True
+                    build_pxe_server = "ubuntu"
                     ubuntu_dict = item.get("ubuntu")
                     user_pass = root_pass = ubuntu_dict["password"]
                     user_name = ubuntu_dict["user"]
                 if "centos" == key:
-                    centosPxeServer = True
-                    buildPxeServer = "centos"
+                    centos_pxe_server = True
+                    build_pxe_server = "centos"
                     centos_dict = item.get("centos")
                     user_pass = centos_dict["user_password"]
                     root_pass = centos_dict["root_password"]
                     user_name = centos_dict["user"]
-    if ubuntuPxeServer is True and centosPxeServer is True:
-        buildPxeServer = "ubuntu + centos"
+    if ubuntu_pxe_server is True and centos_pxe_server is True:
+        build_pxe_server = "ubuntu + centos"
 
-    logger.info("buildPxeServer is :" + str(buildPxeServer))
+    logger.info("buildPxeServer is :" + str(build_pxe_server))
 
     if operation == "hardware":
-        __pxe_server_installation(proxy_dict, pxe_dict, ubuntu_dict, subnet_list, buildPxeServer, user_name, user_pass, root_pass)
-        if buildPxeServer == "centos" or buildPxeServer == "ubuntu + centos":
-            __centos_pxe_installation(pxe_dict, centos_dict, buildPxeServer)
-            __validate_modify_centos_ks_cfg(pxe_dict, centos_dict, proxy_dict, buildPxeServer)
+        __pxe_server_installation(proxy_dict, pxe_dict, ubuntu_dict,
+                                  subnet_list, build_pxe_server, user_name,
+                                  user_pass, root_pass)
+        if (build_pxe_server == "centos"
+                or build_pxe_server == "ubuntu + centos"):
+            __centos_pxe_installation(pxe_dict, centos_dict, build_pxe_server)
+            __validate_modify_centos_ks_cfg(pxe_dict, centos_dict, proxy_dict,
+                                            build_pxe_server)
         # Handle deprecated file formats
         if proxy_dict.get("ngcacher_proxy") is None:
             deprecated = True
@@ -90,29 +94,31 @@ def __main(config, operation):
         if proxy_dict.get("ngcacher_proxy") != "":
             __update_ng_cacher_proxy(proxy_dict)
     elif operation == "boot":
-        if buildPxeServer == "ubuntu + centos":
+        if build_pxe_server == "ubuntu + centos":
             operation = "ubuntu"
             __modify_file_for_os(operation)
         __pxe_boot(bmc_dict)
 
     elif operation == "ubuntu":
-        if buildPxeServer == "ubuntu + centos":
+        if build_pxe_server == "ubuntu + centos":
             __modify_file_for_os(operation)
             __pxe_boot(bmc_dict)
-        elif buildPxeServer == "ubuntu":
+        elif build_pxe_server == "ubuntu":
             __pxe_boot(bmc_dict)
         else:
-            logger.error('PXE SERVER IS CENTOS. UBUNTU CANNOT BE INSTALLED ON HOST MACHINES')
+            logger.error('PXE SERVER IS CENTOS. UBUNTU CANNOT BE INSTALLED '
+                         'ON HOST MACHINES')
             exit(1)
 
     elif operation == "centos":
-        if buildPxeServer == "ubuntu + centos":
+        if build_pxe_server == "ubuntu + centos":
             __modify_file_for_os(operation)
             __pxe_boot(bmc_dict)
-        elif buildPxeServer == "centos":
+        elif build_pxe_server == "centos":
             __pxe_boot(bmc_dict)
         else:
-            logger.error('PXE SERVER IS UBUNTU. CENTOS CANNOT BE INSTALLED ON HOST MACHINES')
+            logger.error('PXE SERVER IS UBUNTU. CENTOS CANNOT BE INSTALLED '
+                         'ON HOST MACHINES')
             exit(1)
 
     elif operation == "bootd":
@@ -128,14 +134,17 @@ def __main(config, operation):
     elif operation == "delIsolCpus":
         __del_isol_cpus(cpu_core_dict)
     else:
-        print "Cannot read configuration"
+        logger.warn("Cannot read configuration")
 
     if deprecated is True:
-        logger.warn("The Host.yaml file is a deprecated format, please update ASAP")
+        logger.warn("The Host.yaml file is a deprecated format, please "
+                    "update ASAP")
     logger.warn(deprecated_info)
 
 
-def __pxe_server_installation(proxy_dict, pxe_dict, ubuntu_dict, subnet_list, buildPxeServer, user_name, user_pass, root_pass):
+def __pxe_server_installation(proxy_dict, pxe_dict, ubuntu_dict, subnet_list,
+                              build_pxe_server, user_name, user_pass,
+                              root_pass):
     """
     This will launch the shell script to  install and configure dhcp , tftp
     and apache server.
@@ -160,7 +169,8 @@ def __pxe_server_installation(proxy_dict, pxe_dict, ubuntu_dict, subnet_list, bu
     os.system('sh scripts/PxeInstall.sh tftpAndApacheInstall ' + proxy_dict[
         "http_proxy"] + " " + pxe_dict["password"])
     logger.info("****************Create cloud-init files********************")
-    __add_cloud_init_files(pxe_dict, subnet_list, user_name, user_pass, root_pass)
+    __add_cloud_init_files(pxe_dict, subnet_list, user_name, user_pass,
+                           root_pass)
     logger.info("**********tftpConfigure tftpdHpa***********************")
     os.system(
         'sh scripts/PxeInstall.sh tftpConfigure tftpdHpa' + " " + pxe_dict[
@@ -169,27 +179,31 @@ def __pxe_server_installation(proxy_dict, pxe_dict, ubuntu_dict, subnet_list, bu
     os.system(
         'sh scripts/PxeInstall.sh tftpdHpaRestart' + " "
         + pxe_dict["password"])
-    if buildPxeServer == "ubuntu" or buildPxeServer == "ubuntu + centos":
+    if build_pxe_server == "ubuntu" or build_pxe_server == "ubuntu + centos":
 
         logger.info("******************mountAndCopy************************")
         os.system('sh scripts/PxeInstall.sh mountAndCopy ' + ubuntu_dict["os"]
                   + " " + pxe_dict["password"])
-        logger.info("******************mountAndCopyUefi************************")
+        logger.info("******************mountAndCopyUefi**********************")
         if ubuntu_dict["server_type"] == "UEFI":
-            os.system('sh scripts/PxeInstall.sh mountAndCopyUefi ' + 'grubnetx64.efi.signed'
-                  + " " + "netboot.tar.gz" + " " + pxe_dict["password"])
-        if buildPxeServer == "ubuntu + centos":
-            logger.info("*************defaultFileConfigure********************")
+            os.system('sh scripts/PxeInstall.sh mountAndCopyUefi '
+                      + 'grubnetx64.efi.signed'
+                      + " " + "netboot.tar.gz" + " " + pxe_dict["password"])
+        if build_pxe_server == "ubuntu + centos":
+            logger.info("*************defaultFileConfigure*******************")
             os.system('sh scripts/PxeInstall.sh defaultFileConfigure ' +
-                      pxe_dict["serverIp"] + " " + ubuntu_dict["seed"] + " " + pxe_dict["password"])
-        if buildPxeServer == "ubuntu":
-            logger.info("*************defaultFileConfigureUbuntu********************")
+                      pxe_dict["serverIp"] + " " + ubuntu_dict["seed"] + " " +
+                      pxe_dict["password"])
+        if build_pxe_server == "ubuntu":
+            logger.info("**********defaultFileConfigureUbuntu***************")
             os.system('sh scripts/PxeInstall.sh defaultFileConfigureUbuntu ' +
-                      pxe_dict["serverIp"] + " " + ubuntu_dict["seed"] + " " + pxe_dict["password"])
+                      pxe_dict["serverIp"] + " " + ubuntu_dict["seed"] + " " +
+                      pxe_dict["password"])
 
         logger.info("*************bootMenuConfigure********************")
         os.system('sh scripts/PxeInstall.sh bootMenuConfigure ' + pxe_dict[
-            "serverIp"] + " " + ubuntu_dict["seed"] + " " + pxe_dict["password"])
+            "serverIp"] + " " + ubuntu_dict["seed"] + " " + pxe_dict[
+            "password"])
 
         listen_iface = ""
         name = ""
@@ -198,15 +212,19 @@ def __pxe_server_installation(proxy_dict, pxe_dict, ubuntu_dict, subnet_list, bu
             name = subnet.get('name')
 
         logger.info("*********validateAndCreateconfigKsCfg****************")
-        __create_ks_config(pxe_dict, ubuntu_dict, proxy_dict, str(listen_iface))
+        __create_ks_config(pxe_dict, ubuntu_dict, proxy_dict,
+                           str(listen_iface))
 
         logger.info("*************defaultGrubConfigure********************")
-        os.system('sh scripts/PxeInstall.sh defaultGrubConfigure ' + pxe_dict["serverIp"]
-                  + " " + ubuntu_dict["seed"] + " " + str(name) + " " + str(listen_iface)
+        os.system('sh scripts/PxeInstall.sh defaultGrubConfigure '
+                  + pxe_dict["serverIp"]
+                  + " " + ubuntu_dict["seed"] + " " + str(name) + " "
+                  + str(listen_iface)
                   + " " + pxe_dict["password"])
 
-        logger.info("*********validateAndCreateconfigSeedIfUEFI****************")
-        if 'server_type' in ubuntu_dict and ubuntu_dict['server_type'] == 'UEFI':
+        logger.info("*********validateAndCreateconfigSeedIfUEFI*************")
+        if ('server_type' in ubuntu_dict
+                and ubuntu_dict['server_type'] == 'UEFI'):
             __create_seed_config(pxe_dict, ubuntu_dict, str(listen_iface))
 
     logger.info("****************configureAnsibleFile*****************")
@@ -228,68 +246,62 @@ def __create_ks_config(pxe_dict, ubuntu_dict, proxy_dict, boot_interface):
     __find_and_replace('conf/pxe_cluster/ks.cfg', "timezone",
                        "timezone  " + ubuntu_dict["timezone"])
 
-    print " "
     logger.debug("configuring   client user password   name in ks.cfg")
     user_creds = "user " + ubuntu_dict["user"] + " --fullname " + ubuntu_dict[
         "fullname"] + " --password " + ubuntu_dict["password"]
     __find_and_replace('conf/pxe_cluster/ks.cfg', "user", user_creds)
 
-    print " "
     logger.debug("configuring   client root password   name in ks.cfg")
     user_creds = "rootpw " + ubuntu_dict["password"]
     __find_and_replace('conf/pxe_cluster/ks.cfg', "rootpw", user_creds)
 
-    print" "
     logger.debug("configuring server url  in ks.cfg")
     my_url = "url --url http://" + pxe_dict["serverIp"] + "/ubuntu/"
     __find_and_replace('conf/pxe_cluster/ks.cfg', "url", my_url)
 
-    print" "
     logger.debug("configuring ntp server ip  in ks.cfg")
     ntp_server = "server " + pxe_dict["serverIp"] + " iburst"
     __find_and_replace('conf/pxe_cluster/ks.cfg', "server", ntp_server)
 
     if 'server_type' in ubuntu_dict and ubuntu_dict['server_type'] == 'UEFI':
-        print" "
         logger.debug("removing partition from ks.cfg for UEFI")
-        __find_and_replace('conf/pxe_cluster/ks.cfg', "part / --fstype ext4 --size 1 --grow --asprimary", "")
+        __find_and_replace(
+            'conf/pxe_cluster/ks.cfg',
+            "part / --fstype ext4 --size 1 --grow --asprimary", "")
 
-    print" "
     logger.debug("configuring cloud-init server ip  in ks.cfg")
     cloud_init_ip = "CLOUD_INIT_IP=" + pxe_dict["serverIp"]
-    __find_and_replace('conf/pxe_cluster/ks.cfg', "CLOUD_INIT_IP=cloud-init-ip", cloud_init_ip)
+    __find_and_replace('conf/pxe_cluster/ks.cfg',
+                       "CLOUD_INIT_IP=cloud-init-ip",
+                       cloud_init_ip)
 
-    print" "
     logger.debug("configuring cloud-init server ip  in ks.cfg")
     cloud_init_ip = "CLOUD_INIT_IP=" + pxe_dict["serverIp"]
-    __find_and_replace('conf/pxe_cluster/ks.cfg', "CLOUD_INIT_IP=cloud-init-ip", cloud_init_ip)
+    __find_and_replace('conf/pxe_cluster/ks.cfg',
+                       "CLOUD_INIT_IP=cloud-init-ip",
+                       cloud_init_ip)
 
-    print" "
     logger.debug("configuring boot interface in ks.cfg")
     boot_iface = "network --bootproto=dhcp --device=" + boot_interface
     __find_and_replace('conf/pxe_cluster/ks.cfg', "network", boot_iface)
 
-    print" "
     logger.debug("configuring http proxy  in ks.cfg")
     http_proxy = "Acquire::http::Proxy " + "\"" \
                  + proxy_dict["http_proxy"] + "\";"
     __find_and_replace('conf/pxe_cluster/ks.cfg', "Acquire::http::Proxy",
                        http_proxy)
 
-    print" "
     logger.debug("configuring https proxy  in ks.cfg")
     https_proxy = "Acquire::https::Proxy " + "\"" \
                   + proxy_dict["https_proxy"] + "\";"
     __find_and_replace('conf/pxe_cluster/ks.cfg', "Acquire::https::Proxy",
                        https_proxy)
 
-    print" "
     logger.debug("configuring ftp proxy  in ks.cfg")
     ftp_proxy = "Acquire::ftp::Proxy " + "\"" + proxy_dict["ftp_proxy"] + "\";"
     __find_and_replace('conf/pxe_cluster/ks.cfg', "Acquire::ftp::Proxy",
                        ftp_proxy)
 
-    print" "
     logger.debug("copy local ks.cfg to location /var/www/html/ubuntu/")
     os.system('cp conf/pxe_cluster/ks.cfg /var/www/html/ubuntu/')
 
@@ -303,56 +315,64 @@ def __create_seed_config(pxe_dict, ubuntu_dict, boot_interface):
     """
     os.system('dos2unix conf/pxe_cluster/ubuntu-uefi-server.seed')
 
-    print" "
     logger.debug("configuring server url  in ubuntu-uefi-server.seed")
     my_url = "d-i 	mirror/http/hostname string " + pxe_dict["serverIp"]
-    __find_and_replace('conf/pxe_cluster/ubuntu-uefi-server.seed', "d-i 	mirror/http/hostname string 192.168.0.1",
+    __find_and_replace('conf/pxe_cluster/ubuntu-uefi-server.seed',
+                       "d-i 	mirror/http/hostname string 192.168.0.1",
                        my_url)
 
-    print" "
     logger.debug("configuring boot interface in ubuntu-uefi-server.seed")
     boot_iface = "d-i   netcfg/choose_interface select " + boot_interface
-    __find_and_replace('conf/pxe_cluster/ubuntu-uefi-server.seed', "d-i     netcfg/choose_interface select en0",
+    __find_and_replace('conf/pxe_cluster/ubuntu-uefi-server.seed',
+                       "d-i     netcfg/choose_interface select en0",
                        boot_iface)
 
-    print " "
     logger.debug("configuring client user fullname in ubuntu-uefi-server.seed")
     user_creds = "d-i   passwd/user-fullname string " + ubuntu_dict["fullname"]
-    __find_and_replace('conf/pxe_cluster/ubuntu-uefi-server.seed', "d-i 	passwd/user-fullname string Ubuntu User",
+    __find_and_replace('conf/pxe_cluster/ubuntu-uefi-server.seed',
+                       "d-i 	passwd/user-fullname string Ubuntu User",
                        user_creds)
 
-    print " "
     logger.debug("configuring client username in ubuntu-uefi-server.seed")
     user_creds = "d-i   passwd/username string " + ubuntu_dict["user"]
-    __find_and_replace('conf/pxe_cluster/ubuntu-uefi-server.seed', "d-i 	passwd/username string ubuntu", user_creds)
+    __find_and_replace('conf/pxe_cluster/ubuntu-uefi-server.seed',
+                       "d-i 	passwd/username string ubuntu", user_creds)
 
-    print " "
     logger.debug("configuring client user password in ubuntu-uefi-server.seed")
-    user_creds = "d-i 	passwd/user-password password " + ubuntu_dict["password"]
-    __find_and_replace('conf/pxe_cluster/ubuntu-uefi-server.seed', "d-i 	passwd/user-password password fake",
+    user_creds = "d-i 	passwd/user-password password "\
+                 + ubuntu_dict["password"]
+    __find_and_replace('conf/pxe_cluster/ubuntu-uefi-server.seed',
+                       "d-i 	passwd/user-password password fake",
                        user_creds)
 
-    print " "
-    logger.debug("configuring client user password verify in ubuntu-uefi-server.seed")
-    user_creds = "d-i 	passwd/user-password-again password " + ubuntu_dict["password"]
-    __find_and_replace('conf/pxe_cluster/ubuntu-uefi-server.seed', "d-i 	passwd/user-password-again password fake",
+    logger.debug("configuring client user password verify in "
+                 "ubuntu-uefi-server.seed")
+    user_creds = "d-i 	passwd/user-password-again password "\
+                 + ubuntu_dict["password"]
+    __find_and_replace('conf/pxe_cluster/ubuntu-uefi-server.seed',
+                       "d-i 	passwd/user-password-again password fake",
                        user_creds)
 
-    print " "
-    logger.debug("configuring client root password in ubuntu-uefi-server.seed")
-    user_creds = "d-i 	passwd/root-password password " + ubuntu_dict["password"]
-    __find_and_replace('conf/pxe_cluster/ubuntu-uefi-server.seed', "d-i 	passwd/root-password password fake",
+    logger.debug("configuring client root password in "
+                 "ubuntu-uefi-server.seed")
+    user_creds = "d-i 	passwd/root-password password "\
+                 + ubuntu_dict["password"]
+    __find_and_replace('conf/pxe_cluster/ubuntu-uefi-server.seed',
+                       "d-i 	passwd/root-password password fake",
                        user_creds)
 
-    print " "
-    logger.debug("configuring client root password verify in ubuntu-uefi-server.seed")
-    user_creds = "d-i 	passwd/root-password-again password " + ubuntu_dict["password"]
-    __find_and_replace('conf/pxe_cluster/ubuntu-uefi-server.seed', "d-i 	passwd/root-password-again password fake",
+    logger.debug("configuring client root password verify in "
+                 "ubuntu-uefi-server.seed")
+    user_creds = "d-i 	passwd/root-password-again password "\
+                 + ubuntu_dict["password"]
+    __find_and_replace('conf/pxe_cluster/ubuntu-uefi-server.seed',
+                       "d-i 	passwd/root-password-again password fake",
                        user_creds)
 
-    print" "
-    logger.debug("copy local ubuntu-uefi-server.seed to location /var/www/html/ubuntu/preseed")
-    os.system('cp conf/pxe_cluster/ubuntu-uefi-server.seed /var/www/html/ubuntu/preseed')
+    logger.debug("copy local ubuntu-uefi-server.seed to location "
+                 "/var/www/html/ubuntu/preseed")
+    os.system('cp conf/pxe_cluster/ubuntu-uefi-server.seed '
+              '/var/www/html/ubuntu/preseed')
 
 
 def __find_and_replace(fname, pat, s_after):
@@ -382,7 +402,6 @@ def __config_ansible_file():
     """
     to uncomment host_key_checking field in ansible.cfg file
     """
-    print" "
     logger.info("configureAnsibleFile function")
     file_path = "/etc/ansible/ansible.cfg"
     os.system('dos2unix ' + file_path)
@@ -397,7 +416,6 @@ def __config_ntp_server_file(pxe_dict):
     to  configure   ntp.conf file
     :param pxe_dict:
     """
-    print" "
     logger.info("configureNTPServerFile function")
     file_path = "/etc/ntp.conf"
     os.system('dos2unix ' + file_path)
@@ -424,7 +442,6 @@ def __restart_ntp_server(pxe_dict):
     to restart ntp server
     :param pxe_dict
     """
-    print" "
     logger.info("restartNTPServer function")
     os.system('echo ' + pxe_dict[
         "password"] + ' |  sudo -S systemctl restart  ntp.service')
@@ -436,7 +453,6 @@ def __add_dhcpd_file(subnet_list):
     """
     to generate local dhcpd.conf file
     """
-    print" "
     logger.info("addDhcpdFile function")
     common_str = """
  ddns-update-style none;
@@ -504,7 +520,8 @@ def __add_dhcpd_file(subnet_list):
                 text_file.write("\n")
 
 
-def __add_cloud_init_files(pxe_dict, subnet_list, user_name, user_pass, root_pass):
+def __add_cloud_init_files(pxe_dict, subnet_list, user_name, user_pass,
+                           root_pass):
     """
     Create cloud init files on the web server for each traget node
     """
@@ -531,7 +548,6 @@ def __move_dhcpd_file():
     """
     to  move local dhcpd  file
     """
-    print" "
     logger.info("moveDhcpdFile function")
     file_path_local = "conf/pxe_cluster/dhcpd.conf"
     if os.path.exists(file_path_local):
@@ -549,7 +565,6 @@ def __add_isc_dhcp_file(pxe_dict, subnet_list):
     """
     to  add interfaces in isc-dhcp-server  file
     """
-    print" "
     logger.info("addIscDhcpFile function")
 
     file_path = "conf/pxe_cluster/isc-dhcp-server"
@@ -563,7 +578,6 @@ def __add_isc_dhcp_file(pxe_dict, subnet_list):
             all_interface = all_interface + " " + str(listen_iface)
 
         all_interface = all_interface.strip()
-        print all_interface
         __find_and_replace(file_path, "INTERFACES",
                            "INTERFACES=" + "\"" + all_interface + "\"")
         if os.path.exists("/etc/default/isc-dhcp-server"):
@@ -582,7 +596,6 @@ def __dhcp_restart():
     """
     to  restart dhcp server
     """
-    print" "
     logger.info("dhcpRestart function")
     os.system(' systemctl restart  isc-dhcp-server')
     os.system(' systemctl status  isc-dhcp-server')
@@ -592,11 +605,7 @@ def __ipmi_power_status(bmc_ip, bmc_user, bmc_pass):
     """
     to  get the status of bmc
     """
-    print" "
     logger.info("ipmiPowerStatus function")
-    print bmc_ip
-    print bmc_user
-    print bmc_pass
     os.system(
         'ipmitool -I lanplus -H ' + bmc_ip + ' -U ' + bmc_user + '  -P '
         + bmc_pass + '  chassis power status')
@@ -606,7 +615,6 @@ def __ipmi_lan_status(bmc_ip, bmc_user, bmc_pass):
     """
     to  get the status of lan
     """
-    print" "
     logger.info("ipmiLanStatus function")
     os.system(
         'ipmitool -I lanplus -H ' + bmc_ip + ' -U ' + bmc_user + '  -P '
@@ -617,7 +625,6 @@ def __ipmi_set_boot_order_pxe(bmc_ip, bmc_user, bmc_pass, order):
     """
     to set the boot order pxe
     """
-    print" "
     logger.info("ipmiSetBootOrderPxe function")
     os.system(
         'ipmitool -I lanplus -H ' + bmc_ip + ' -U ' + bmc_user + '  -P '
@@ -628,7 +635,6 @@ def __ipmi_reboot_system(bmc_ip, bmc_user, bmc_pass):
     """
     to reboot the system via ipmi
     """
-    print" "
     logger.info("ipmiRebootSystem function")
     os.system(
         'ipmitool -I lanplus -H ' + bmc_ip + ' -U ' + bmc_user + '  -P '
@@ -639,7 +645,6 @@ def __ipmi_power_on_system(bmc_ip, bmc_user, bmc_pass):
     """
     to power on the system via ipmi
     """
-    print" "
     logger.info("ipmiPowerOnSystem function")
     os.system(
         'ipmitool -I lanplus -H ' + bmc_ip + ' -U ' + bmc_user + '  -P '
@@ -650,7 +655,6 @@ def __ipmi_power_off_system(bmc_ip, bmc_user, bmc_pass):
     """
     to power off the system via ipmi
     """
-    print" "
     logger.info("ipmiPowerOnSystem function")
     os.system(
         'ipmitool -I lanplus -H ' + bmc_ip + ' -U ' + bmc_user + '  -P '
@@ -661,7 +665,6 @@ def __pxe_boot(bmc_dict):
     """
     to start boot via ipmi
     """
-    print" "
     logger.info("pxeBoot function")
     for host in bmc_dict.get('host'):
         user = host.get('user')
@@ -676,7 +679,6 @@ def __pxe_bootd(bmc_dict):
     """
     to start boot  via disk
     """
-    print" "
     logger.info("pxeBoot function")
     for host in bmc_dict.get('host'):
         user = host.get('user')
@@ -691,7 +693,6 @@ def __provision_clean(proxy_dict):
     """
     to clean the pxe server installation
     """
-    print" "
     logger.info("provisionClean function")
     logger.info("stop isc-dhcp-server::systemctl stop isc-dhcp-server")
     os.system('systemctl stop isc-dhcp-server')
@@ -725,8 +726,6 @@ def __static_ip_configure(static_dict, proxy_dict):
         'interfaceBak.yaml')
 
     host = static_dict.get('host')
-    print "HOSTS---------------"
-    print host
     valid = __validate_static_config(static_dict)
     if valid is False:
         logger.info(
@@ -734,30 +733,27 @@ def __static_ip_configure(static_dict, proxy_dict):
         exit()
     http_proxy = proxy_dict.get('http_proxy')
     https_proxy = proxy_dict.get('https_proxy')
-    print host[0]
     iplist = []
 
-    for i in range(len(host)):
-        target = host[i].get('access_ip')
+    for this_host in host:
+        target = this_host.get('access_ip')
         iplist.append(target)
-    for host_counter in range(len(host)):
-        target = host[host_counter].get('access_ip')
+    for host_counter in host:
+        target = host_counter.get('access_ip')
 
-        interfaces = host[host_counter].get('interfaces')
+        interfaces = host_counter.get('interfaces')
         backup_var = "Y"
         apl.__launch_ansible_playbook(
             iplist, playbook_path_bak, {'target': target, 'bak': backup_var})
 
-        # TODO/FIXME - why is the var 'i' being used in both the inner and
-        # outer loops???
-        for i in range(len(interfaces)):
-            address = interfaces[i].get('address')
-            gateway = interfaces[i].get('gateway')
-            netmask = interfaces[i].get('netmask')
-            iface = interfaces[i].get('iface')
-            dns = interfaces[i].get('dns')
-            dn = interfaces[i].get('dn')
-            intf_type = interfaces[i].get('type')
+        for interface in interfaces:
+            address = interface.get('address')
+            gateway = interface.get('gateway')
+            netmask = interface.get('netmask')
+            iface = interface.get('iface')
+            dns = interface.get('dns')
+            dn = interface.get('dn')
+            intf_type = interface.get('type')
             apl.__launch_ansible_playbook(
                 iplist, playbook_path, {
                     'target': target,
@@ -783,27 +779,23 @@ def __static_ip_cleanup(static_dict):
     host = static_dict.get('host')
     iplist = []
 
-    for i in range(len(host)):
-        target = host[i].get('access_ip')
-        iplist.append(target)
-    print iplist
-    for host_counter in range(len(host)):
-        target = host[host_counter].get('access_ip')
-        interfaces = host[host_counter].get('interfaces')
+    for this_host in host:
+        iplist.append(this_host.get('access_ip'))
+    for host_counter in host:
+        target = host_counter.get('access_ip')
+        interfaces = host_counter.get('interfaces')
         backup_var = "N"
         apl.__launch_ansible_playbook(
             iplist, playbook_path_bak, {'target': target, 'bak': backup_var})
 
-        # TODO/FIXME - why is the var 'i' being used in both the inner and
-        # outer loops???
-        for i in range(len(interfaces)):
-            address = interfaces[i].get('address')
-            gateway = interfaces[i].get('gateway')
-            netmask = interfaces[i].get('netmask')
-            iface = interfaces[i].get('iface')
-            dns = interfaces[i].get('dns')
-            dn = interfaces[i].get('dn')
-            intf_type = interfaces[i].get('type')
+        for interface in interfaces:
+            address = interface.get('address')
+            gateway = interface.get('gateway')
+            netmask = interface.get('netmask')
+            iface = interface.get('iface')
+            dns = interface.get('dns')
+            dn = interface.get('dn')
+            intf_type = interface.get('type')
             apl.__launch_ansible_playbook(
                 iplist, playbook_path, {
                     'target': target,
@@ -905,8 +897,6 @@ def __centos_pxe_installation(pxe_dict, centos_dict, build_pxe_server):
     boot_disk = centos_dict.get('boot_disk')
     if boot_disk is None:
         boot_disk = "sda"
-    print iso_name
-    print build_pxe_server
     iplist.append(pxe_dict.get('serverIp'))
     apl.__launch_ansible_playbook(
         iplist, playbook_path, {
@@ -916,7 +906,8 @@ def __centos_pxe_installation(pxe_dict, centos_dict, build_pxe_server):
             'cloudInitIp': iplist[0]})
 
 
-def __validate_modify_centos_ks_cfg(pxe_dict, centos_dict, proxy_dict, build_pxe_server):
+def __validate_modify_centos_ks_cfg(pxe_dict, centos_dict, proxy_dict,
+                                    build_pxe_server):
     """
     used to configure ks.cfg file
     :param pxe_dict
@@ -926,83 +917,91 @@ def __validate_modify_centos_ks_cfg(pxe_dict, centos_dict, proxy_dict, build_pxe
     :return
     """
 
-    print " "
     logger.info("configuring   timezone in ks.cfg")
-    __find_and_replace('/var/www/centos7/ks.cfg', "timezone", "timezone " + centos_dict["timezone"])
+    __find_and_replace('/var/www/centos7/ks.cfg', "timezone", "timezone " +
+                       centos_dict["timezone"])
 
-    print " "
     logger.debug("configuring   client user password   name in ks.cfg")
-    user_credentials = "user --name=" + centos_dict["user"] + " --password=" + centos_dict[
-        "user_password"] + " --gecos=" + "\"" + centos_dict["user"] + "\""
+    user_credentials = "user --name=" + centos_dict["user"] + " --password=" +\
+                       centos_dict["user_password"] + " --gecos=" + "\"" +\
+                       centos_dict["user"] + "\""
     __find_and_replace('/var/www/centos7/ks.cfg', "user", user_credentials)
 
-    print " "
     logger.debug("configuring   client root password   name in ks.cfg")
     user_credentials = "rootpw " + centos_dict["root_password"]
     __find_and_replace('/var/www/centos7/ks.cfg', "rootpw", user_credentials)
 
-    print" "
     logger.debug("configuring server url  in ks.cfg")
-    my_url = "url --url=" + "\"http://" + pxe_dict["serverIp"] + ":/centos7" + "\""
+    my_url = "url --url=" + "\"http://" + pxe_dict["serverIp"] + ":/centos7" +\
+             "\""
     __find_and_replace('/var/www/centos7/ks.cfg', "url", my_url)
 
-    print" "
     logger.debug("configuring ntp server ip  in ks.cfg")
     ntp_server = "server " + pxe_dict["serverIp"] + " iburst"
     __find_and_replace('/var/www/centos7/ks.cfg', "server", ntp_server)
 
-    print" "
     logger.debug("configuring http proxy  in ks.cfg")
-    httpProxy = "proxy=" + proxy_dict["http_proxy"]
-    __find_and_replace('/var/www/centos7/ks.cfg', "#proxy=http:", httpProxy)
+    http_proxy = "proxy=" + proxy_dict["http_proxy"]
+    __find_and_replace('/var/www/centos7/ks.cfg', "#proxy=http:", http_proxy)
 
-    print" "
     if proxy_dict["https_proxy"] != "":
         logger.debug("configuring https proxy  in ks.cfg")
-        httpsProxy = "proxy=" + proxy_dict["https_proxy"]
-        __find_and_replace('/var/www/centos7/ks.cfg', "#proxy=https:", httpsProxy)
+        https_proxy = "proxy=" + proxy_dict["https_proxy"]
+        __find_and_replace('/var/www/centos7/ks.cfg', "#proxy=https:",
+                           https_proxy)
 
-    print" "
     if proxy_dict["ftp_proxy"] != "":
         logger.debug("configuring ftp proxy  in ks.cfg")
-        ftpProxy = "proxy=" + proxy_dict["ftp_proxy"]
-        __find_and_replace('/var/www/centos7/ks.cfg', "#proxy=ftp", ftpProxy)
+        ftp_proxy = "proxy=" + proxy_dict["ftp_proxy"]
+        __find_and_replace('/var/www/centos7/ks.cfg', "#proxy=ftp", ftp_proxy)
 
     if build_pxe_server == "centos":
         __modify_ip_in_pxelinux(pxe_dict)
 
 
 def __modify_file_for_os(operation):
-    osToBeInstalled = operation
-    if osToBeInstalled == "centos":
-        print" "
+    os_to_be_installed = operation
+    if os_to_be_installed == "centos":
         logger.debug("configuring ftp proxy  in ks.cfg")
         value = "ONTIMEOUT centos"
-        __find_and_replace('/var/lib/tftpboot/ubuntu-installer/amd64/pxelinux.cfg/default', "ONTIMEOUT", value)
-    elif osToBeInstalled == "ubuntu":
-        print" "
+        __find_and_replace(
+            '/var/lib/tftpboot/ubuntu-installer/amd64/pxelinux.cfg/default',
+            "ONTIMEOUT", value)
+    elif os_to_be_installed == "ubuntu":
         logger.debug("configuring ftp proxy  in ks.cfg")
         value = "ONTIMEOUT ubuntu"
-        __find_and_replace('/var/lib/tftpboot/ubuntu-installer/amd64/pxelinux.cfg/default', "ONTIMEOUT", value)
+        __find_and_replace(
+            '/var/lib/tftpboot/ubuntu-installer/amd64/pxelinux.cfg/default',
+            "ONTIMEOUT", value)
 
 
 def __modify_ip_in_pxelinux(pxe_dict):
-    value = "append initrd=centos7/initrd.img ks=http://" + pxe_dict["serverIp"] + ":/centos7/ks.cfg"
-    __find_and_replace('/var/lib/tftpboot/pxelinux.cfg/default', "append initrd", value)
+    value = "append initrd=centos7/initrd.img ks=http://"\
+            + pxe_dict["serverIp"] + ":/centos7/ks.cfg"
+    __find_and_replace('/var/lib/tftpboot/pxelinux.cfg/default',
+                       "append initrd", value)
 
 
 def __update_ng_cacher_proxy(proxy_dict):
     value1 = "Proxy: " + proxy_dict["ngcacher_proxy"]
-    value2 = "VfilePatternEx: ^(/\?release=[0-9]+&arch=.*|.*/RPM-GPG-KEY-.*|/metalink\?repo=epel\-[0-9]+&arch=.*)$"
-    __find_and_replace('/etc/apt-cacher-ng/acng.conf', "# Proxy: https://username:proxypassword@proxy.example.net:3129",
-                       value1)
-    __find_and_replace('/etc/apt-cacher-ng/acng.conf', "#VfilePatternEx: /centos/treeinfo", value2)
+    value2 = "VfilePatternEx: {}|{}|{}".format(
+        '^(/\?release=[0-9]+&arch=.*',
+        '.*/RPM-GPG-KEY-.*',
+        '/metalink\?repo=epel\-[0-9]+&arch=.*)$')
+    __find_and_replace(
+        '/etc/apt-cacher-ng/acng.conf',
+        "# Proxy: https://username:proxypassword@proxy.example.net:3129",
+        value1)
+    __find_and_replace('/etc/apt-cacher-ng/acng.conf',
+                       "#VfilePatternEx: /centos/treeinfo", value2)
     os.system(' systemctl restart  apt-cacher-ng')
 
 
 def __clean_ngcacher_proxy(proxy_dict):
     value1 = "Proxy: " + proxy_dict["ngcacher_proxy"]
-    __find_and_replace('/etc/apt-cacher-ng/acng.conf', value1,
-                       "# Proxy: https://username:proxypassword@proxy.example.net:3129")
-    __find_and_replace('/etc/apt-cacher-ng/acng.conf', "VfilePatternEx:", "#VfilePatternEx: /centos/treeinfo")
+    __find_and_replace(
+        '/etc/apt-cacher-ng/acng.conf', value1,
+        "# Proxy: https://username:proxypassword@proxy.example.net:3129")
+    __find_and_replace('/etc/apt-cacher-ng/acng.conf', "VfilePatternEx:",
+                       "#VfilePatternEx: /centos/treeinfo")
     os.system(' systemctl restart  apt-cacher-ng')

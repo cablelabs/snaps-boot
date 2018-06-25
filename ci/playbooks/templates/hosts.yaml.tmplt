@@ -173,7 +173,7 @@ PROVISION:
 {% if pxe_config == "centos" %}
        -
         centos:
-           os: CentOS-7-x86_64-Everything-1804.iso
+           os: boot-img.iso
            root_password: {{ pxe_pass }}
            user: centos
            user_password: {{ pxe_pass }}
@@ -183,7 +183,7 @@ PROVISION:
 {% else %}
        -
         ubuntu:
-          os: ubuntu-16.04.4-server-amd64.iso
+          os: boot-img.iso
           password: {{ pxe_pass }}
           seed: hwe-ubuntu-server.seed
           timezone: America/Denver
