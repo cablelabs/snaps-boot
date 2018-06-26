@@ -305,11 +305,6 @@
           %end
 
           %post
-          sed -i 's/prohibit-password/yes/' /etc/ssh/sshd_config
-          service ssh restart
-          %end
-
-          %post
           yum -y install ntp
           cat >> /etc/ntp.conf <<EOF
           server 172.16.141.18 iburst

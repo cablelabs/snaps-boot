@@ -185,7 +185,7 @@ def __pxe_server_installation(proxy_dict, pxe_dict, ubuntu_dict, subnet_list,
         os.system('sh scripts/PxeInstall.sh mountAndCopy ' + ubuntu_dict["os"]
                   + " " + pxe_dict["password"])
         logger.info("******************mountAndCopyUefi**********************")
-        if ubuntu_dict["server_type"] == "UEFI":
+        if "server_type" in ubuntu_dict and ubuntu_dict["server_type"] == "UEFI":
             os.system('sh scripts/PxeInstall.sh mountAndCopyUefi '
                       + 'grubnetx64.efi.signed'
                       + " " + "netboot.tar.gz" + " " + pxe_dict["password"])
