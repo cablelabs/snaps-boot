@@ -47,6 +47,10 @@ openstack:
         ram: 4096
         disk: 80
         vcpus: 2
+        {% if flavor_metadata is defined %}
+        metadata:
+          hw:mem_page_size: {{ flavor_metadata.page_size }}
+        {% endif %}
     - flavor:
         os_creds_name: admin-creds
         name: pxe-flavor-{{ build_num }}
@@ -75,6 +79,9 @@ openstack:
           project_name: pxe-proj-{{ build_num }}
         name: ctrl-net-{{ build_num }}
         project_name: pxe-proj-{{ build_num }}
+        {% if overlay_mtu is defined %}
+        mtu: {{ overlay_mtu }}
+        {% endif %}
         subnets:
           - subnet:
               name: ctrl-subnet-{{ build_num }}
@@ -87,6 +94,9 @@ openstack:
           project_name: pxe-proj-{{ build_num }}
         name: admin-net-{{ build_num }}
         project_name: pxe-proj-{{ build_num }}
+        {% if overlay_mtu is defined %}
+        mtu: {{ overlay_mtu }}
+        {% endif %}
         subnets:
           - subnet:
               name: admin-subnet-{{ build_num }}
@@ -102,6 +112,9 @@ openstack:
           project_name: pxe-proj-{{ build_num }}
         name: priv-net-{{ build_num }}
         project_name: pxe-proj-{{ build_num }}
+        {% if overlay_mtu is defined %}
+        mtu: {{ overlay_mtu }}
+        {% endif %}
         subnets:
           - subnet:
               name: priv-subnet-{{ build_num }}
@@ -117,6 +130,9 @@ openstack:
           project_name: pxe-proj-{{ build_num }}
         name: public-net-{{ build_num }}
         project_name: pxe-proj-{{ build_num }}
+        {% if overlay_mtu is defined %}
+        mtu: {{ overlay_mtu }}
+        {% endif %}
         subnets:
           - subnet:
               name: public-subnet-{{ build_num }}
@@ -191,20 +207,20 @@ openstack:
             - [sh, -c, "echo '  iface ens4 inet static' >> /etc/network/interfaces.d/ens4.cfg"]
             - [sh, -c, "echo '  address {{ admin_ip_prfx }}.10' >> /etc/network/interfaces.d/ens4.cfg"]
             - [sh, -c, "echo '  netmask 255.255.255.0' >> /etc/network/interfaces.d/ens4.cfg"]
-            - [sh, -c, "echo '  mtu 1450' >> /etc/network/interfaces.d/ens4.cfg"]
+            - [sh, -c, "echo '  mtu {{ vm_mtu | default('1450') }}' >> /etc/network/interfaces.d/ens4.cfg"]
             - [sh, -c, "sudo ifup ens4"]
             - [sh, -c, "echo 'auto ens5' > /etc/network/interfaces.d/ens5.cfg"]
             - [sh, -c, "echo '  iface ens5 inet static' >> /etc/network/interfaces.d/ens5.cfg"]
             - [sh, -c, "echo '  address {{ priv_ip_prfx }}.10' >> /etc/network/interfaces.d/ens5.cfg"]
             - [sh, -c, "echo '  netmask 255.255.255.0' >> /etc/network/interfaces.d/ens5.cfg"]
-            - [sh, -c, "echo '  mtu 1450' >> /etc/network/interfaces.d/ens5.cfg"]
+            - [sh, -c, "echo '  mtu {{ vm_mtu | default('1450') }}' >> /etc/network/interfaces.d/ens5.cfg"]
             - [sh, -c, "sudo ifup ens5"]
             - [sh, -c, "echo 'auto ens6' > /etc/network/interfaces.d/ens6.cfg"]
             - [sh, -c, "echo '  iface ens6 inet static' >> /etc/network/interfaces.d/ens6.cfg"]
             - [sh, -c, "echo '  address {{ pub_ip_prfx }}.10' >> /etc/network/interfaces.d/ens6.cfg"]
             - [sh, -c, "echo '  netmask 255.255.255.0' >> /etc/network/interfaces.d/ens6.cfg"]
             - [sh, -c, "echo '  gateway {{ pub_ip_prfx }}.1' >> /etc/network/interfaces.d/ens6.cfg"]
-            - [sh, -c, "echo '  mtu 1450' >> /etc/network/interfaces.d/ens6.cfg"]
+            - [sh, -c, "echo '  mtu {{ vm_mtu | default('1450') }}' >> /etc/network/interfaces.d/ens6.cfg"]
             - [sh, -c, "sudo ifup ens6"]
         ports:
           - port:
@@ -244,23 +260,26 @@ openstack:
         name: pxe-vm-1-{{ build_num }}
         flavor: pxe-flavor-{{ build_num }}
         imageName: pxe-image-{{ build_num }}
-        security_group_names: [pxe-vm-sg-{{ build_num }}]
+#        security_group_names: [pxe-vm-sg-{{ build_num }}]
         ports:
           - port:
               name: pxe-admin-port-1-{{ build_num }}
               network_name: admin-net-{{ build_num }}
+              port_security_enabled: False
               ip_addrs:
                 - subnet_name: admin-subnet-{{ build_num }}
                   ip: {{ admin_ip_prfx }}.11
           - port:
               name: pxe-priv-port-1-{{ build_num }}
               network_name: priv-net-{{ build_num }}
+              port_security_enabled: False
               ip_addrs:
                 - subnet_name: priv-subnet-{{ build_num }}
                   ip: {{ priv_ip_prfx }}.11
           - port:
               name: pxe-pub-port-1-{{ build_num }}
               network_name: public-net-{{ build_num }}
+              port_security_enabled: False
               ip_addrs:
                 - subnet_name: public-subnet-{{ build_num }}
                   ip: {{ pub_ip_prfx }}.11
@@ -271,23 +290,26 @@ openstack:
         name: pxe-vm-2-{{ build_num }}
         flavor: pxe-flavor-{{ build_num }}
         imageName: pxe-image-{{ build_num }}
-        security_group_names: [pxe-vm-sg-{{ build_num }}]
+#        security_group_names: [pxe-vm-sg-{{ build_num }}]
         ports:
           - port:
               name: pxe-admin-port-2-{{ build_num }}
               network_name: admin-net-{{ build_num }}
+              port_security_enabled: False
               ip_addrs:
                 - subnet_name: admin-subnet-{{ build_num }}
                   ip: {{ admin_ip_prfx }}.12
           - port:
               name: pxe-priv-port-2-{{ build_num }}
               network_name: priv-net-{{ build_num }}
+              port_security_enabled: False
               ip_addrs:
                 - subnet_name: priv-subnet-{{ build_num }}
                   ip: {{ priv_ip_prfx }}.12
           - port:
               name: pxe-pub-port-2-{{ build_num }}
               network_name: public-net-{{ build_num }}
+              port_security_enabled: False
               ip_addrs:
                 - subnet_name: public-subnet-{{ build_num }}
                   ip: {{ pub_ip_prfx }}.12
@@ -298,23 +320,26 @@ openstack:
         name: pxe-vm-3-{{ build_num }}
         flavor: pxe-flavor-{{ build_num }}
         imageName: pxe-image-{{ build_num }}
-        security_group_names: [pxe-vm-sg-{{ build_num }}]
+#        security_group_names: [pxe-vm-sg-{{ build_num }}]
         ports:
           - port:
               name: pxe-admin-port-3-{{ build_num }}
               network_name: admin-net-{{ build_num }}
+              port_security_enabled: False
               ip_addrs:
                 - subnet_name: admin-subnet-{{ build_num }}
                   ip: {{ admin_ip_prfx }}.13
           - port:
               name: pxe-priv-port-3-{{ build_num }}
               network_name: priv-net-{{ build_num }}
+              port_security_enabled: False
               ip_addrs:
                 - subnet_name: priv-subnet-{{ build_num }}
                   ip: {{ priv_ip_prfx }}.13
           - port:
               name: pxe-pub-port-3-{{ build_num }}
               network_name: public-net-{{ build_num }}
+              port_security_enabled: False
               ip_addrs:
                 - subnet_name: public-subnet-{{ build_num }}
                   ip: {{ pub_ip_prfx }}.13
