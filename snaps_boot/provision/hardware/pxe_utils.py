@@ -87,6 +87,7 @@ def __main(config, operation):
             __validate_modify_centos_ks_cfg(pxe_dict, centos_dict, proxy_dict,
                                             build_pxe_server)
         # Handle deprecated file formats
+        if not proxy_dict.get("ngcacher_proxy"):
             deprecated = True
             deprecated_info['proxy'] = 'Missing ngcacher_proxy'
             proxy_dict['ngcacher_proxy'] = ""
@@ -712,6 +713,7 @@ def __provision_clean(proxy_dict):
     logger.info("unmount mount point")
     os.system('umount  /mnt')
 
+    if "ngcacher_proxy" in proxy_dict and proxy_dict["ngcacher_proxy"] != "":
         __clean_ngcacher_proxy(proxy_dict)
 
 
@@ -942,11 +944,13 @@ def __validate_modify_centos_ks_cfg(pxe_dict, centos_dict, proxy_dict,
     http_proxy = "proxy=" + proxy_dict["http_proxy"]
     __find_and_replace('/var/www/centos7/ks.cfg', "#proxy=http:", http_proxy)
 
+    if "https_proxy" in proxy_dict and proxy_dict["https_proxy"] != "":
         logger.debug("configuring https proxy  in ks.cfg")
         https_proxy = "proxy=" + proxy_dict["https_proxy"]
         __find_and_replace('/var/www/centos7/ks.cfg', "#proxy=https:",
                            https_proxy)
 
+    if "ftp_proxy" in proxy_dict and proxy_dict["ftp_proxy"] != "":
         logger.debug("configuring ftp proxy  in ks.cfg")
         ftp_proxy = "proxy=" + proxy_dict["ftp_proxy"]
         __find_and_replace('/var/www/centos7/ks.cfg', "#proxy=ftp", ftp_proxy)
