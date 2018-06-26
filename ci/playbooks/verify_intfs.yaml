@@ -17,4 +17,7 @@
 
   tasks:
     - name: Attempting to obtain an SSH connection to {{ ip_addr }}
-      command: python {{ snaps_boot_dir }}/ci/scripts/validate_ssh_ip.py -u {{ username }} -p {{ password }} -i {{ ip_addr }} -t {{ timeout }}
+      become: yes
+      become_method: sudo
+      become_user: root
+      command: python {{ snaps_boot_dir }}/ci/scripts/validate_ssh_ip.py -u {{ username }} -i {{ ip_addr }} -t {{ timeout }}
