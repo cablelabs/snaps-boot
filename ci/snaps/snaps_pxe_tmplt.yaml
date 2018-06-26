@@ -54,8 +54,8 @@ openstack:
     - flavor:
         os_creds_name: admin-creds
         name: pxe-flavor-{{ build_num }}
-        ram: 1024
-        disk: 10
+        ram: 2048
+        disk: 40
         vcpus: 1
   images:
     - image:
@@ -355,6 +355,12 @@ ansible:
         - pxe-vm-2-{{ build_num }}
         - pxe-vm-3-{{ build_num }}
     variables:
+      install_iso_url:
+        type: string
+        value: {{ install_iso_url }}
+      pxe_config:
+        type: string
+        value: {{ install_type }}
       src_snaps_boot_dir:
         type: string
         value: {{ local_snaps_boot_dir }}

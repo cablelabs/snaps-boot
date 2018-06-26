@@ -166,6 +166,7 @@ PROVISION:
            user: centos
            user_password: ChangeMe123
            timezone: America/Denver
+           boot_disk: sda
   CPUCORE:
     host:
        -

@@ -442,10 +442,6 @@ case "$1" in
       echo " "
       echo "$2" | sudo -S sudo apt-get install -y ntp
       echo " "
-      echo "++++++++++++++++++apt-get install sshpass++++++++++++++++++++++++++++"
-      echo " "
-      echo "$2" | sudo -S apt-get install -y sshpass
-      echo " "
       echo "++++++++++++++++++++++++++++++++++++++++++++++"
       echo "++++++++++++++++++pip installs++++++++++++++++++++++++++++"
       echo " "

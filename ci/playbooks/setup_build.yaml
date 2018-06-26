@@ -44,14 +44,11 @@
         path: "{{ src_copy_dir }}/snaps-boot/packages/images"
         state: directory
 
-    - name: Download PXE image - ubuntu-16.04.4-server-amd64.iso
+    - name: Download ISO image
       get_url:
-        url: http://releases.ubuntu.com/16.04/ubuntu-16.04.4-server-amd64.iso
-        dest: "{{ src_copy_dir }}/ubuntu-16.04.4-server-amd64.iso"
+        url: "{{ install_iso_url }}"
+        dest: "{{ src_copy_dir }}/snaps-boot/packages/images/boot-img.iso"
         timeout: 1000
-
-    - name: Copy PXE image to - {{ src_copy_dir }}/snaps-boot/packages/images/ubuntu-16.04.4-server-amd64.iso
-      command: "cp {{ src_copy_dir }}/ubuntu-16.04.4-server-amd64.iso {{ src_copy_dir }}/snaps-boot/packages/images/ubuntu-16.04.4-server-amd64.iso"
 
     - name: Apply template and copy hosts.yaml to {{ hosts_yaml_path }}
       action: template src=templates/hosts.yaml.tmplt dest={{ hosts_yaml_path }}

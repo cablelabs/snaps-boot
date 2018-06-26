@@ -39,13 +39,3 @@ apt-get install -y ipmitool
 command_status=$?
 checkStatus $command_status "install  ipmitool using apt-get"
 sleep 5
-
-echo "++++++++++++++++++++++++++++++++++++++++++++++"
-echo "apt-get install sshpass "
-echo "++++++++++++++++++++++++++++++++++++++++++++++"
-apt-get install -y sshpass
-command_status=$?
-checkStatus $command_status "install sshpass  using apt-get"
-sleep 5
-
-

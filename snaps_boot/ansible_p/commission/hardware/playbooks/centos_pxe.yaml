@@ -6,6 +6,9 @@
   vars:
     - iso_name: "{{ isoName }}"
     - pxe_server: "{{ pxeServer }}"
+    - cloud_init_ip: "{{ cloudInitIp }}"
+    - boot_disk: "{{ bootDisk }}"
+
   tasks:
     ##
     # Apt package installation of required software.
@@ -189,7 +192,7 @@
 
           # Run the Setup Agent on first boot
           firstboot --enable
-          ignoredisk --only-use=sda
+          ignoredisk --only-use={{ boot_disk }}
 
           # Keyboard layouts
           keyboard --vckeymap=us --xlayouts='us'
@@ -214,16 +217,15 @@
           user --name=centos --password= --gecos="centos"
 
           # System bootloader configuration
-          bootloader --append=" crashkernel=auto" --location=mbr --boot-drive=sda
+          bootloader --append=" crashkernel=auto" --location=mbr --boot-drive={{ boot_disk }}
           #autopart --type=lvm
           # Partition clearing information
-          #clearpart --all --initlabel --drives=sda
-          clearpart --all --initlabel --drives=sda
+          clearpart --all --initlabel --drives={{ boot_disk }}
 
           # Disk partitioning information
           #part / --fstype="ext4" --size 1 --grow --asprimary
           part /boot --fstype="ext4" --size=476
-          part pv.749 --fstype="lvmpv" --ondisk=sda --size=22896
+          part pv.749 --fstype="lvmpv" --ondisk={{ boot_disk }} --size=22896
           volgroup centVG --pesize=4096 pv.749
           logvol swap  --fstype="swap" --size=3814 --name=swap --vgname=centVG
           logvol /  --fstype="ext4" --size=19072 --name=root --vgname=centVG
@@ -250,6 +252,7 @@
           nfs-utils
           python-devel
           perl
+          cloud-init
           %end
 
           %addon com_redhat_kdump --enable --reserve-mb='auto'
@@ -293,9 +296,12 @@
 
           %end
 
-          %post
-          sed -i 's/prohibit-password/yes/' /etc/ssh/sshd_config
-          service ssh restart
+          %post --interpreter=/bin/bash
+          ADMIN_MAC=$(ip a | grep -v lo| awk 'f{print $2;f=0;exit} /UP/{f=1}')
+          CLOUD_INIT_IP={{ cloud_init_ip }}
+          echo -E "GRUB_CMDLINE_LINUX=\"\$GRUB_CMDLINE_LINUX console=ttyS1,115200  ds=nocloud-net cloud-config-url=http://$CLOUD_INIT_IP/latest/meta-data/$ADMIN_MAC \"" >> /etc/default/grub
+          grub2-mkconfig -o /boot/grub2/grub.cfg
+
           %end
 
           %post

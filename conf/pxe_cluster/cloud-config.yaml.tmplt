@@ -1,0 +1,26 @@
+#cloud-config
+# vim: syntax=yaml
+
+users:
+  - name: root
+    ssh_pwauth: True
+    lock_passwd: False
+    password: {{ root_pass }}
+    ssh-authorized-keys:
+      - {{ pub_key }}
+  - name: {{ user_name }}
+    ssh_pwauth: True
+    lock_passwd: False
+    password: {{ user_pass }}
+    ssh-authorized-keys:
+      - {{ pub_key }}
+    sudo: ['ALL=(ALL) NOPASSWD:ALL']
+    groups: sudo
+    shell: /bin/bash
+
+#Disable cloud-init network settings
+#We are relying on ansible scripts to configure the network
+network:
+  config: disabled
+
+final_message: "The system is finally up, after $UPTIME seconds"

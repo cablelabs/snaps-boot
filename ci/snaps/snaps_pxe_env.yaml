@@ -31,3 +31,11 @@ pxe_machine_user: root
 pxe_machine_pass: Pa$$w0rd
 
 hosts_yaml_target_path: /tmp/hosts.yaml
+
+# install_typ is centos or ubuntu
+install_type: ubuntu
+
+# The location where the iso is located
+# Local mirrors are preferred
+# Ubuntu http://releases.ubuntu.com/16.04/ubuntu-16.04.4-server-amd64.iso
+install_iso_url: http://releases.ubuntu.com/16.04/ubuntu-16.04.4-server-amd64.iso
