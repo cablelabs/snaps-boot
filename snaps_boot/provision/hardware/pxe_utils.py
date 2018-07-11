@@ -316,58 +316,71 @@ def __create_seed_config(pxe_dict, ubuntu_dict, boot_interface):
     os.system('dos2unix conf/pxe_cluster/ubuntu-uefi-server.seed')
 
     logger.debug("configuring server url  in ubuntu-uefi-server.seed")
-    my_url = "d-i 	mirror/http/hostname string " + pxe_dict["serverIp"]
+    my_url = "d-i mirror/http/hostname string " + pxe_dict["serverIp"]
     __find_and_replace('conf/pxe_cluster/ubuntu-uefi-server.seed',
-                       "d-i 	mirror/http/hostname string 192.168.0.1",
+                       "d-i mirror/http/hostname string 192.168.0.1",
                        my_url)
 
     logger.debug("configuring boot interface in ubuntu-uefi-server.seed")
-    boot_iface = "d-i   netcfg/choose_interface select " + boot_interface
+    boot_iface = "d-i netcfg/choose_interface select " + boot_interface
     __find_and_replace('conf/pxe_cluster/ubuntu-uefi-server.seed',
-                       "d-i     netcfg/choose_interface select en0",
+                       "d-i netcfg/choose_interface select en0",
                        boot_iface)
 
-    logger.debug("configuring client user fullname in ubuntu-uefi-server.seed")
-    user_creds = "d-i   passwd/user-fullname string " + ubuntu_dict["fullname"]
+    logger.debug("configuring ntp in ubuntu-uefi-server.seed")
+    ntp_server = "d-i clock-setup/ntp-server string " + pxe_dict["serverIp"]
     __find_and_replace('conf/pxe_cluster/ubuntu-uefi-server.seed',
-                       "d-i 	passwd/user-fullname string Ubuntu User",
+                       "d-i clock-setup/ntp-server string 192.168.0.1",
+                       ntp_server)
+
+    logger.debug("configuring client user fullname in ubuntu-uefi-server.seed")
+    user_creds = "d-i passwd/user-fullname string " + ubuntu_dict["fullname"]
+    __find_and_replace('conf/pxe_cluster/ubuntu-uefi-server.seed',
+                       "d-i passwd/user-fullname string Ubuntu User",
                        user_creds)
 
     logger.debug("configuring client username in ubuntu-uefi-server.seed")
-    user_creds = "d-i   passwd/username string " + ubuntu_dict["user"]
+    user_creds = "d-i passwd/username string " + ubuntu_dict["user"]
     __find_and_replace('conf/pxe_cluster/ubuntu-uefi-server.seed',
-                       "d-i 	passwd/username string ubuntu", user_creds)
+                       "d-i passwd/username string ubuntu", user_creds)
 
     logger.debug("configuring client user password in ubuntu-uefi-server.seed")
-    user_creds = "d-i 	passwd/user-password password "\
+    user_creds = "d-i passwd/user-password password "\
                  + ubuntu_dict["password"]
     __find_and_replace('conf/pxe_cluster/ubuntu-uefi-server.seed',
-                       "d-i 	passwd/user-password password fake",
+                       "d-i passwd/user-password password ChangeMe123",
                        user_creds)
 
     logger.debug("configuring client user password verify in "
                  "ubuntu-uefi-server.seed")
-    user_creds = "d-i 	passwd/user-password-again password "\
+    user_creds = "d-i passwd/user-password-again password "\
                  + ubuntu_dict["password"]
     __find_and_replace('conf/pxe_cluster/ubuntu-uefi-server.seed',
-                       "d-i 	passwd/user-password-again password fake",
+                       "d-i passwd/user-password-again password ChangeMe123",
                        user_creds)
 
     logger.debug("configuring client root password in "
                  "ubuntu-uefi-server.seed")
-    user_creds = "d-i 	passwd/root-password password "\
+    user_creds = "d-i passwd/root-password password "\
                  + ubuntu_dict["password"]
     __find_and_replace('conf/pxe_cluster/ubuntu-uefi-server.seed',
-                       "d-i 	passwd/root-password password fake",
+                       "d-i passwd/user-password password ChangeMe123",
                        user_creds)
 
     logger.debug("configuring client root password verify in "
                  "ubuntu-uefi-server.seed")
-    user_creds = "d-i 	passwd/root-password-again password "\
+    user_creds = "d-i passwd/root-password-again password "\
                  + ubuntu_dict["password"]
     __find_and_replace('conf/pxe_cluster/ubuntu-uefi-server.seed',
-                       "d-i 	passwd/root-password-again password fake",
+                       "d-i passwd/user-password-again password ChangeMe123",
                        user_creds)
+
+    logger.debug("configuring late command script in "
+                 "ubuntu-uefi-server.seed")
+    post_command = "http://" + pxe_dict["serverIp"] + "/ubuntu/post.sh "
+    __find_and_replace('conf/pxe_cluster/ubuntu-uefi-server.seed',
+                       "    http://192.168.0.1/ubuntu/post.sh | \\",
+                       post_command)
 
     logger.debug("copy local ubuntu-uefi-server.seed to location "
                  "/var/www/html/ubuntu/preseed")

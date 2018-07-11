@@ -313,7 +313,7 @@ set timeout=10
 
 menuentry "Install Ubuntu 16" {
 set gfxpayload=keep
-linux ubuntu-installer/amd64/linux gfxpayload=800x600x16,800x600 netcfg/choose_interface=$4 live-installer/net-image=http://$1/ubuntu/install/filesystem.squashfs --- auto=true url=http://$1/ubuntu/preseed/$2 ks=http://$1/ubuntu/ks.cfg
+linux ubuntu-installer/amd64/linux gfxpayload=800x600x16,800x600 netcfg/choose_interface=$4 hostname=compute live-installer/net-image=http://$1/ubuntu/install/filesystem.squashfs --- auto=true url=http://$1/ubuntu/preseed/$2 ks=http://$1/ubuntu/ks.cfg
 initrd ubuntu-installer/amd64/initrd.gz
 }
 EOF
