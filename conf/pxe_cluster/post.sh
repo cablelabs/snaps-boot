@@ -1,4 +1,11 @@
 #!/usr/bin/env bash
+
+cat > /etc/apt/apt.conf <<EOF
+Acquire::http::Proxy "http://172.16.141.17:3142";
+Acquire::http::Proxy "http://172.16.141.17:3142";
+Acquire::ftp::Proxy "";
+EOF
+
 cat > /etc/apt/sources.list <<EOF
 deb http://archive.ubuntu.com/ubuntu/ xenial main restricted
 deb http://archive.ubuntu.com/ubuntu/ xenial-updates main restricted
@@ -33,7 +40,7 @@ EOF
 
 #Get the MAC for the first working NIC
 ADMIN_MAC=$(ip a | grep -v lo| awk 'f{print $2;f=0;exit} /UP/{f=1}')
-CLOUD_INIT_IP=10.197.143.11
+CLOUD_INIT_IP=cloud-init-ip
 sed -E -i "s/GRUB_CMDLINE_LINUX=\"\"/GRUB_CMDLINE_LINUX=\" console=ttyS1,115200  ds=nocloud-net cloud-config-url=http:\/\/$CLOUD_INIT_IP\/latest\/meta-data\/$ADMIN_MAC \"/g" /etc/default/grub
 update-grub
 cat >> /etc/modprobe.d/nest.conf <<EOF

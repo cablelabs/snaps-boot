@@ -226,6 +226,8 @@ def __pxe_server_installation(proxy_dict, pxe_dict, ubuntu_dict, subnet_list,
         if ('server_type' in ubuntu_dict
                 and ubuntu_dict['server_type'] == 'UEFI'):
             __create_seed_config(pxe_dict, ubuntu_dict, str(listen_iface))
+            logger.info("*********validateAndCreateconfigPostScriptIfUEFI*************")
+            __create_post_script_config(pxe_dict, ubuntu_dict, proxy_dict);
 
     logger.info("****************configureAnsibleFile*****************")
     __config_ansible_file()
@@ -386,6 +388,50 @@ def __create_seed_config(pxe_dict, ubuntu_dict, boot_interface):
                  "/var/www/html/ubuntu/preseed")
     os.system('cp conf/pxe_cluster/ubuntu-uefi-server.seed '
               '/var/www/html/ubuntu/preseed')
+
+
+
+def __create_post_script_config(pxe_dict, ubuntu_dict, proxy_dict):
+    """
+    used to configure seed file from hosts.yaml file
+    :param pxe_dict:
+    :param ubuntu_dict:
+    :param proxy_dict:
+    """
+    os.system('dos2unix conf/pxe_cluster/post.sh')
+
+
+
+    logger.debug("configuring ntp server ip  in post.sh")
+    ntp_server = "server " + pxe_dict["serverIp"] + " iburst"
+    __find_and_replace('conf/pxe_cluster/post.sh', "server", ntp_server)
+
+    logger.debug("configuring cloud-init server ip  in post.sh")
+    cloud_init_ip = "CLOUD_INIT_IP=" + pxe_dict["serverIp"]
+    __find_and_replace('conf/pxe_cluster/post.sh',
+                       "CLOUD_INIT_IP=cloud-init-ip",
+                       cloud_init_ip)
+
+    logger.debug("configuring http proxy  in post.sh")
+    http_proxy = "Acquire::http::Proxy " + "\"" \
+                 + proxy_dict["http_proxy"] + "\";"
+    __find_and_replace('conf/pxe_cluster/post.sh', "Acquire::http::Proxy",
+                       http_proxy)
+
+    logger.debug("configuring https proxy  in post.sh")
+    https_proxy = "Acquire::https::Proxy " + "\"" \
+                  + proxy_dict["https_proxy"] + "\";"
+    __find_and_replace('conf/pxe_cluster/post.sh', "Acquire::https::Proxy",
+                       https_proxy)
+
+    logger.debug("configuring ftp proxy  in post.sh")
+    ftp_proxy = "Acquire::ftp::Proxy " + "\"" + proxy_dict["ftp_proxy"] + "\";"
+    __find_and_replace('conf/pxe_cluster/post.sh', "Acquire::ftp::Proxy",
+                       ftp_proxy)
+
+    logger.debug("copy local post.sh to location /var/www/html/ubuntu/")
+    os.system('cp conf/pxe_cluster/post.sh /var/www/html/ubuntu/')
+
 
 
 def __find_and_replace(fname, pat, s_after):
