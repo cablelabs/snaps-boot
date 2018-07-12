@@ -379,9 +379,9 @@ def __create_seed_config(pxe_dict, ubuntu_dict, boot_interface):
 
     logger.debug("configuring late command script in "
                  "ubuntu-uefi-server.seed")
-    post_command = "http://" + pxe_dict["serverIp"] + "/ubuntu/post.sh "
+    post_command = "http://" + pxe_dict["serverIp"] + "/ubuntu/post.sh | \\"
     __find_and_replace('conf/pxe_cluster/ubuntu-uefi-server.seed',
-                       "    http://192.168.0.1/ubuntu/post.sh | \\",
+                       "    http://192.168.0.1/ubuntu/post.sh",
                        post_command)
 
     logger.debug("copy local ubuntu-uefi-server.seed to location "
