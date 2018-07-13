@@ -208,6 +208,7 @@ if [ -f packages/images/"$1" ] #if [ "$1" ] #
 then
     echo "Grub file $1 exists."
 	echo "$pxeServerPass" | sudo -S  cp -fr packages/images/$1 /var/lib/tftpboot
+
 else
     echo "Error: Grub file $1  does not exists."
 	exit 0
@@ -313,7 +314,7 @@ set timeout=10
 
 menuentry "Install Ubuntu 16" {
 set gfxpayload=keep
-linux ubuntu-installer/amd64/linux gfxpayload=800x600x16,800x600 netcfg/choose_interface=$4 live-installer/net-image=http://$1/ubuntu/install/filesystem.squashfs --- auto=true url=http://$1/ubuntu/preseed/$2 ks=http://$1/ubuntu/ks.cfg
+linux ubuntu-installer/amd64/linux gfxpayload=800x600x16,800x600 netcfg/choose_interface=$4 hostname=compute live-installer/net-image=http://$1/ubuntu/install/filesystem.squashfs --- auto=true url=http://$1/ubuntu/preseed/$2 ks=http://$1/ubuntu/ks.cfg
 initrd ubuntu-installer/amd64/initrd.gz
 }
 EOF
@@ -324,6 +325,15 @@ checkStatus $command_status " creation of grub file "
 cp $temp_dir/grub.cfg  /var/lib/tftpboot/grub/grub.cfg
 command_status=$?
 checkStatus $command_status " writing data of local grub  to  /var/lib/tftpboot/grub/grub.cfg"
+
+cp $temp_dir/post.sh  /var/www/html/ubuntu/post.sh
+command_status=$?
+checkStatus $command_status " writing data of local post script  to  /var/www/html/ubuntu/post.sh"
+
+#cp $temp_dir/$2  /var/www/html/ubuntu/preseed/$2
+#command_status=$?
+#checkStatus $command_status " writing data of seed file to  /var/www/html/ubuntu/preseed/" + $2
+
 }
 
 bootMenuConfigure () {
