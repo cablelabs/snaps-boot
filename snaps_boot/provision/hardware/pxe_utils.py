@@ -1,3 +1,4 @@
+
 # Copyright 2017 ARICENT HOLDINGS LUXEMBOURG SARL and Cable Television
 # Laboratories, Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -23,6 +24,7 @@ import re
 
 import os
 import pkg_resources
+import subprocess
 
 from snaps_boot.ansible_p.ansible_utils import ansible_playbook_launcher as apl
 
@@ -97,14 +99,14 @@ def __main(config, operation):
         if build_pxe_server == "ubuntu + centos":
             operation = "ubuntu"
             __modify_file_for_os(operation)
-        __pxe_boot(bmc_dict)
+        __pxe_boot(bmc_dict, static_dict, proxy_dict)
 
     elif operation == "ubuntu":
         if build_pxe_server == "ubuntu + centos":
             __modify_file_for_os(operation)
-            __pxe_boot(bmc_dict)
+            __pxe_boot(bmc_dict, static_dict, proxy_dict)
         elif build_pxe_server == "ubuntu":
-            __pxe_boot(bmc_dict)
+            __pxe_boot(bmc_dict, static_dict, proxy_dict)
         else:
             logger.error('PXE SERVER IS CENTOS. UBUNTU CANNOT BE INSTALLED '
                          'ON HOST MACHINES')
@@ -113,9 +115,9 @@ def __main(config, operation):
     elif operation == "centos":
         if build_pxe_server == "ubuntu + centos":
             __modify_file_for_os(operation)
-            __pxe_boot(bmc_dict)
+            __pxe_boot(bmc_dict, static_dict, proxy_dict)
         elif build_pxe_server == "centos":
-            __pxe_boot(bmc_dict)
+            __pxe_boot(bmc_dict, static_dict, proxy_dict)
         else:
             logger.error('PXE SERVER IS UBUNTU. CENTOS CANNOT BE INSTALLED '
                          'ON HOST MACHINES')
@@ -720,7 +722,7 @@ def __ipmi_power_off_system(bmc_ip, bmc_user, bmc_pass):
         + bmc_pass + '  chassis power off')
 
 
-def __pxe_boot(bmc_dict):
+def __pxe_boot(bmc_dict, static_dict, proxy_dict):
     """
     to start boot via ipmi
     """
@@ -732,6 +734,7 @@ def __pxe_boot(bmc_dict):
         __ipmi_power_status(ip, user, password)
         __ipmi_set_boot_order_pxe(ip, user, password, "pxe")
         __ipmi_reboot_system(ip, user, password)
+    __static_ip_configure(static_dict, proxy_dict) 
 
 
 def __pxe_bootd(bmc_dict):
@@ -783,6 +786,9 @@ def __static_ip_configure(static_dict, proxy_dict):
     playbook_path_bak = pkg_resources.resource_filename(
         'snaps_boot.ansible_p.commission.hardware.playbooks',
         'interfaceBak.yaml')
+    playbook_path_waitServer = pkg_resources.resource_filename(
+        'snaps_boot.ansible_p.commission.hardware.playbooks',
+        'waitServer.yaml')
 
     host = static_dict.get('host')
     valid = __validate_static_config(static_dict)
@@ -794,6 +800,11 @@ def __static_ip_configure(static_dict, proxy_dict):
     https_proxy = proxy_dict.get('https_proxy')
     iplist = []
 
+    for this_host in host:
+        target = this_host.get('access_ip')
+        command= 'ansible-playbook %s --extra-vars "target=%s"' % (playbook_path_waitServer, target)
+        subprocess.call(command, shell=True)
+        
     for this_host in host:
         target = this_host.get('access_ip')
         iplist.append(target)

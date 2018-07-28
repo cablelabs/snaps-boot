@@ -24,14 +24,11 @@
      command: mv /etc/resolvconf/resolv.conf.d/base.bak /etc/resolvconf/resolv.conf.d/base
      ignore_errors: True
      when: is_ext|bool and true
-   - name: Deleting connection address
-     command: ifconfig "{{ iface }}" 0.0.0.0
-     ignore_errors: True
-     when: is_ext|bool and true
-   - name: ifconfig down
-     command: ifconfig "{{ iface }}" down
-     ignore_errors: True
-     when: is_ext|bool and true
+   - name: remove the interfaces file
+     file:
+       state: absent
+       path: /etc/network/interfaces.d/static.cfg
+
    - name: restarting system
      shell: /sbin/shutdown -r 1 "Ansible restart"
      ignore_errors: True

@@ -16,15 +16,10 @@
 - hosts: all
 
   tasks:
-    - name: Delete {{ src_copy_dir }}/snaps-boot directory
-      file:
-        state: absent
-        dest: "{{ src_copy_dir }}/snaps-boot"
-
-    - name: Copy this source tree from local {{ src_snaps_boot_dir }} to {{ src_copy_dir }}/snaps-boot
+    - name: Copy this source tree to {{ src_copy_dir }}/snaps-boot
       synchronize:
-        src: "{{ src_snaps_boot_dir }}"
-        dest: "{{ src_copy_dir }}"
+        src: ../../../
+        dest: "{{ src_copy_dir }}/snaps-boot"
         dirs: yes
 
     - name: Install python-pip
@@ -58,14 +53,6 @@
       become_method: sudo
       become_user: root
       command: "sh {{ src_copy_dir }}/snaps-boot/scripts/PreRequisite.sh"
-      register: out
-    - debug: var=out.stderr_lines
-
-    - name: Clean just in case PXE & DHCP server - iaas_launch.py -pc
-      become: yes
-      become_method: sudo
-      become_user: root
-      command: "python {{ src_copy_dir }}/snaps-boot/iaas_launch.py -f {{ hosts_yaml_path }} -pc"
       register: out
     - debug: var=out.stderr_lines
 

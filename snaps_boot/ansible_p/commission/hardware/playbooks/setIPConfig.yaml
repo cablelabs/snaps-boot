@@ -23,7 +23,7 @@
     http_proxy: "{{ http_proxy }}"
     https_proxy: "{{ https_proxy }}"
   tasks:
-   - name: Configuring nodes with static ip for mangment network
+   - name: Configuring nodes with static ip for management network
      lineinfile:
           dest: /etc/network/interfaces
           state: present
@@ -31,14 +31,22 @@
           regexp: 'iface {{ iface }} inet dhcp'
           line: "iface {{ iface}} inet static\naddress {{ address }} \nnetmask {{netmask}}"
      when: is_mng|bool and true
+
+   - stat: path=/etc/network/interfaces.d/static.cfg
+     register: out
+
+   - name: create new interfaces file for static.cfg
+     file: path=/etc/network/interfaces.d/static.cfg state=touch
+     when: out.stat.exists is defined and not out.stat.exists
+
    - name: Configuring nodes with static ip for external network
      lineinfile:
-          dest: /etc/network/interfaces
+          dest: /etc/network/interfaces.d/static.cfg
           line: "auto {{ iface }}\niface {{ iface}} inet static\naddress {{ address }} \nnetmask {{ netmask }} \ngateway {{ gateway }}\ndns-nameservers {{ dns }}\ndns-search {{ dn }}\nup route add netmask {{ netmask }} gw {{ gateway }}"
      when: is_ext|bool and true
    - name: Configuring nodes with static ip for tenant network
      lineinfile:
-          dest: /etc/network/interfaces
+          dest: /etc/network/interfaces.d/static.cfg
           line: "auto {{ iface }}\niface {{ iface }} inet static\naddress {{ address }} \nnetmask {{ netmask }}"
      when: is_tnt|bool and true
    - name: Backing up resolv.conf

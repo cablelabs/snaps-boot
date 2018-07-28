@@ -1,0 +1,12 @@
+---
+- hosts: localhost
+  tasks:
+    - name: Wait for reboot 
+      wait_for:
+         host: "{{ target }}"
+         port: 22 
+         timeout: 1700 
+         delay: 10 
+         state: started
+    - name: remove known hosts entry
+      shell: 'ssh-keygen -f "/root/.ssh/known_hosts" -R {{target}}'

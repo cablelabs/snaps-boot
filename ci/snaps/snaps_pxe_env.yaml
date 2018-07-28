@@ -13,9 +13,8 @@ ssh_proxy_cmd:
 ext_net: {{ external_network_name }}
 ext_subnet: {{ external_subnet_name }}
 
-src_snaps_boot_dir: {{ src_snaps_boot_dir }}
 src_copy_dir: /tmp
-local_snaps_boot_dir: /tmp/snaps-boot
+local_snaps_boot_dir: {{ local_snaps_boot_dir }}
 
 os_pxe_user_pass: password
 
