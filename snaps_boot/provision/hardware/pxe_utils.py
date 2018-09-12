@@ -241,9 +241,10 @@ def __configure_ng_cacher():
     used to configure acng.conf for ngcacher
     """
     logger.info("configuring apt-cacher-ng")
-    __find_and_replace('/etc/apt-cacher-ng/acng.conf', "# PassThroughPattern: .* # this would allow CONNECT to everything",
-                       " PassThroughPattern: .* # this would allow CONNECT to everything")
-    os.system('systemctl restart apt-cacher-ng') 
+    __find_and_replace('/etc/apt-cacher-ng/acng.conf', "# PassThroughPattern: .*" \
+                       +" # this would allow CONNECT to everything", " PassThroughPattern:" \
+                       +" .* # this would allow CONNECT to everything")
+    os.system('systemctl restart apt-cacher-ng')
 
 def __create_ks_config(pxe_dict, ubuntu_dict, proxy_dict, boot_interface):
     """
