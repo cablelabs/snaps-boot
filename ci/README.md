@@ -77,10 +77,9 @@ document.
     proxy_port:
     ssh_proxy_cmd:
 
-    ext_net: external
-    ext_subnet: external-net
+    ext_net: public1
+    ext_subnet: public1-subnet
 
-    src_snaps_boot_dir: /home/ubuntu/snaps-boot
     src_copy_dir: /tmp
     local_snaps_boot_dir: /home/ubuntu/snaps-boot
 
@@ -91,8 +90,8 @@ document.
     priv_ip_prfx: 10.1.1
     pub_ip_prfx: 10.1.2
 
-    build_kp_pub_path: /tmp/pxe-kp-lab1-launcher.pub
-    build_kp_priv_path: /tmp/pxe-kp-lab1-launcher
+    build_kp_pub_path: /tmp/pxe-kp-lab-launcher.pub
+    build_kp_priv_path: /tmp/pxe-kp-lab-launcher
 
     pxe_machine_user: root
     pxe_machine_pass: Pa$$w0rd
@@ -108,7 +107,7 @@ document.
     ```Bash
     cd snaps/examples
     python ./launch.py -t /home/ubuntu/snaps-boot/ci/snaps/snaps_pxe_tmplt.yaml \
-    -e lab3.yaml -d
+        -e lab.yaml -d
     ```
 
 1. Clean the environment
@@ -118,5 +117,5 @@ document.
 
     ```Bash
     python ./launch.py -t /home/ubuntu/snaps-boot/ci/snaps/snaps_pxe_tmplt.yaml \
-    -e lab3.yaml -c
+        -e lab.yaml -c
     ```

@@ -113,3 +113,9 @@ snaps-boot.iml
 
 # VI swap files
 *.swp
+
+#Pipenv file
+Pipfile*
+
+#Visual Studio
+.vscode
