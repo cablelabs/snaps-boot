@@ -516,7 +516,7 @@ ansible:
         value: {{ pxe_machine_user }}
       timeout:
         type: string
-        value: 300
+        value: 800
 
   # Verify admin interface on pxe-vm-3 was configured
   - playbook_location: {{ local_snaps_boot_dir }}/ci/playbooks/verify_intfs.yaml
@@ -536,7 +536,7 @@ ansible:
         value: {{ pxe_machine_user }}
       timeout:
         type: string
-        value: 300
+        value: 800
 
   # Statically configure interfaces
   - playbook_location: {{ local_snaps_boot_dir }}/ci/playbooks/config_intfs.yaml
