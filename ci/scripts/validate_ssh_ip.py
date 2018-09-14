@@ -101,7 +101,7 @@ if __name__ == '__main__':
         '-i', '--ip-addr', dest='ip_addr', required=True,
         help='The address to connect')
     parser.add_argument(
-        '-t', '--timeout', dest='timeout', default=3600,
+        '-t', '--timeout', dest='timeout', default=13600,
         help='The number of seconds to retry')
     parser.add_argument(
         '-pi', '--poll-interval', dest='poll_interval', default=10,
