@@ -19,8 +19,8 @@ guide](doc/source/install/install.md). The fun really begins with the
 steps](https://github.com/cablelabs/snaps-boot/blob/master/doc/source/install/install.md#4-installation-steps).
 That's where you'll be able to clone this repo and commence building:
 
-```
-$ git clone https://github.com/cablelabs/snaps-boot.git
+```Bash
+git clone https://github.com/cablelabs/snaps-boot.git
 ```
 
 If you're new to git and GitHub, be sure to check out the [Pro
@@ -52,6 +52,6 @@ Questions? Just send us an email at
 [![IRC](https://www.irccloud.com/invite-svg?channel=%23cablelabs-snaps&amp;hostname=irc.freenode.net&amp;port=6697&amp;ssl=1)](http://webchat.freenode.net/?channels=cablelabs-snaps)[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fcablelabs%2Fsnaps-boot.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2Fcablelabs%2Fsnaps-boot?ref=badge_shield)
 .
 
-
 ## License
+
 [![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fcablelabs%2Fsnaps-boot.svg?type=large)](https://app.fossa.io/projects/git%2Bgithub.com%2Fcablelabs%2Fsnaps-boot?ref=badge_large)
