@@ -87,6 +87,7 @@ def __main(config, operation):
             __validate_modify_centos_ks_cfg(pxe_dict, centos_dict, proxy_dict,
                                             build_pxe_server)
         # Handle deprecated file formats
+        __configure_ng_cacher()
         if not proxy_dict.get("ngcacher_proxy"):
             deprecated = True
             deprecated_info['proxy'] = 'Missing ngcacher_proxy'
@@ -234,6 +235,16 @@ def __pxe_server_installation(proxy_dict, pxe_dict, ubuntu_dict, subnet_list,
     __config_ntp_server_file(pxe_dict)
     __restart_ntp_server(pxe_dict)
 
+
+def __configure_ng_cacher():
+    """
+    used to configure acng.conf for ngcacher
+    """
+    logger.info("configuring apt-cacher-ng")
+    __find_and_replace('/etc/apt-cacher-ng/acng.conf', "# PassThroughPattern: .*" \
+                       +" # this would allow CONNECT to everything", " PassThroughPattern:" \
+                       +" .* # this would allow CONNECT to everything")
+    os.system('systemctl restart apt-cacher-ng')
 
 def __create_ks_config(pxe_dict, ubuntu_dict, proxy_dict, boot_interface):
     """
