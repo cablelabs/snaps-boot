@@ -87,6 +87,7 @@ def __main(config, operation):
             __validate_modify_centos_ks_cfg(pxe_dict, centos_dict, proxy_dict,
                                             build_pxe_server)
         # Handle deprecated file formats
+        __configure_ng_cacher()
         if not proxy_dict.get("ngcacher_proxy"):
             deprecated = True
             deprecated_info['proxy'] = 'Missing ngcacher_proxy'
@@ -226,12 +227,24 @@ def __pxe_server_installation(proxy_dict, pxe_dict, ubuntu_dict, subnet_list,
         if ('server_type' in ubuntu_dict
                 and ubuntu_dict['server_type'] == 'UEFI'):
             __create_seed_config(pxe_dict, ubuntu_dict, str(listen_iface))
+            logger.info("*********validateAndCreateconfigPostScriptIfUEFI*************")
+            __create_post_script_config(pxe_dict, ubuntu_dict, proxy_dict);
 
     logger.info("****************configureAnsibleFile*****************")
     __config_ansible_file()
     __config_ntp_server_file(pxe_dict)
     __restart_ntp_server(pxe_dict)
 
+
+def __configure_ng_cacher():
+    """
+    used to configure acng.conf for ngcacher
+    """
+    logger.info("configuring apt-cacher-ng")
+    __find_and_replace('/etc/apt-cacher-ng/acng.conf', "# PassThroughPattern: .*" \
+                       +" # this would allow CONNECT to everything", " PassThroughPattern:" \
+                       +" .* # this would allow CONNECT to everything")
+    os.system('systemctl restart apt-cacher-ng')
 
 def __create_ks_config(pxe_dict, ubuntu_dict, proxy_dict, boot_interface):
     """
@@ -316,63 +329,120 @@ def __create_seed_config(pxe_dict, ubuntu_dict, boot_interface):
     os.system('dos2unix conf/pxe_cluster/ubuntu-uefi-server.seed')
 
     logger.debug("configuring server url  in ubuntu-uefi-server.seed")
-    my_url = "d-i 	mirror/http/hostname string " + pxe_dict["serverIp"]
+    my_url = "d-i mirror/http/hostname string " + pxe_dict["serverIp"]
     __find_and_replace('conf/pxe_cluster/ubuntu-uefi-server.seed',
-                       "d-i 	mirror/http/hostname string 192.168.0.1",
+                       "d-i mirror/http/hostname string 192.168.0.1",
                        my_url)
 
     logger.debug("configuring boot interface in ubuntu-uefi-server.seed")
-    boot_iface = "d-i   netcfg/choose_interface select " + boot_interface
+    boot_iface = "d-i netcfg/choose_interface select " + boot_interface
     __find_and_replace('conf/pxe_cluster/ubuntu-uefi-server.seed',
-                       "d-i     netcfg/choose_interface select en0",
+                       "d-i netcfg/choose_interface select en0",
                        boot_iface)
 
-    logger.debug("configuring client user fullname in ubuntu-uefi-server.seed")
-    user_creds = "d-i   passwd/user-fullname string " + ubuntu_dict["fullname"]
+    logger.debug("configuring ntp in ubuntu-uefi-server.seed")
+    ntp_server = "d-i clock-setup/ntp-server string " + pxe_dict["serverIp"]
     __find_and_replace('conf/pxe_cluster/ubuntu-uefi-server.seed',
-                       "d-i 	passwd/user-fullname string Ubuntu User",
+                       "d-i clock-setup/ntp-server string 192.168.0.1",
+                       ntp_server)
+
+    logger.debug("configuring client user fullname in ubuntu-uefi-server.seed")
+    user_creds = "d-i passwd/user-fullname string " + ubuntu_dict["fullname"]
+    __find_and_replace('conf/pxe_cluster/ubuntu-uefi-server.seed',
+                       "d-i passwd/user-fullname string Ubuntu User",
                        user_creds)
 
     logger.debug("configuring client username in ubuntu-uefi-server.seed")
-    user_creds = "d-i   passwd/username string " + ubuntu_dict["user"]
+    user_creds = "d-i passwd/username string " + ubuntu_dict["user"]
     __find_and_replace('conf/pxe_cluster/ubuntu-uefi-server.seed',
-                       "d-i 	passwd/username string ubuntu", user_creds)
+                       "d-i passwd/username string ubuntu", user_creds)
 
     logger.debug("configuring client user password in ubuntu-uefi-server.seed")
-    user_creds = "d-i 	passwd/user-password password "\
+    user_creds = "d-i passwd/user-password password "\
                  + ubuntu_dict["password"]
     __find_and_replace('conf/pxe_cluster/ubuntu-uefi-server.seed',
-                       "d-i 	passwd/user-password password fake",
+                       "d-i passwd/user-password password ChangeMe123",
                        user_creds)
 
     logger.debug("configuring client user password verify in "
                  "ubuntu-uefi-server.seed")
-    user_creds = "d-i 	passwd/user-password-again password "\
+    user_creds = "d-i passwd/user-password-again password "\
                  + ubuntu_dict["password"]
     __find_and_replace('conf/pxe_cluster/ubuntu-uefi-server.seed',
-                       "d-i 	passwd/user-password-again password fake",
+                       "d-i passwd/user-password-again password ChangeMe123",
                        user_creds)
 
     logger.debug("configuring client root password in "
                  "ubuntu-uefi-server.seed")
-    user_creds = "d-i 	passwd/root-password password "\
+    user_creds = "d-i passwd/root-password password "\
                  + ubuntu_dict["password"]
     __find_and_replace('conf/pxe_cluster/ubuntu-uefi-server.seed',
-                       "d-i 	passwd/root-password password fake",
+                       "d-i passwd/user-password password ChangeMe123",
                        user_creds)
 
     logger.debug("configuring client root password verify in "
                  "ubuntu-uefi-server.seed")
-    user_creds = "d-i 	passwd/root-password-again password "\
+    user_creds = "d-i passwd/root-password-again password "\
                  + ubuntu_dict["password"]
     __find_and_replace('conf/pxe_cluster/ubuntu-uefi-server.seed',
-                       "d-i 	passwd/root-password-again password fake",
+                       "d-i passwd/user-password-again password ChangeMe123",
                        user_creds)
+
+    logger.debug("configuring late command script in "
+                 "ubuntu-uefi-server.seed")
+    post_command = "http://" + pxe_dict["serverIp"] + "/ubuntu/post.sh | \\"
+    __find_and_replace('conf/pxe_cluster/ubuntu-uefi-server.seed',
+                       "    http://192.168.0.1/ubuntu/post.sh",
+                       post_command)
 
     logger.debug("copy local ubuntu-uefi-server.seed to location "
                  "/var/www/html/ubuntu/preseed")
     os.system('cp conf/pxe_cluster/ubuntu-uefi-server.seed '
               '/var/www/html/ubuntu/preseed')
+
+
+
+def __create_post_script_config(pxe_dict, ubuntu_dict, proxy_dict):
+    """
+    used to configure seed file from hosts.yaml file
+    :param pxe_dict:
+    :param ubuntu_dict:
+    :param proxy_dict:
+    """
+    os.system('dos2unix conf/pxe_cluster/post.sh')
+
+
+
+    logger.debug("configuring ntp server ip  in post.sh")
+    ntp_server = "server " + pxe_dict["serverIp"] + " iburst"
+    __find_and_replace('conf/pxe_cluster/post.sh', "server", ntp_server)
+
+    logger.debug("configuring cloud-init server ip  in post.sh")
+    cloud_init_ip = "CLOUD_INIT_IP=" + pxe_dict["serverIp"]
+    __find_and_replace('conf/pxe_cluster/post.sh',
+                       "CLOUD_INIT_IP=cloud-init-ip",
+                       cloud_init_ip)
+
+    logger.debug("configuring http proxy  in post.sh")
+    http_proxy = "Acquire::http::Proxy " + "\"" \
+                 + proxy_dict["http_proxy"] + "\";"
+    __find_and_replace('conf/pxe_cluster/post.sh', "Acquire::http::Proxy",
+                       http_proxy)
+
+    logger.debug("configuring https proxy  in post.sh")
+    https_proxy = "Acquire::https::Proxy " + "\"" \
+                  + proxy_dict["https_proxy"] + "\";"
+    __find_and_replace('conf/pxe_cluster/post.sh', "Acquire::https::Proxy",
+                       https_proxy)
+
+    logger.debug("configuring ftp proxy  in post.sh")
+    ftp_proxy = "Acquire::ftp::Proxy " + "\"" + proxy_dict["ftp_proxy"] + "\";"
+    __find_and_replace('conf/pxe_cluster/post.sh', "Acquire::ftp::Proxy",
+                       ftp_proxy)
+
+    logger.debug("copy local post.sh to location /var/www/html/ubuntu/")
+    os.system('cp conf/pxe_cluster/post.sh /var/www/html/ubuntu/')
+
 
 
 def __find_and_replace(fname, pat, s_after):

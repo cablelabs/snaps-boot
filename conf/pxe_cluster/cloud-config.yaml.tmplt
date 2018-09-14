@@ -18,9 +18,4 @@ users:
     groups: sudo
     shell: /bin/bash
 
-#Disable cloud-init network settings
-#We are relying on ansible scripts to configure the network
-network:
-  config: disabled
-
 final_message: "The system is finally up, after $UPTIME seconds"
