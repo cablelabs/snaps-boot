@@ -1,5 +1,3 @@
-PR Test
-
 # SNAPS-Boot
 
 SNAPS-Boot is the fundamental building block for the SNAPS<sup>TM</sup> Program
@@ -55,4 +53,5 @@ Questions? Just send us an email at
 .
 
 ## License
+
 [![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fcablelabs%2Fsnaps-boot.svg?type=large)](https://app.fossa.io/projects/git%2Bgithub.com%2Fcablelabs%2Fsnaps-boot?ref=badge_large)
