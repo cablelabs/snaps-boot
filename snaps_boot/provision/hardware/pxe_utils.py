@@ -1,5 +1,5 @@
-# Copyright 2017 ARICENT HOLDINGS LUXEMBOURG SARL and Cable Television
-# Laboratories, Inc.
+# Copyright 2017 ARICENT HOLDINGS LUXEMBOURG SARL
+# and Cable Television Laboratories, Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -186,7 +186,8 @@ def __pxe_server_installation(proxy_dict, pxe_dict, ubuntu_dict, subnet_list,
         os.system('sh scripts/PxeInstall.sh mountAndCopy ' + ubuntu_dict["os"]
                   + " " + pxe_dict["password"])
         logger.info("******************mountAndCopyUefi**********************")
-        if "server_type" in ubuntu_dict and ubuntu_dict["server_type"] == "UEFI":
+        if "server_type" in ubuntu_dict and ubuntu_dict["server_type"] == \
+                "UEFI":
             os.system('sh scripts/PxeInstall.sh mountAndCopyUefi '
                       + 'grubnetx64.efi.signed'
                       + " " + "netboot.tar.gz" + " " + pxe_dict["password"])
@@ -227,8 +228,9 @@ def __pxe_server_installation(proxy_dict, pxe_dict, ubuntu_dict, subnet_list,
         if ('server_type' in ubuntu_dict
                 and ubuntu_dict['server_type'] == 'UEFI'):
             __create_seed_config(pxe_dict, ubuntu_dict, str(listen_iface))
-            logger.info("*********validateAndCreateconfigPostScriptIfUEFI*************")
-            __create_post_script_config(pxe_dict, ubuntu_dict, proxy_dict);
+            logger.info("*********validateAndCreateconfigPostScriptIfUEFI"
+                        + "*************")
+            __create_post_script_config(pxe_dict, ubuntu_dict, proxy_dict)
 
     logger.info("****************configureAnsibleFile*****************")
     __config_ansible_file()
@@ -241,10 +243,12 @@ def __configure_ng_cacher():
     used to configure acng.conf for ngcacher
     """
     logger.info("configuring apt-cacher-ng")
-    __find_and_replace('/etc/apt-cacher-ng/acng.conf', "# PassThroughPattern: .*" \
-                       +" # this would allow CONNECT to everything", " PassThroughPattern:" \
-                       +" .* # this would allow CONNECT to everything")
+    __find_and_replace('/etc/apt-cacher-ng/acng.conf', "# PassThroughPattern:"
+                       + " .* # this would allow CONNECT to everything",
+                       " PassThroughPattern:"
+                       + " .* # this would allow CONNECT to everything")
     os.system('systemctl restart apt-cacher-ng')
+
 
 def __create_ks_config(pxe_dict, ubuntu_dict, proxy_dict, boot_interface):
     """
@@ -401,7 +405,6 @@ def __create_seed_config(pxe_dict, ubuntu_dict, boot_interface):
               '/var/www/html/ubuntu/preseed')
 
 
-
 def __create_post_script_config(pxe_dict, ubuntu_dict, proxy_dict):
     """
     used to configure seed file from hosts.yaml file
@@ -410,9 +413,6 @@ def __create_post_script_config(pxe_dict, ubuntu_dict, proxy_dict):
     :param proxy_dict:
     """
     os.system('dos2unix conf/pxe_cluster/post.sh')
-
-
-
     logger.debug("configuring ntp server ip  in post.sh")
     ntp_server = "server " + pxe_dict["serverIp"] + " iburst"
     __find_and_replace('conf/pxe_cluster/post.sh', "server", ntp_server)
@@ -442,7 +442,6 @@ def __create_post_script_config(pxe_dict, ubuntu_dict, proxy_dict):
 
     logger.debug("copy local post.sh to location /var/www/html/ubuntu/")
     os.system('cp conf/pxe_cluster/post.sh /var/www/html/ubuntu/')
-
 
 
 def __find_and_replace(fname, pat, s_after):
@@ -1055,9 +1054,9 @@ def __modify_ip_in_pxelinux(pxe_dict):
 def __update_ng_cacher_proxy(proxy_dict):
     value1 = "Proxy: " + proxy_dict["ngcacher_proxy"]
     value2 = "VfilePatternEx: {}|{}|{}".format(
-        '^(/\?release=[0-9]+&arch=.*',
+        '^(/\\?release=[0-9]+&arch=.*',
         '.*/RPM-GPG-KEY-.*',
-        '/metalink\?repo=epel\-[0-9]+&arch=.*)$')
+        '/metalink\\?repo=epel\\-[0-9]+&arch=.*)$')
     __find_and_replace(
         '/etc/apt-cacher-ng/acng.conf',
         "# Proxy: https://username:proxypassword@proxy.example.net:3129",
