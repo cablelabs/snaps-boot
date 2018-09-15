@@ -26,6 +26,14 @@
         src: "{{ src_snaps_boot_dir }}"
         dest: "{{ src_copy_dir }}"
         dirs: yes
+    
+    - name: Check if {{ src_copy_dir }}/snaps-boot exists
+      stat: path={{ src_copy_dir }}/snaps-boot
+      register: dir
+
+    - name: Move from {{ src_copy_dir }}/{{ src_snaps_boot_dir.split('/')[-1] }} to {{ src_copy_dir }}/snaps-boot
+      command: mv {{ src_copy_dir }}/{{ src_snaps_boot_dir.split('/')[-1] }} {{ src_copy_dir }}/snaps-boot
+      when: not dir.stat.exists
 
     - name: Install python-pip
       become: yes
