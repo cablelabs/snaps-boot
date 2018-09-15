@@ -1,5 +1,3 @@
-PR Test
-
 # SNAPS-Boot
 
 SNAPS-Boot is the fundamental building block for the SNAPS<sup>TM</sup> Program
