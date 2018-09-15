@@ -541,7 +541,7 @@ ansible:
       timeout:
         type: string
         value: 300
-{% if pxe_config == "ubuntu" %}
+{% if install_type == "ubuntu" %}
   # Statically configure interfaces
   - playbook_location: {{ local_snaps_boot_dir }}/ci/playbooks/config_intfs.yaml
     hosts:
