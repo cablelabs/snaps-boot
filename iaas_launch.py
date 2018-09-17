@@ -81,11 +81,11 @@ def main(arguments):
 
     if arguments.boot is not ARG_NOT_SET:
         if arguments.boot == "ubuntu":
-           __read_hw_config(config, "ubuntu")
+            __read_hw_config(config, "ubuntu")
         elif arguments.boot == "centos":
-           __read_hw_config(config, "centos")
+            __read_hw_config(config, "centos")
         else:
-           __read_hw_config(config, "boot")
+            __read_hw_config(config, "boot")
 
     if arguments.bootd is not ARG_NOT_SET:
         __read_hw_config(config, "bootd")
@@ -102,52 +102,91 @@ if __name__ == '__main__':
     os.chdir(os.path.dirname(os.path.realpath(__file__)))
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('-p', '--provision', dest='hardware', nargs='?',
-                        default=ARG_NOT_SET,
-                        help='When used, setting up of pxe server and '
-                             'provisioning of PXE clients will be started')
-    parser.add_argument('-f', '--file', dest='config', required=True,
-                        help='The configuration file in YAML format'
-                             ' - REQUIRED',
-                        metavar="FILE")
-    parser.add_argument('-l', '--log-level', dest='log_level', default='INFO',
-                        help='Logging Level (INFO|DEBUG)')
-    parser.add_argument('-b', '--boot', dest='boot', nargs='?',
-                        default=ARG_NOT_SET,
-                        help='When used, to boot the system via pxe')
-    parser.add_argument('-bd', '--bootd', dest='bootd', nargs='?',
-                        default=ARG_NOT_SET,
-                        help='When used, to boot the system via hdd')
-    parser.add_argument('-pc', '--provisionClean', dest='provisionClean',
-                        nargs='?', default=ARG_NOT_SET,
-                        help='When used, the pxe server environment will be '
-                             'removed')
-    parser.add_argument('-s', '--staticIPConfigure', dest='staticIPConfigure',
-                        nargs='?', default=ARG_NOT_SET,
-                        help='When used, the pxe server environment will be '
-                             'removed')
-    parser.add_argument('-sc', '--staticIPCleanup', dest='staticIPCleanup',
-                        nargs='?', default=ARG_NOT_SET,
-                        help='When used, the pxe server environment will be '
-                             'removed')
-    parser.add_argument('-i', '--setIsolCpus', dest='setIsolCpus', nargs='?',
-                        default=ARG_NOT_SET,
-                        help='When used, the pxe server environment will be '
-                             'removed')
-    parser.add_argument('-ic', '--cleanIsolCpus', dest='delIsolCpus',
-                        nargs='?', default=ARG_NOT_SET,
-                        help='When used, the pxe server environment will be '
-                             'removed')
+    parser.add_argument(
+        '-p',
+        '--provision',
+        dest='hardware',
+        nargs='?',
+        default=ARG_NOT_SET,
+        help='When used, setting up of pxe server and '
+        'provisioning of PXE clients will be started')
+    parser.add_argument(
+        '-f',
+        '--file',
+        dest='config',
+        required=True,
+        help='The configuration file in YAML format'
+        ' - REQUIRED',
+        metavar="FILE")
+    parser.add_argument(
+        '-l',
+        '--log-level',
+        dest='log_level',
+        default='INFO',
+        help='Logging Level (INFO|DEBUG)')
+    parser.add_argument(
+        '-b',
+        '--boot',
+        dest='boot',
+        nargs='?',
+        default=ARG_NOT_SET,
+        help='When used, to boot the system via pxe')
+    parser.add_argument(
+        '-bd',
+        '--bootd',
+        dest='bootd',
+        nargs='?',
+        default=ARG_NOT_SET,
+        help='When used, to boot the system via hdd')
+    parser.add_argument(
+        '-pc',
+        '--provisionClean',
+        dest='provisionClean',
+        nargs='?',
+        default=ARG_NOT_SET,
+        help='When used, the pxe server environment will be '
+        'removed')
+    parser.add_argument(
+        '-s',
+        '--staticIPConfigure',
+        dest='staticIPConfigure',
+        nargs='?',
+        default=ARG_NOT_SET,
+        help='When used, the pxe server environment will be '
+        'removed')
+    parser.add_argument(
+        '-sc',
+        '--staticIPCleanup',
+        dest='staticIPCleanup',
+        nargs='?',
+        default=ARG_NOT_SET,
+        help='When used, the pxe server environment will be '
+        'removed')
+    parser.add_argument(
+        '-i',
+        '--setIsolCpus',
+        dest='setIsolCpus',
+        nargs='?',
+        default=ARG_NOT_SET,
+        help='When used, the pxe server environment will be '
+        'removed')
+    parser.add_argument(
+        '-ic',
+        '--cleanIsolCpus',
+        dest='delIsolCpus',
+        nargs='?',
+        default=ARG_NOT_SET,
+        help='When used, the pxe server environment will be '
+        'removed')
     args = parser.parse_args()
 
-    if (args.hardware is ARG_NOT_SET and
-                args.boot is ARG_NOT_SET and
-                args.bootd is ARG_NOT_SET and
-                args.provisionClean is ARG_NOT_SET and
-                args.setIsolCpus is ARG_NOT_SET and
-                args.delIsolCpus is ARG_NOT_SET and
-                args.staticIPConfigure is ARG_NOT_SET and
-                args.staticIPCleanup is ARG_NOT_SET):
+    if (args.hardware is ARG_NOT_SET and args.boot is ARG_NOT_SET
+            and args.bootd is ARG_NOT_SET
+            and args.provisionClean is ARG_NOT_SET
+            and args.setIsolCpus is ARG_NOT_SET
+            and args.delIsolCpus is ARG_NOT_SET
+            and args.staticIPConfigure is ARG_NOT_SET
+            and args.staticIPCleanup is ARG_NOT_SET):
         print 'Must enter either -p for provision hardware or -pc for clean ' \
               'provision hardware or -b for boot or -i for isolate cpu ' \
               'provision or -bd for boot from disk'

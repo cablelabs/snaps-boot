@@ -47,20 +47,24 @@ openstack:
         ram: 4096
         disk: 80
         vcpus: 2
-        {% if flavor_metadata is defined %}
+{% if flavor_metadata is defined %}
         metadata:
-          hw:mem_page_size: {{ flavor_metadata.page_size }}
-        {% endif %}
+        {% for key, value in flavor_metadata.iteritems() %}
+          {{ key }}: {{ value }}
+        {% endfor %}
+{% endif %}
     - flavor:
         os_creds_name: admin-creds
         name: pxe-flavor-{{ build_num }}
         ram: 2048
         disk: 40
         vcpus: 1
-        {% if flavor_metadata is defined %}
+{% if flavor_metadata is defined %}
         metadata:
-          hw:mem_page_size: {{ flavor_metadata.page_size }}
-        {% endif %}
+        {% for key, value in flavor_metadata.iteritems() %}
+          {{ key }}: {{ value }}
+        {% endfor %}
+{% endif %}
   images:
     - image:
         os_creds_name: admin-creds
@@ -516,7 +520,7 @@ ansible:
         value: {{ pxe_machine_user }}
       timeout:
         type: string
-        value: 1000
+        value: 300
 
   # Verify admin interface on pxe-vm-3 was configured
   - playbook_location: {{ local_snaps_boot_dir }}/ci/playbooks/verify_intfs.yaml
@@ -536,8 +540,8 @@ ansible:
         value: {{ pxe_machine_user }}
       timeout:
         type: string
-        value: 1000
-
+        value: 300
+{% if install_type == "ubuntu" %}
   # Statically configure interfaces
   - playbook_location: {{ local_snaps_boot_dir }}/ci/playbooks/config_intfs.yaml
     hosts:
@@ -731,3 +735,4 @@ ansible:
       timeout:
         type: string
         value: 120
+{% endif %}

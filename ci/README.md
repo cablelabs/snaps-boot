@@ -97,6 +97,11 @@ document.
     pxe_machine_pass: Pa$$w0rd
 
     hosts_yaml_target_path: /tmp/hosts.yaml
+
+    flavor_metadata:
+        hw:cpu_policy: dedicated
+        hw:cpu_thread_policy: isolate
+        hw:mem_page_size: large
     ```
 
 1. Launch the test
