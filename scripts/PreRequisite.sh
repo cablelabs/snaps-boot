@@ -24,12 +24,15 @@ fi
 
 
 echo "++++++++++++++++++++++++++++++++++++++++++++++"
-echo "apt-get install apt-cacher-ng"
+echo "Install Digital Rebar"
 echo "++++++++++++++++++++++++++++++++++++++++++++++"
-apt-get install -y apt-cacher-ng
+curl -fsSL get.rebar.digital/stable | bash -s -- install
 command_status=$?
-checkStatus $command_status "install apt-cache-eng  using apt-get"
-sleep 5
+checkStatus $command_status "install Digital Rebar"
+sudo systemctl daemon-reload && sudo systemctl enable dr-provision
+sudo systemctl daemon-reload && sudo systemctl start dr-provision
+drpcli bootenvs uploadiso sledgehammer
+drpcli bootenvs uploadiso ubuntu-16.04-install
 
 
 echo "++++++++++++++++++++++++++++++++++++++++++++++"

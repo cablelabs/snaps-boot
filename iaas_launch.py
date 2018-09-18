@@ -68,10 +68,12 @@ def main(arguments):
     config = file_utils.read_yaml(arguments.config)
     logger.info('Read configuration file - ' + arguments.config)
     if arguments.hardware is not ARG_NOT_SET:
-        __read_hw_config(config, "hardware")
+        logger.error('Need to implement with digital rebar')
+        # __read_hw_config(config, "hardware")
 
     if arguments.provisionClean is not ARG_NOT_SET:
-        __read_hw_config(config, "provisionClean")
+        logger.error('Need to implement with digital rebar')
+        # __read_hw_config(config, "provisionClean")
 
     if arguments.staticIPCleanup is not ARG_NOT_SET:
         __read_hw_config(config, "staticIPCleanup")

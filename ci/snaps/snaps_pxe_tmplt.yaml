@@ -482,6 +482,8 @@ ansible:
         type: string
         value: {{ hosts_yaml_target_path }}
 
+{% if 1 == 2 %}
+
   # Verify admin interface on pxe-vm-1 was configured
   - playbook_location: {{ local_snaps_boot_dir }}/ci/playbooks/verify_intfs.yaml
     hosts:
@@ -541,6 +543,8 @@ ansible:
       timeout:
         type: string
         value: 300
+{% endif %}
+
 {% if install_type == "ubuntu" %}
   # Statically configure interfaces
   - playbook_location: {{ local_snaps_boot_dir }}/ci/playbooks/config_intfs.yaml

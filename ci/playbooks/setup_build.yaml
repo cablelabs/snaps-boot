@@ -47,17 +47,6 @@
       become_method: sudo
       become_user: root
 
-    - name: Make directory {{ src_copy_dir }}/snaps-boot/packages/images
-      file:
-        path: "{{ src_copy_dir }}/snaps-boot/packages/images"
-        state: directory
-
-    - name: Download ISO image
-      get_url:
-        url: "{{ install_iso_url }}"
-        dest: "{{ src_copy_dir }}/snaps-boot/packages/images/boot-img.iso"
-        timeout: 1000
-
     - name: Apply template and copy hosts.yaml to {{ hosts_yaml_path }}
       action: template src=templates/hosts.yaml.tmplt dest={{ hosts_yaml_path }}
 
@@ -91,10 +80,10 @@
       fail: msg="iaas_launch.py -d command failed"
       when: out.rc != 0
 
-    - name: Make sure isc-dhcp-server is running
+    - name: Make sure Digital Rebar is running
       become: yes
       become_method: sudo
       become_user: root
       systemd:
-        name: isc-dhcp-server
+        name: dr-provision
         state: started
