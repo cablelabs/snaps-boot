@@ -33,6 +33,9 @@ sudo systemctl daemon-reload && sudo systemctl enable dr-provision
 sudo systemctl daemon-reload && sudo systemctl start dr-provision
 drpcli bootenvs uploadiso sledgehammer
 drpcli bootenvs uploadiso ubuntu-16.04-install
+drpcli workflows create '{ "Name": "discovery", "Stages": [ "discover", "sledgehammer-wait" ] } '
+drpcli workflows create '{ "Name": "ubuntu16", "Stages": [ "discover", "ubuntu-16.04-install", "complete" ] } '
+drpcli prefs set defaultWorkflow ubuntu16 unknownBootEnv discovery defaultBootEnv sledgehammer defaultStage discover
 
 
 echo "++++++++++++++++++++++++++++++++++++++++++++++"
