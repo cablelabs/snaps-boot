@@ -5,3 +5,4 @@ mock
 paramiko
 PyYAML
 requests
+netaddr

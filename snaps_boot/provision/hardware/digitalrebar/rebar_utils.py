@@ -12,7 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import logging
+from netaddr import IPAddress
 import requests
+
+from snaps_boot.provision.hardware.digitalrebar.rebar_erros import \
+    RebarPostError
 
 logger = logging.getLogger('rebar_utils')
 
@@ -24,7 +28,14 @@ def setup_dhcp_service(boot_conf):
     """
     data = __generate_subnet_config(boot_conf)
     url = None
+
+    logger.info('Creating a subnet for DHCP')
     response = requests.post(url, data=data)
+
+    if response.status_code != requests.codes.ok:
+        raise RebarPostError(
+            'POST error to {} with response {}'.format(url, response.text)
+        )
 
 
 def __generate_subnet_config(boot_conf):
@@ -33,12 +44,18 @@ def __generate_subnet_config(boot_conf):
     :param boot_conf:
     :return:
     """
-    cidr = None
-    start = None
-    end = None
-    gateway = None
-    dns = None
-    domain = None
+    subnet_conf = boot_conf['PROVISION']['DHCP']['subnet'][0]
+
+    netmask_bits = IPAddress(subnet_conf['netmask']).netmask_bits()
+
+    cidr = '{}/{}'.format(subnet_conf['address'], netmask_bits)
+
+    ranges = subnet_conf['range'].split(' ')
+    start = ranges[0]
+    end = ranges[1]
+    gateway = subnet_conf['router']
+    dns = subnet_conf['dns']
+    domain = subnet_conf['dn']
 
     out = """
     {
