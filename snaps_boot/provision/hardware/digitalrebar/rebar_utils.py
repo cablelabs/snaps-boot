@@ -11,8 +11,10 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import json
+import logging
 import requests
+
+logger = logging.getLogger('rebar_utils')
 
 
 def setup_dhcp_service(boot_conf):
@@ -20,9 +22,8 @@ def setup_dhcp_service(boot_conf):
     Creates a DHCP service
     :param boot_conf: the configuration
     """
-    subnet_conf = __generate_subnet_config(boot_conf)
+    data = __generate_subnet_config(boot_conf)
     url = None
-    data = json.dumps(subnet_conf)
     response = requests.post(url, data=data)
 
 
@@ -39,7 +40,7 @@ def __generate_subnet_config(boot_conf):
     dns = None
     domain = None
 
-    return """
+    out = """
     {
         "Name": "local_subnet",
         "Subnet": "{0}",
@@ -56,3 +57,6 @@ def __generate_subnet_config(boot_conf):
         ]
     }
     """.format(cidr, start, end, gateway, dns, domain)
+
+    logger.debug('Subnet config \n%s', out)
+    return out
