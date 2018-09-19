@@ -152,19 +152,12 @@ Configuration parameters for the subnet section are explained below.
 
 | Parameter | Required | Description |
 | --------- | ----------- | ----------- |
-| address | Y | Subnet address e.g. 10.10.10.0 |
-| bind_host | Y | This section defines group of mac and ip address. One such group is required for each host machine. The ip addresses defined here are allocated by the SNAPS-Boot during OS provisioning. The ip addresses defined here should be from the subnet defined by parameter ‘address’. |
-| broadcast-address | N | Broadcast address for the subnet |
-| default-lease | Y | Lease time (in seconds) to be used by DHCP server on Build Server. |
+| subnet | Y | Subnet address e.g. 10.10.10.0 |
 | dn | Y | Domain name of Build Server. |
 | dns | Y | IP of domain name server. |
-| listen_iface | Y | Name of interface to which DHCP server will bind for IP requests. |
-| max-lease | Y | Maximum lease time (in seconds) for DHCP server running on Build Server. |
-| Name | Y | Human readable name for this subnet. |
 | netmask | Y | Netmask of the subnet. |
 | range | Y | IP range to be used on this subnet. User is required to define a string of first and last ip address, see example below "172.16.109.210 172.16.109.224" |
-| routers | Y | IP of external router (gateway ip). |
-| Type | Y | Type of network this subnet will serve. Possible values are: **management**, **ipmi** (to be used only if user wants to modify IP address allocated to IPMI interfaces), **data**, **external**. |
+| router | Y | IP of external router (gateway ip). |
 
 > Note: For optional parameters, use null value **“”** if not required.
 
