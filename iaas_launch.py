@@ -21,6 +21,7 @@ import os
 
 from snaps_boot.common.utils import file_utils
 from snaps_boot.provision.hardware import pxe_utils
+from snaps_boot.provision.hardware.digitalrebar import rebar_utils
 
 logger = logging.getLogger('iaas_launch')
 
@@ -69,7 +70,7 @@ def main(arguments):
     logger.info('Read configuration file - ' + arguments.config)
     if arguments.hardware is not ARG_NOT_SET:
         logger.error('Need to implement with digital rebar')
-        # __read_hw_config(config, "hardware")
+        rebar_utils.setup_dhcp_service(config)
 
     if arguments.provisionClean is not ARG_NOT_SET:
         logger.error('Need to implement with digital rebar')
