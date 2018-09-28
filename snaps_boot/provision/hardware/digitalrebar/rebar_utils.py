@@ -26,16 +26,16 @@ def setup_dhcp_service(boot_conf):
     Creates a DHCP service
     :param boot_conf: the configuration
     """
-    data = __generate_subnet_config(boot_conf)
-    url = None
+    # data = __generate_subnet_config(boot_conf)
+    # url = None
 
     logger.info('Creating a subnet for DHCP')
-    response = requests.post(url, data=data)
+    # response = requests.post(url, data=data)
 
-    if response.status_code != requests.codes.ok:
-        raise RebarPostError(
-            'POST error to {} with response {}'.format(url, response.text)
-        )
+    # if response.status_code != requests.codes.ok:
+    #     raise RebarPostError(
+    #         'POST error to {} with response {}'.format(url, response.text)
+    #     )
 
 
 def __generate_subnet_config(boot_conf):
@@ -57,7 +57,7 @@ def __generate_subnet_config(boot_conf):
     dns = subnet_conf['dns']
     domain = subnet_conf['dn']
 
-    out = """
+    out = '''
     {
         "Name": "local_subnet",
         "Subnet": "{0}",
@@ -73,7 +73,7 @@ def __generate_subnet_config(boot_conf):
             { "Code": 15, "Value": "{5}", "Description": "Domain Name" }
         ]
     }
-    """.format(cidr, start, end, gateway, dns, domain)
+    '''.format(cidr, start, end, gateway, dns, domain)
 
     logger.debug('Subnet config \n%s', out)
     return out
