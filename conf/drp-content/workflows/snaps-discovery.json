@@ -1,0 +1,1 @@
+{"Validated":false,"Available":false,"Errors":[],"ReadOnly":false,"Meta":{"color":"red","icon":"tag","title":""},"Name":"snaps-discovery","Description":"Server discovery","Documentation":"","Stages":["discover","sledgehammer-wait"]}

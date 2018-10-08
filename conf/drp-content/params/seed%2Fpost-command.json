@@ -1,0 +1,1 @@
+{"Validated":false,"Available":false,"Errors":[],"ReadOnly":false,"Meta":{"color":"red","icon":"pencil"},"Name":"seed/post-command","Description":"Location of post install script","Documentation":"Location of post install script","Secure":false,"Schema":{"type":"string"}}
