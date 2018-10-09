@@ -341,9 +341,6 @@ ansible:
         - pxe-vm-2
         - pxe-vm-3
     variables:
-      install_iso_url:
-        type: string
-        value: {{ install_iso_url }}
       pxe_config:
         type: string
         value: {{ install_type }}
@@ -353,9 +350,6 @@ ansible:
       src_copy_dir:
         type: string
         value: {{ src_copy_dir }}
-      local_snaps_boot_dir:
-        type: string
-        value: {{ local_snaps_boot_dir }}
       priv_addr:
         type: network
         network_name: admin-net
@@ -482,6 +476,7 @@ ansible:
         type: string
         value: {{ hosts_yaml_target_path }}
 
+# TODO - REMOVE CONDITIONAL AFTER DRP CHANGES WORK FOR REAL VALIDATION
 {% if 1 == 2 %}
 
   # Verify admin interface on pxe-vm-1 was configured
