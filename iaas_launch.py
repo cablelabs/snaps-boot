@@ -18,6 +18,9 @@ import argparse
 import logging
 
 import os
+import sys
+
+from drp_python.network_layer.http_session import HttpSession
 
 from snaps_boot.common.utils import file_utils
 from snaps_boot.provision.hardware import pxe_utils
@@ -55,7 +58,7 @@ def main(arguments):
     log_level = logging.INFO
     if arguments.log_level != 'INFO':
         log_level = logging.DEBUG
-    logging.basicConfig(level=log_level)
+    logging.basicConfig(stream=sys.stdout, level=log_level)
 
     logger.info('Launching Operation Starts ........')
 
@@ -67,22 +70,42 @@ def main(arguments):
     logger.info('export CWD_IAAS=%s', export_path)
 
     config = file_utils.read_yaml(arguments.config)
-    logger.info('Read configuration file - ' + arguments.config)
+    logger.info('Read configuration file [%s]', arguments.config)
+
+    prv_config = config.get('PROVISION')
+    if not prv_config:
+        raise Exception('Missing top-level config member PROVISION')
+    logger.info('PROVISION configuration %s', prv_config)
+
+    drp_config = prv_config.get('digitalRebar')
+    if drp_config:
+        logger.info('Rebar configuration %s', drp_config)
+        user = drp_config.get('user', 'rocketskates')
+        password = drp_config.get('password', 'r0cketsk8ts')
+    else:
+        user = 'rocketskates'
+        password = 'r0cketsk8ts'
+
+    rebar_session = HttpSession(
+        'https://localhost:8092', user, password)
+
     if arguments.hardware is not ARG_NOT_SET:
-        logger.error('Need to implement with digital rebar')
-        rebar_utils.setup_dhcp_service(config)
+        rebar_utils.setup_dhcp_service(rebar_session, config)
 
     if arguments.provisionClean is not ARG_NOT_SET:
-        logger.error('Need to implement with digital rebar')
-        # __read_hw_config(config, "provisionClean")
+        rebar_utils.cleanup_dhcp_service(rebar_session, config)
 
     if arguments.staticIPCleanup is not ARG_NOT_SET:
+        # Do we really need to support this function?
         __read_hw_config(config, "staticIPCleanup")
 
     if arguments.staticIPConfigure is not ARG_NOT_SET:
+        # Is this something that we should do with cloud-init or other means
+        # immediately after the OS is laid down?
         __read_hw_config(config, "staticIPConfigure")
 
     if arguments.boot is not ARG_NOT_SET:
+        # Why 3 different means to perform a PXE reboot
         if arguments.boot == "ubuntu":
             __read_hw_config(config, "ubuntu")
         elif arguments.boot == "centos":
@@ -91,10 +114,13 @@ def main(arguments):
             __read_hw_config(config, "boot")
 
     if arguments.bootd is not ARG_NOT_SET:
+        # This power cycles the nodes
         __read_hw_config(config, "bootd")
     if arguments.setIsolCpus is not ARG_NOT_SET:
+        # This operation is unclear
         __read_hw_config(config, "setIsolCpus")
     if arguments.delIsolCpus is not ARG_NOT_SET:
+        # This operation is unclear
         __read_hw_config(config, "delIsolCpus")
     logger.info('Completed operation successfully')
 
@@ -140,6 +166,9 @@ if __name__ == '__main__':
         dest='bootd',
         nargs='?',
         default=ARG_NOT_SET,
+        # TODO/FIXME - Does this operation really do anything differently
+        # CI just calls -b in other contexts and those machines are booting
+        # from the internal storage
         help='When used, to boot the system via hdd')
     parser.add_argument(
         '-pc',
@@ -147,40 +176,40 @@ if __name__ == '__main__':
         dest='provisionClean',
         nargs='?',
         default=ARG_NOT_SET,
-        help='When used, the pxe server environment will be '
-        'removed')
+        # TODO/FIXME - Description is incorrect
+        help='When used, the pxe server environment will be removed')
     parser.add_argument(
         '-s',
         '--staticIPConfigure',
         dest='staticIPConfigure',
         nargs='?',
         default=ARG_NOT_SET,
-        help='When used, the pxe server environment will be '
-        'removed')
+        # TODO/FIXME - Description is incorrect
+        help='When used, the pxe server environment will be removed')
     parser.add_argument(
         '-sc',
         '--staticIPCleanup',
         dest='staticIPCleanup',
         nargs='?',
         default=ARG_NOT_SET,
-        help='When used, the pxe server environment will be '
-        'removed')
+        # TODO/FIXME - Description is incorrect
+        help='When used, the pxe server environment will be removed')
     parser.add_argument(
         '-i',
         '--setIsolCpus',
         dest='setIsolCpus',
         nargs='?',
         default=ARG_NOT_SET,
-        help='When used, the pxe server environment will be '
-        'removed')
+        # TODO/FIXME - Description is incorrect
+        help='When used, the pxe server environment will be removed')
     parser.add_argument(
         '-ic',
         '--cleanIsolCpus',
         dest='delIsolCpus',
         nargs='?',
         default=ARG_NOT_SET,
-        help='When used, the pxe server environment will be '
-        'removed')
+        # TODO/FIXME - Description is incorrect
+        help='When used, the pxe server environment will be removed')
     args = parser.parse_args()
 
     if (args.hardware is ARG_NOT_SET and args.boot is ARG_NOT_SET

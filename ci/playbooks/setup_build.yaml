@@ -41,6 +41,12 @@
       become_user: root
       apt: name=python-pip
 
+    - name: Install snaps-boot requirements
+      command: pip install -r {{ src_copy_dir }}/snaps-boot/requirements-drb.txt
+      become: yes
+      become_method: sudo
+      become_user: root
+
     - name: Install snaps-boot
       command: pip install -e {{ src_copy_dir }}/snaps-boot
       become: yes
@@ -58,19 +64,27 @@
       register: out
     - debug: var=out.stderr_lines
 
-    - name: Clean just in case PXE & DHCP server - iaas_launch.py -pc
+    - name: Make sure Digital Rebar is running
       become: yes
       become_method: sudo
       become_user: root
-      command: "python {{ src_copy_dir }}/snaps-boot/iaas_launch.py -f {{ hosts_yaml_path }} -pc"
-      register: out
-    - debug: var=out.stderr_lines
+      systemd:
+        name: dr-provision
+        state: started
+
+#    - name: Clean just in case PXE & DHCP server - iaas_launch.py -pc
+#      become: yes
+#      become_method: sudo
+#      become_user: root
+#      command: "python {{ src_copy_dir }}/snaps-boot/iaas_launch.py -f {{ hosts_yaml_path }} -pc"
+#      register: out
+#    - debug: var=out.stderr_lines
 
     - name: Config PXE & DHCP server - iaas_launch.py -p
       become: yes
       become_method: sudo
       become_user: root
-      command: "python {{ src_copy_dir }}/snaps-boot/iaas_launch.py -f {{ hosts_yaml_path }} -p"
+      shell: "python {{ src_copy_dir }}/snaps-boot/iaas_launch.py -f {{ hosts_yaml_path }} -p > ~/snaps-boot.out"
       register: out
       ignore_errors: True
     - debug: var=out.stderr_lines
@@ -79,11 +93,3 @@
     - name: Validating iaas_launch returned 0
       fail: msg="iaas_launch.py -d command failed"
       when: out.rc != 0
-
-    - name: Make sure Digital Rebar is running
-      become: yes
-      become_method: sudo
-      become_user: root
-      systemd:
-        name: dr-provision
-        state: started

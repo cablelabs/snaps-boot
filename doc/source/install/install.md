@@ -101,11 +101,11 @@ Ubuntu 16.04 Xenial as host OS. This host needs to be able to reach the Internet
 to download the software.
 
 1. Install Ubuntu on the Build Server
-2. Download SNAPS-boot from GitHub
+1. Download SNAPS-boot from GitHub
 ```
 wget https://github.com/cablelabs/snaps-boot/archive/master.zip
 ```
-3. Extract the files
+1. Extract the files
 ```
 unzip master.zip
 ```
@@ -114,6 +114,14 @@ unzip master.zip
 
 ```
 git clone https://github.com/cablelabs/snaps-boot.git
+```
+
+1. Install
+
+```
+sudo apt install python-pip
+sudo pip install -r snaps-boot/requirements-drb.txt
+sudo pip install -e snaps-boot/
 ```
 
 >:warning: Note:  If you use git, make sure not to push your changes back to the repository.

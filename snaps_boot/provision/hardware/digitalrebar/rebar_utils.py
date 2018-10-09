@@ -12,68 +12,35 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import logging
-from netaddr import IPAddress
-import requests
-
-from snaps_boot.provision.hardware.digitalrebar.rebar_erros import \
-    RebarPostError
+from drp_python.model_layer.subnet_model import SubnetModel
+from drp_python.subnet import Subnet
 
 logger = logging.getLogger('rebar_utils')
 
 
-def setup_dhcp_service(boot_conf):
+def setup_dhcp_service(rebar_session, boot_conf):
     """
     Creates a DHCP service
+    :param rebar_session: the Digital Rebar session object
     :param boot_conf: the configuration
+    :return - the drb-python Subnet object
     """
-    # data = __generate_subnet_config(boot_conf)
-    # url = None
-
     logger.info('Creating a subnet for DHCP')
-    # response = requests.post(url, data=data)
-
-    # if response.status_code != requests.codes.ok:
-    #     raise RebarPostError(
-    #         'POST error to {} with response {}'.format(url, response.text)
-    #     )
-
-
-def __generate_subnet_config(boot_conf):
-    """
-    Returns a dict containing the
-    :param boot_conf:
-    :return:
-    """
     subnet_conf = boot_conf['PROVISION']['DHCP']['subnet'][0]
+    drp_subnet_conf = SubnetModel(**subnet_conf)
+    subnet = Subnet(rebar_session, drp_subnet_conf)
+    subnet.create()
 
-    netmask_bits = IPAddress(subnet_conf['netmask']).netmask_bits()
 
-    cidr = '{}/{}'.format(subnet_conf['address'], netmask_bits)
-
-    ranges = subnet_conf['range'].split(' ')
-    start = ranges[0]
-    end = ranges[1]
-    gateway = subnet_conf['router']
-    dns = subnet_conf['dns']
-    domain = subnet_conf['dn']
-
-    out = '''
-    {
-        "Name": "local_subnet",
-        "Subnet": "{0}",
-        "ActiveStart": "{1}",
-        "ActiveEnd": "{2}",
-        "ActiveLeaseTime": 60,
-        "Enabled": true,
-        "ReservedLeaseTime": 7200,
-        "Strategy": "MAC",
-        "Options": [
-            { "Code": 3, "Value": "{3}", "Description": "Default Gateway" },
-            { "Code": 6, "Value": "{4}", "Description": "DNS Servers" },
-            { "Code": 15, "Value": "{5}", "Description": "Domain Name" }
-        ]
-    }
-    '''.format(cidr, start, end, gateway, dns, domain)
-
-    logger.debug('Subnet config \n%s', out)
-    return out
+def cleanup_dhcp_service(rebar_session, boot_conf):
+    """
+    Creates a DHCP service
+    :param rebar_session: the Digital Rebar session object
+    :param boot_conf: the configuration
+    :return - the drb-python Subnet object
+    """
+    logger.info('Delete a subnet for DHCP')
+    subnet_conf = boot_conf['PROVISION']['DHCP']['subnet'][0]
+    drp_subnet_conf = SubnetModel(**subnet_conf)
+    subnet = Subnet(rebar_session, drp_subnet_conf)
+    subnet.delete()
