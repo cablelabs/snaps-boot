@@ -1,1 +1,0 @@
-{"Validated":false,"Available":false,"Errors":[],"ReadOnly":false,"Meta":{"color":"red","icon":"pencil"},"Name":"seed/boot-interface","Description":"Server boot interface","Documentation":"Server boot interface","Secure":false,"Schema":{"type":"string"}}

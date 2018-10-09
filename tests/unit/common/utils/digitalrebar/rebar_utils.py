@@ -13,6 +13,8 @@
 # limitations under the License.
 import unittest
 
+from snaps_boot.provision.hardware.digitalrebar import rebar_utils
+
 
 class RebarUtilsTests(unittest.TestCase):
     """
@@ -23,3 +25,4 @@ class RebarUtilsTests(unittest.TestCase):
         Tests the rebar_utils.
         :return:
         """
+        rebar_utils.setup_dhcp_service(None, None)

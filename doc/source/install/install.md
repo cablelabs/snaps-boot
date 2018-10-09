@@ -127,15 +127,17 @@ sudo pip install -e snaps-boot/
 >:warning: Note:  If you use git, make sure not to push your changes back to the repository.
 ## 3 Configuration
 
-### 3.1 conf/pxe-cluster/hosts.yaml
-
-Save a copy of hosts.yaml before modifying it.
-`cp hosts.yaml origional-hosts.yaml`
+### 3.1 snaps-boot Configuration
 
 Configuration file used for hardware provisioning. Options defined here
- are used by deployment layer to discover and net boot host machines,
- allocate IP addresses, set proxies and install operating system on
-  these machines.
+are used by deployment layer to discover and net boot host machines,
+allocate IP addresses, set proxies and install operating system on
+these machines.
+
+Use the doc/conf/hosts.yaml file as a template for configuring your
+environment for use as your -f argument to iaas_launch.py. (note: the
+file does not need to be called hosts.yaml or reside in any particular
+directory)
 
 #### DHCP:
 

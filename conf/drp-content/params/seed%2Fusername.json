@@ -1,1 +1,0 @@
-{"Validated":false,"Available":false,"Errors":[],"ReadOnly":false,"Meta":{"color":"red","icon":"pencil"},"Name":"seed/username","Description":"User login name","Documentation":"User login name","Secure":false,"Schema":{"type":"string"}}

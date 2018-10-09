@@ -41,7 +41,7 @@
       become_user: root
       apt: name=python-pip
 
-    - name: Install snaps-boot requirements
+    - name: Install snaps-boot requirements for DRP
       command: pip install -r {{ src_copy_dir }}/snaps-boot/requirements-drb.txt
       become: yes
       become_method: sudo

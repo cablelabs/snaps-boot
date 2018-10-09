@@ -40,7 +40,7 @@ def __read_hw_config(config, operation):
         logger.info(
             'Read & Validate functionality for Hardware Provisioning - %s',
             operation)
-        pxe_utils.__main(config, operation)
+        pxe_utils.run(config, operation)
 
 
 def main(arguments):
