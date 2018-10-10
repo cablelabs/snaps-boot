@@ -24,7 +24,7 @@ import re
 import os
 import pkg_resources
 
-from snaps_boot.ansible_p.ansible_utils import ansible_playbook_launcher as apl
+from snaps_common.ansible_snaps import ansible_utils
 
 logger = logging.getLogger('deploy_venv')
 
@@ -212,8 +212,9 @@ def __static_ip_configure(static_dict, proxy_dict):
 
         interfaces = host_counter.get('interfaces')
         backup_var = "Y"
-        apl.__launch_ansible_playbook(
-            iplist, playbook_path_bak, {'target': target, 'bak': backup_var})
+        ansible_utils.apply_playbook(
+            playbook_path_bak, iplist,
+            variables={'target': target, 'bak': backup_var})
 
         for interface in interfaces:
             address = interface.get('address')
@@ -223,18 +224,17 @@ def __static_ip_configure(static_dict, proxy_dict):
             dns = interface.get('dns')
             dn = interface.get('dn')
             intf_type = interface.get('type')
-            apl.__launch_ansible_playbook(
-                iplist, playbook_path, {
-                    'target': target,
-                    'address': address,
-                    'gateway': gateway,
-                    'netmask': netmask,
-                    'iface': iface,
-                    'http_proxy': http_proxy,
-                    'https_proxy': https_proxy,
-                    'type': intf_type,
-                    'dns': dns,
-                    'dn': dn})
+            ansible_utils.apply_playbook(playbook_path, iplist, variables={
+                'target': target,
+                'address': address,
+                'gateway': gateway,
+                'netmask': netmask,
+                'iface': iface,
+                'http_proxy': http_proxy,
+                'https_proxy': https_proxy,
+                'type': intf_type,
+                'dns': dns,
+                'dn': dn})
 
 
 def __static_ip_cleanup(static_dict):
@@ -254,8 +254,9 @@ def __static_ip_cleanup(static_dict):
         target = host_counter.get('access_ip')
         interfaces = host_counter.get('interfaces')
         backup_var = "N"
-        apl.__launch_ansible_playbook(
-            iplist, playbook_path_bak, {'target': target, 'bak': backup_var})
+        ansible_utils.apply_playbook(
+            playbook_path_bak, iplist,
+            variables={'target': target, 'bak': backup_var})
 
         for interface in interfaces:
             address = interface.get('address')
@@ -265,16 +266,15 @@ def __static_ip_cleanup(static_dict):
             dns = interface.get('dns')
             dn = interface.get('dn')
             intf_type = interface.get('type')
-            apl.__launch_ansible_playbook(
-                iplist, playbook_path, {
-                    'target': target,
-                    'address': address,
-                    'gateway': gateway,
-                    'netmask': netmask,
-                    'iface': iface,
-                    'type': intf_type,
-                    'dns': dns,
-                    'dn': dn})
+            ansible_utils.apply_playbook(playbook_path, iplist, variables={
+                'target': target,
+                'address': address,
+                'gateway': gateway,
+                'netmask': netmask,
+                'iface': iface,
+                'type': intf_type,
+                'dns': dns,
+                'dn': dn})
 
 
 def __validate_static_config(static_dict):
@@ -318,12 +318,11 @@ def __set_isol_cpus(cpu_core_dict):
             logger.info("isolate cpu's for " + target + " are " + isolcpus)
             logger.info("hugepagesz for " + target + "  " + hugepagesz)
             logger.info("hugepages for " + target + "  " + hugepages)
-            apl.__launch_ansible_playbook(
-                iplist, playbook_path, {
-                    'target': target,
-                    'isolcpus': isolcpus,
-                    'hugepagesz': hugepagesz,
-                    'hugepages': hugepages})
+            ansible_utils.apply_playbook(playbook_path, iplist, variables={
+                'target': target,
+                'isolcpus': isolcpus,
+                'hugepagesz': hugepagesz,
+                'hugepages': hugepages})
 
 
 def __del_isol_cpus(cpu_core_dict):
@@ -349,12 +348,11 @@ def __del_isol_cpus(cpu_core_dict):
             logger.info("isolate cpu's for " + target + " are " + isolcpus)
             logger.info("hugepagesz for " + target + "  " + hugepagesz)
             logger.info("hugepages for " + target + "  " + hugepages)
-            apl.__launch_ansible_playbook(
-                iplist, playbook_path, {
-                    'target': target,
-                    'isolcpus': isolcpus,
-                    'hugepagesz': hugepagesz,
-                    'hugepages': hugepages})
+            ansible_utils.apply_playbook(playbook_path, iplist, variables={
+                'target': target,
+                'isolcpus': isolcpus,
+                'hugepagesz': hugepagesz,
+                'hugepages': hugepages})
 
 
 def __modify_file_for_os(operation):

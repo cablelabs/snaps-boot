@@ -44,9 +44,9 @@ openstack:
     - flavor:
         os_creds_name: admin-creds
         name: build-flavor-{{ build_num }}
-        ram: 4096
+        ram: 8192
         disk: 80
-        vcpus: 2
+        vcpus: 4
 {% if flavor_metadata is defined %}
         metadata:
         {% for key, value in flavor_metadata.iteritems() %}

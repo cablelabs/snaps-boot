@@ -1,1 +1,0 @@
-git+https://github.com/cablelabs/drb-python@master#egg=drp-python
