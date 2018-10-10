@@ -1,0 +1,2 @@
+git+https://github.com/cablelabs/snaps-common@master#egg=snaps-common
+git+https://github.com/cablelabs/drb-python@master#egg=drp-python

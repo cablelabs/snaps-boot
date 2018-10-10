@@ -22,7 +22,7 @@ import sys
 
 from drp_python.network_layer.http_session import HttpSession
 
-from snaps_boot.common.utils import file_utils
+from snaps_common.file import file_utils
 from snaps_boot.provision.hardware import pxe_utils
 from snaps_boot.provision.hardware.digitalrebar import rebar_utils
 
@@ -40,7 +40,7 @@ def __read_hw_config(config, operation):
         logger.info(
             'Read & Validate functionality for Hardware Provisioning - %s',
             operation)
-        pxe_utils.__main(config, operation)
+        pxe_utils.run(config, operation)
 
 
 def main(arguments):

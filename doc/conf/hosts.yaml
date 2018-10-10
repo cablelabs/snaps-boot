@@ -52,7 +52,7 @@ PROVISION:
     ftp_proxy: ""
     http_proxy: ""
     https_proxy: ""
-    #user to provide ngcacher_proxy only in case when servers are behind company 
+    #user to provide ngcacher_proxy only in case when servers are behind company
     #firewall, else left blank.
     ngcacher_proxy: ""
 

@@ -13,13 +13,27 @@
 # limitations under the License.
 import unittest
 
+import mock
+import pkg_resources
+from snaps_common.file import file_utils
+
+from snaps_boot.provision.hardware.digitalrebar import rebar_utils
+
 
 class RebarUtilsTests(unittest.TestCase):
     """
     Tests function snaps_boot.provision.hardware.digitalrebar#rebar_utils
     """
-    def test_setup_dhcp_service(self):
+    @mock.patch('os.system', return_value=0)
+    @mock.patch('drp_python.translation_layer.api_http.ApiHttp.open')
+    @mock.patch('drp_python.translation_layer.subnets_translation.'
+                'SubnetTranslation.get_subnet')
+    @mock.patch('drp_python.subnet.Subnet.create')
+    def test_setup_dhcp_service(self, m1, m2, m3, m4):
         """
         Tests the rebar_utils.
         :return:
         """
+        conf_file = pkg_resources.resource_filename('tests.conf', 'hosts.yaml')
+        conf = file_utils.read_yaml(conf_file)
+        rebar_utils.setup_dhcp_service(None, conf)

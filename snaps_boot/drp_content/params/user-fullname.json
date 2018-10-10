@@ -1,0 +1,17 @@
+{
+  "Validated": false,
+  "Available": false,
+  "Errors": [],
+  "ReadOnly": false,
+  "Meta": {
+    "color": "red",
+    "icon": "pencil"
+  },
+  "Name": "seed/user-fullname",
+  "Description": "User full name",
+  "Documentation": "User full name",
+  "Secure": false,
+  "Schema": {
+    "type": "string"
+  }
+}

@@ -26,7 +26,9 @@
         src: "{{ src_snaps_boot_dir }}"
         dest: "{{ src_copy_dir }}"
         dirs: yes
-    
+        rsync_opts:
+          - "--exclude=.idea"
+
     - name: Check if {{ src_copy_dir }}/snaps-boot exists
       stat: path={{ src_copy_dir }}/snaps-boot
       register: dir
@@ -41,8 +43,8 @@
       become_user: root
       apt: name=python-pip
 
-    - name: Install snaps-boot requirements
-      command: pip install -r {{ src_copy_dir }}/snaps-boot/requirements-drb.txt
+    - name: Install snaps-boot requirements-git.txt
+      command: pip install -r {{ src_copy_dir }}/snaps-boot/requirements-git.txt
       become: yes
       become_method: sudo
       become_user: root
