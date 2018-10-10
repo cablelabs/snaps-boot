@@ -19,8 +19,8 @@ from drp_python.model_layer.subnet_model import SubnetModel
 from drp_python.subnet import Subnet
 # from drp_python.model_layer.reservation_model import ReservationModel
 # from drp_python.reservation import Reservation
-# from drp_python.model_layer.machine_model import MachineModel
-# from drp_python.machine import Machine
+from drp_python.model_layer.machine_model import MachineModel
+from drp_python.machine import Machine
 
 logger = logging.getLogger('rebar_utils')
 
@@ -33,7 +33,7 @@ def setup_dhcp_service(rebar_session, boot_conf):
     :raises Exceptions
     """
     logger.info('Setting up Digital Rebar objects for DHCP/PXE booting')
-    __create_content_pack(rebar_session, boot_conf)
+    __create_content_pack()
     __create_subnet(rebar_session, boot_conf)
     __create_reservations(rebar_session, boot_conf)
     __create_machines(rebar_session, boot_conf)
@@ -50,14 +50,12 @@ def cleanup_dhcp_service(rebar_session, boot_conf):
     __delete_machines(rebar_session, boot_conf)
     __delete_reservations(rebar_session, boot_conf)
     __delete_subnet(rebar_session, boot_conf)
-    __delete_content_pack(rebar_session, boot_conf)
+    __delete_content_pack()
 
 
-def __create_content_pack(rebar_session, boot_conf):
+def __create_content_pack():
     """
     Creates a Digital Rebar subnet object
-    :param rebar_session: the HTTP session to Digital Rebar
-    :param boot_conf: the boot configuration
     :raises Exceptions
     """
     # TODO/FIXME - find appropriate API to perform these tasks
@@ -76,11 +74,9 @@ def __create_content_pack(rebar_session, boot_conf):
         raise Exception('Command failed [%s]', upload_cmd)
 
 
-def __delete_content_pack(rebar_session, boot_conf):
+def __delete_content_pack():
     """
     Deletes a Digital Rebar subnet object
-    :param rebar_session: the HTTP session to Digital Rebar
-    :param boot_conf: the boot configuration
     :raises Exceptions
     """
     # TODO/FIXME - find appropriate API to perform these tasks
@@ -123,7 +119,10 @@ def __instantiate_drp_subnet(rebar_session, boot_conf):
     :param boot_conf: the boot configuration
     :return: a Subnet object
     """
+    # TODO/FIXME - Why are there multiple subnets configured
     subnet_conf = boot_conf['PROVISION']['DHCP']['subnet'][0]
+    # TODO/FIXME - Create function to return a SubnetModel so we can support
+    # TODO/FIXME - different types of configurations
     drp_subnet_conf = SubnetModel(**subnet_conf)
     return Subnet(rebar_session, drp_subnet_conf)
 
@@ -161,6 +160,7 @@ def __instantiate_drp_reservations(rebar_session, boot_conf):
     :return: a list of Reservation objects
     """
     out = list()
+    # TODO/FIXME - Why are there multiple subnets configured
     subnet_conf = boot_conf['PROVISION']['DHCP']['subnet'][0]
 
     bind_hosts = subnet_conf['bind_host']
@@ -203,9 +203,55 @@ def __instantiate_drp_machines(rebar_session, boot_conf):
     :return: a list of Machine objects
     """
     out = list()
-    host_confs = boot_conf['PROVISION']['STATIC']['host']
-    # for host_conf in host_confs:
-    #     drp_mach_conf = MachineModel(**host_conf)
-    #     out.append(Machine(rebar_session, drp_mach_conf))
+    prov_conf = boot_conf['PROVISION']
+    host_confs = prov_conf['STATIC']['host']
+    tftp_conf = prov_conf['TFTP']
+    dhcp_conf = prov_conf['DHCP']
+    # TODO/FIXME - Why are there multiple subnets configured
+    subnet_conf = dhcp_conf['subnet'][0]
+    bind_hosts_confs = subnet_conf['bind_host']
+    pxe_confs = tftp_conf.get('pxe_server_configuration')
+    if pxe_confs:
+        if isinstance(pxe_confs, list):
+            # TODO/FIXME - Determine how to deal with multiple PXE configs???
+            pxe_conf = pxe_confs[0]
+        else:
+            pxe_conf = pxe_confs
+    else:
+        raise Exception('Could not locate the PXE configuration for parsing')
+
+    for host_conf in host_confs:
+        drp_mach_conf = __get_drb_machine_config(
+            host_conf, pxe_conf, bind_hosts_confs)
+        out.append(Machine(rebar_session, drp_mach_conf))
 
     return out
+
+
+def __get_drb_machine_config(host_conf, pxe_conf, bind_host_confs):
+
+    operating_sys = None
+    for key, the_conf in pxe_conf.items():
+        operating_sys = the_conf.get('os')
+
+    mac = None
+    for bind_host_conf in bind_host_confs:
+        if bind_host_conf['ip'] == host_conf['access_ip']:
+            mac = bind_host_conf['mac']
+
+    if not operating_sys or not mac:
+        raise Exception('Cannot find the OS MAC configuration')
+
+    # TODO/FIXME - os and workflow must be hardcoded now
+    drp_mach_dict = {
+        'ip': host_conf['access_ip'],
+        'mac': mac,
+        'name': host_conf['name'],
+        'os': 'ubuntu-16.04.5-server-amd64.iso',
+        'type': 'snaps-boot',
+        'workflow': 'snaps-ubuntu-16.04'
+    }
+
+    logger.info('Instantiating a MachineModel object with %s', drp_mach_dict)
+
+    return MachineModel(**drp_mach_dict)
