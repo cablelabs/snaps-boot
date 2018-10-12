@@ -20,30 +20,19 @@ import logging
 import os
 import sys
 
+import pkg_resources
 from drp_python.network_layer.http_session import HttpSession
+from snaps_common.ansible_snaps import ansible_utils
 
 from snaps_common.file import file_utils
-from snaps_boot.provision.hardware import pxe_utils
-from snaps_boot.provision.hardware.digitalrebar import rebar_utils
+from snaps_boot.provision.hardware import pxe_utils, rebar_utils
 
 logger = logging.getLogger('iaas_launch')
 
 ARG_NOT_SET = "argument not set"
 
 
-def __read_hw_config(config, operation):
-    """
-     This will launch the provisioning of PXE setup on the configuration node.
-     :param config : This configuration data extracted from the host.yaml.
-    """
-    if config:
-        logger.info(
-            'Read & Validate functionality for Hardware Provisioning - %s',
-            operation)
-        pxe_utils.run(config, operation)
-
-
-def main(arguments):
+def __run(arguments):
     """
      This will launch the provisioning of Bare metat & IaaS.
      There is pxe based configuration defined to provision the bare metal.
@@ -60,14 +49,14 @@ def main(arguments):
         log_level = logging.DEBUG
     logging.basicConfig(stream=sys.stdout, level=log_level)
 
-    logger.info('Launching Operation Starts ........')
+    logger.info('Install dependencies')
+    # TODO/FIXME - Should we support remove DRP instances or will it always
+    # TODO/FIXME - run on the build host?
+    playbook_path = pkg_resources.resource_filename(
+        'snaps_boot.ansible_p.setup', 'dependencies.yaml')
+    ansible_utils.apply_playbook(playbook_path)
 
-    dir_path = os.path.dirname(os.path.realpath(__file__))
-    export_path = dir_path + "/"
-    os.environ['CWD_IAAS'] = export_path
-    print '===========================Current Exported Relevant Path' \
-          '=================================='
-    logger.info('export CWD_IAAS=%s', export_path)
+    logger.info('Launching Operation Starts ........')
 
     config = file_utils.read_yaml(arguments.config)
     logger.info('Read configuration file [%s]', arguments.config)
@@ -77,6 +66,7 @@ def main(arguments):
         raise Exception('Missing top-level config member PROVISION')
     logger.info('PROVISION configuration %s', prv_config)
 
+    # TODO/FIXME - Hardcoding of user/pass should be configurable
     drp_config = prv_config.get('digitalRebar')
     if drp_config:
         logger.info('Rebar configuration %s', drp_config)
@@ -86,6 +76,7 @@ def main(arguments):
         user = 'rocketskates'
         password = 'r0cketsk8ts'
 
+    # TODO/FIXME - DRP host and port should be configurable
     rebar_session = HttpSession(
         'https://localhost:8092', user, password)
 
@@ -97,31 +88,31 @@ def main(arguments):
 
     if arguments.staticIPCleanup is not ARG_NOT_SET:
         # Do we really need to support this function?
-        __read_hw_config(config, "staticIPCleanup")
+        pxe_utils.run(config, "staticIPCleanup")
 
     if arguments.staticIPConfigure is not ARG_NOT_SET:
         # Is this something that we should do with cloud-init or other means
         # immediately after the OS is laid down?
-        __read_hw_config(config, "staticIPConfigure")
+        pxe_utils.run(config, "staticIPConfigure")
 
     if arguments.boot is not ARG_NOT_SET:
         # Why 3 different means to perform a PXE reboot
         if arguments.boot == "ubuntu":
-            __read_hw_config(config, "ubuntu")
+            pxe_utils.run(config, "ubuntu")
         elif arguments.boot == "centos":
-            __read_hw_config(config, "centos")
+            pxe_utils.run(config, "centos")
         else:
-            __read_hw_config(config, "boot")
+            pxe_utils.run(config, "boot")
 
     if arguments.bootd is not ARG_NOT_SET:
         # This power cycles the nodes
-        __read_hw_config(config, "bootd")
+        pxe_utils.run(config, "bootd")
     if arguments.setIsolCpus is not ARG_NOT_SET:
         # This operation is unclear
-        __read_hw_config(config, "setIsolCpus")
+        pxe_utils.run(config, "setIsolCpus")
     if arguments.delIsolCpus is not ARG_NOT_SET:
         # This operation is unclear
-        __read_hw_config(config, "delIsolCpus")
+        pxe_utils.run(config, "delIsolCpus")
     logger.info('Completed operation successfully')
 
 
@@ -228,4 +219,4 @@ if __name__ == '__main__':
               ' and -f/--file'
         exit(1)
 
-    main(args)
+    __run(args)

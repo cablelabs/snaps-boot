@@ -17,6 +17,9 @@
 
   tasks:
     - name: Delete {{ src_copy_dir }}/snaps-boot directory
+      become: yes
+      become_method: sudo
+      become_user: root
       file:
         state: absent
         dest: "{{ src_copy_dir }}/snaps-boot"
@@ -57,22 +60,6 @@
 
     - name: Apply template and copy hosts.yaml to {{ hosts_yaml_path }}
       action: template src=templates/hosts.yaml.tmplt dest={{ hosts_yaml_path }}
-
-    - name: Complete build host setup - PreRequisite.sh
-      become: yes
-      become_method: sudo
-      become_user: root
-      command: "sh {{ src_copy_dir }}/snaps-boot/scripts/PreRequisite.sh"
-      register: out
-    - debug: var=out.stderr_lines
-
-    - name: Make sure Digital Rebar is running
-      become: yes
-      become_method: sudo
-      become_user: root
-      systemd:
-        name: dr-provision
-        state: started
 
 #    - name: Clean just in case PXE & DHCP server - iaas_launch.py -pc
 #      become: yes

@@ -188,11 +188,9 @@ def __pxe_bootd(bmc_dict):
 
 def __static_ip_configure(static_dict, proxy_dict):
     playbook_path = pkg_resources.resource_filename(
-        'snaps_boot.ansible_p.commission.hardware.playbooks',
-        'setIPConfig.yaml')
+        'snaps_boot.ansible_p.commission', 'setIPConfig.yaml')
     playbook_path_bak = pkg_resources.resource_filename(
-        'snaps_boot.ansible_p.commission.hardware.playbooks',
-        'interfaceBak.yaml')
+        'snaps_boot.ansible_p.commission', 'interfaceBak.yaml')
 
     host = static_dict.get('host')
     valid = __validate_static_config(static_dict)
@@ -239,11 +237,9 @@ def __static_ip_configure(static_dict, proxy_dict):
 
 def __static_ip_cleanup(static_dict):
     playbook_path = pkg_resources.resource_filename(
-        'snaps_boot.ansible_p.commission.hardware.playbooks',
-        'delIPConfig.yaml')
+        'snaps_boot.ansible_p.commission', 'delIPConfig.yaml')
     playbook_path_bak = pkg_resources.resource_filename(
-        'snaps_boot.ansible_p.commission.hardware.playbooks',
-        'interfaceBak.yaml')
+        'snaps_boot.ansible_p.commission', 'interfaceBak.yaml')
 
     host = static_dict.get('host')
     iplist = []
@@ -302,8 +298,7 @@ def __set_isol_cpus(cpu_core_dict):
     logger.info("setIsolCpus function")
     iplist = []
     playbook_path = pkg_resources.resource_filename(
-        'snaps_boot.ansible_p.commission.hardware.playbooks',
-        'setIsolCpus.yaml')
+        'snaps_boot.ansible_p.commission', 'setIsolCpus.yaml')
     host = cpu_core_dict.get('host')
     for ipCpu1 in host:
         target1 = ipCpu1.get('ip')
@@ -332,8 +327,7 @@ def __del_isol_cpus(cpu_core_dict):
     logger.info("setIsolCpus function")
     iplist = []
     playbook_path = pkg_resources.resource_filename(
-        'snaps_boot.ansible_p.commission.hardware.playbooks',
-        'delIsolCpus.yaml')
+        'snaps_boot.ansible_p.commission', 'delIsolCpus.yaml')
     host = cpu_core_dict.get('host')
     for ipCpu1 in host:
         target1 = ipCpu1.get('ip')

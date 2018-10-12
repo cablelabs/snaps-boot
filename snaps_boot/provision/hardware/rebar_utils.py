@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import logging
-import os
 
 import pkg_resources
 from drp_python.model_layer.subnet_model import SubnetModel
@@ -21,6 +20,7 @@ from drp_python.subnet import Subnet
 # from drp_python.reservation import Reservation
 from drp_python.model_layer.machine_model import MachineModel
 from drp_python.machine import Machine
+from snaps_common.ansible_snaps import ansible_utils
 
 logger = logging.getLogger('rebar_utils')
 
@@ -32,10 +32,10 @@ def setup_dhcp_service(rebar_session, boot_conf):
     :param boot_conf: the configuration
     :raises Exceptions
     """
-    logger.info('Setting up Digital Rebar objects for DHCP/PXE booting')
-    __create_content_pack()
+    __setup_drp()
     __create_subnet(rebar_session, boot_conf)
     __create_reservations(rebar_session, boot_conf)
+    __create_content_pack()
     __create_machines(rebar_session, boot_conf)
 
 
@@ -48,9 +48,32 @@ def cleanup_dhcp_service(rebar_session, boot_conf):
     """
     logger.info('Removing Digital Rebar objects for DHCP/PXE booting')
     __delete_machines(rebar_session, boot_conf)
+    __delete_content_pack()
     __delete_reservations(rebar_session, boot_conf)
     __delete_subnet(rebar_session, boot_conf)
-    __delete_content_pack()
+    __teardown_drp()
+
+
+def __setup_drp():
+    """
+    Installs DRP and creates required objects
+    :raises Exceptions
+    """
+    logger.info('Setting up Digital Rebar objects for DHCP/PXE booting')
+    playbook_path = pkg_resources.resource_filename(
+        'snaps_boot.ansible_p.setup', 'drp_setup.yaml')
+    ansible_utils.apply_playbook(playbook_path)
+
+
+def __teardown_drp():
+    """
+    Installs DRP and creates required objects
+    :raises Exceptions
+    """
+    logger.info('Setting up Digital Rebar objects for DHCP/PXE booting')
+    playbook_path = pkg_resources.resource_filename(
+        'snaps_boot.ansible_p.setup', 'drp_teardown.yaml')
+    ansible_utils.apply_playbook(playbook_path)
 
 
 def __create_content_pack():
@@ -61,17 +84,12 @@ def __create_content_pack():
     # TODO/FIXME - find appropriate API to perform these tasks
     logger.info('Creating content pack')
     pack_dir = pkg_resources.resource_filename('snaps_boot', 'drp_content')
-    os.chdir(pack_dir)
 
-    gen_cmd = 'drpcli contents bundle snaps-content.yaml'
-    retval = os.system(gen_cmd)
-    if retval != 0:
-        raise Exception('Command failed [%s]', gen_cmd)
-
-    upload_cmd = 'drpcli contents upload snaps-content.yaml'
-    retval = os.system(upload_cmd)
-    if retval != 0:
-        raise Exception('Command failed [%s]', upload_cmd)
+    logger.info('Setting up Digital Rebar objects for DHCP/PXE booting')
+    playbook_path = pkg_resources.resource_filename(
+        'snaps_boot.ansible_p.setup', 'drp_content_pack_create.yaml')
+    ansible_utils.apply_playbook(
+        playbook_path, variables={'content_dir': pack_dir})
 
 
 def __delete_content_pack():
@@ -81,13 +99,9 @@ def __delete_content_pack():
     """
     # TODO/FIXME - find appropriate API to perform these tasks
     logger.info('Deleting content pack')
-    pack_dir = pkg_resources.resource_filename('snaps_boot', 'drp_content')
-    os.chdir(pack_dir)
-
-    delete_cmd = 'drpcli contents destroy snaps-content'
-    retval = os.system(delete_cmd)
-    if retval != 0:
-        logger.warn('Command failed [%s]', delete_cmd)
+    playbook_path = pkg_resources.resource_filename(
+        'snaps_boot.ansible_p.setup', 'drp_content_pack_destroy.yaml')
+    ansible_utils.apply_playbook(playbook_path)
 
 
 def __create_subnet(rebar_session, boot_conf):
@@ -98,6 +112,7 @@ def __create_subnet(rebar_session, boot_conf):
     :raises Exceptions
     """
     subnet = __instantiate_drp_subnet(rebar_session, boot_conf)
+    logger.info('Attempting to create DRP subnet')
     subnet.create()
 
 
@@ -109,6 +124,7 @@ def __delete_subnet(rebar_session, boot_conf):
     :raises Exceptions
     """
     subnet = __instantiate_drp_subnet(rebar_session, boot_conf)
+    logger.info('Attempting to delete DRP subnet')
     subnet.delete()
 
 
@@ -123,6 +139,7 @@ def __instantiate_drp_subnet(rebar_session, boot_conf):
     subnet_conf = boot_conf['PROVISION']['DHCP']['subnet'][0]
     # TODO/FIXME - Create function to return a SubnetModel so we can support
     # TODO/FIXME - different types of configurations
+    logger.info('Instantiating DRP subnet object with values %s', subnet_conf)
     drp_subnet_conf = SubnetModel(**subnet_conf)
     return Subnet(rebar_session, drp_subnet_conf)
 
@@ -135,7 +152,9 @@ def __create_reservations(rebar_session, boot_conf):
     :raises Exceptions
     """
     reservations = __instantiate_drp_reservations(rebar_session, boot_conf)
+    logger.info('Attempting to create DRP reservations')
     for reservation in reservations:
+        logger.debug('Attempting to create DRP reservation %s', reservation)
         reservation.create()
 
 
@@ -147,7 +166,9 @@ def __delete_reservations(rebar_session, boot_conf):
     :raises Exceptions
     """
     reservations = __instantiate_drp_reservations(rebar_session, boot_conf)
+    logger.info('Attempting to delete DRP reservations')
     for reservation in reservations:
+        logger.debug('Attempting to delete DRP reservation %s', reservation)
         reservation.delete()
 
 
@@ -179,7 +200,9 @@ def __create_machines(rebar_session, boot_conf):
     :raises Exceptions
     """
     machines = __instantiate_drp_machines(rebar_session, boot_conf)
+    logger.info('Attempting to create DRP machines')
     for machine in machines:
+        logger.debug('Attempting to create DRP machine %s', machine)
         machine.create()
 
 
@@ -191,7 +214,9 @@ def __delete_machines(rebar_session, boot_conf):
     :raises Exceptions
     """
     machines = __instantiate_drp_machines(rebar_session, boot_conf)
+    logger.info('Attempting to create DRP machines')
     for machine in machines:
+        logger.debug('Attempting to delete DRP machine %s', machine)
         machine.delete()
 
 

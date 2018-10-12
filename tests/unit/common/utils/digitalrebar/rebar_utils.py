@@ -17,7 +17,7 @@ import mock
 import pkg_resources
 from snaps_common.file import file_utils
 
-from snaps_boot.provision.hardware.digitalrebar import rebar_utils
+from snaps_boot.provision.hardware import rebar_utils
 
 
 class RebarUtilsTests(unittest.TestCase):
