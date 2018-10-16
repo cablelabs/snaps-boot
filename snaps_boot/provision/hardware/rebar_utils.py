@@ -53,6 +53,8 @@ def cleanup_dhcp_service(rebar_session, boot_conf):
     __delete_reservations(rebar_session, boot_conf)
     __delete_subnet(rebar_session, boot_conf)
     __delete_content_pack()
+    __delete_workflows()
+    # __delete_images()
     __teardown_drp()
 
 
@@ -90,6 +92,18 @@ def __create_images():
     ansible_utils.apply_playbook(playbook_path)
 
 
+def __delete_images():
+    """
+    Creates a Digital Rebar image objects
+    :raises Exceptions
+    """
+    # TODO/FIXME - find appropriate API to perform these tasks
+    logger.info('Deleting Digital Rebar images')
+    playbook_path = pkg_resources.resource_filename(
+        'snaps_boot.ansible_p.setup', 'drp_images_destroy.yaml')
+    ansible_utils.apply_playbook(playbook_path)
+
+
 def __create_workflows():
     """
     Creates a Digital Rebar workflow objects
@@ -99,6 +113,18 @@ def __create_workflows():
     logger.info('Setting up Digital Rebar workflows')
     playbook_path = pkg_resources.resource_filename(
         'snaps_boot.ansible_p.setup', 'drp_workflows_create.yaml')
+    ansible_utils.apply_playbook(playbook_path)
+
+
+def __delete_workflows():
+    """
+    Creates a Digital Rebar workflow objects
+    :raises Exceptions
+    """
+    # TODO/FIXME - find appropriate API to perform these tasks
+    logger.info('Deleting up Digital Rebar workflows')
+    playbook_path = pkg_resources.resource_filename(
+        'snaps_boot.ansible_p.setup', 'drp_workflows_destroy.yaml')
     ansible_utils.apply_playbook(playbook_path)
 
 
@@ -126,7 +152,11 @@ def __delete_content_pack():
     logger.info('Deleting content pack')
     playbook_path = pkg_resources.resource_filename(
         'snaps_boot.ansible_p.setup', 'drp_content_pack_destroy.yaml')
-    ansible_utils.apply_playbook(playbook_path)
+
+    try:
+        ansible_utils.apply_playbook(playbook_path)
+    except Exception as e:
+        logger.warn('Unexpected error deleting content bundle - %s', e)
 
 
 def __create_subnet(rebar_session, boot_conf):
@@ -217,7 +247,7 @@ def __instantiate_drp_reservations(rebar_session, boot_conf):
     return out
 
 
-def __create_machines(rebar_session, boot_conf):
+def __create_machines(rebar_session, boot_conf, retry=False):
     """
     Creates all of the DHCP reservations for PXE booting
     :param rebar_session: the HTTP session to Digital Rebar
@@ -227,9 +257,23 @@ def __create_machines(rebar_session, boot_conf):
     machines = __instantiate_drp_machines(rebar_session, boot_conf)
     logger.info('Attempting to create DRP machines')
     for machine in machines:
-        logger.debug('Attempting to create DRP machine %s', machine)
-        machine.create()
-        logger.info('Created machine %s', machine)
+        try:
+            logger.debug('Attempting to create DRP machine %s', machine)
+            machine.create()
+            logger.info('Created machine %s', machine)
+        except Exception as e:
+            # TODO/FIXME - Why do we need to delete the content pack and
+            # TODO/FIXME - recreate in order for the workflows to be properly
+            # TODO/FIXME - created? Race condition?
+            if retry:
+                raise e
+
+            logger.warn('Unexpected error creating machine with error %s. '
+                        'Recreating content pack and retrying', e)
+            __delete_content_pack()
+            __create_content_pack()
+            __create_machines(rebar_session, boot_conf, True)
+            break
 
 
 def __delete_machines(rebar_session, boot_conf):
