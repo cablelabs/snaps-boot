@@ -33,9 +33,11 @@ def setup_dhcp_service(rebar_session, boot_conf):
     :raises Exceptions
     """
     __setup_drp()
+    __create_images()
+    __create_workflows()
+    __create_content_pack()
     __create_subnet(rebar_session, boot_conf)
     __create_reservations(rebar_session, boot_conf)
-    __create_content_pack()
     __create_machines(rebar_session, boot_conf)
 
 
@@ -48,9 +50,9 @@ def cleanup_dhcp_service(rebar_session, boot_conf):
     """
     logger.info('Removing Digital Rebar objects for DHCP/PXE booting')
     __delete_machines(rebar_session, boot_conf)
-    __delete_content_pack()
     __delete_reservations(rebar_session, boot_conf)
     __delete_subnet(rebar_session, boot_conf)
+    __delete_content_pack()
     __teardown_drp()
 
 
@@ -73,6 +75,32 @@ def __teardown_drp():
     logger.info('Setting up Digital Rebar objects for DHCP/PXE booting')
     playbook_path = pkg_resources.resource_filename(
         'snaps_boot.ansible_p.setup', 'drp_teardown.yaml')
+    ansible_utils.apply_playbook(playbook_path)
+
+
+def __create_images():
+    """
+    Creates a Digital Rebar image objects
+    :raises Exceptions
+    """
+    # TODO/FIXME - find appropriate API to perform these tasks
+    logger.info('Creating content pack')
+    logger.info('Setting up Digital Rebar objects for DHCP/PXE booting')
+    playbook_path = pkg_resources.resource_filename(
+        'snaps_boot.ansible_p.setup', 'drp_workflows_create.yaml')
+    ansible_utils.apply_playbook(playbook_path)
+
+
+def __create_workflows():
+    """
+    Creates a Digital Rebar workflow objects
+    :raises Exceptions
+    """
+    # TODO/FIXME - find appropriate API to perform these tasks
+    logger.info('Creating content pack')
+    logger.info('Setting up Digital Rebar objects for DHCP/PXE booting')
+    playbook_path = pkg_resources.resource_filename(
+        'snaps_boot.ansible_p.setup', 'drp_workflows_create.yaml')
     ansible_utils.apply_playbook(playbook_path)
 
 
@@ -204,6 +232,7 @@ def __create_machines(rebar_session, boot_conf):
     for machine in machines:
         logger.debug('Attempting to create DRP machine %s', machine)
         machine.create()
+        logger.info('Created machine %s', machine)
 
 
 def __delete_machines(rebar_session, boot_conf):

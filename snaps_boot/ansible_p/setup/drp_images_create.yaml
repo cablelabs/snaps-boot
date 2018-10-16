@@ -12,20 +12,8 @@
 # limitations under the License.
 ---
 - hosts: localhost
+  - name: Upload Sledgehammer ISO to DRP
+    command: drpcli bootenvs uploadiso sledgehammer
 
-  tasks:
-  - name: Install Digital Rebar
-    become: yes
-    become_method: sudo
-    become_user: root
-    shell: "curl -fsSL get.rebar.digital/stable | bash -s -- install"
-
-  - name: dr-provision
-    become: yes
-    become_method: sudo
-    become_user: root
-    systemd:
-      state: restarted
-      daemon_reload: yes
-      enabled: yes
-      name: dr-provision
+  - name: Upload Ubuntu 16.04 ISO to DRP
+    command: drpcli bootenvs uploadiso ubuntu-16.04-install
