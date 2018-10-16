@@ -29,7 +29,10 @@ class RebarUtilsTests(unittest.TestCase):
     @mock.patch('drp_python.translation_layer.subnets_translation.'
                 'SubnetTranslation.get_subnet')
     @mock.patch('drp_python.subnet.Subnet.create')
-    def test_setup_dhcp_service(self, m1, m2, m3, m4):
+    @mock.patch('drp_python.machine.Machine.create')
+    @mock.patch('drp_python.machine.Machine.get')
+    @mock.patch('snaps_common.ansible_snaps.ansible_utils.apply_playbook')
+    def test_setup_dhcp_service(self, m1, m2, m3, m4, m5, m6, m7):
         """
         Tests the rebar_utils.
         :return:

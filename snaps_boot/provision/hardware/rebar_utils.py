@@ -313,40 +313,40 @@ def __instantiate_drp_machines(rebar_session, boot_conf):
         else:
             pxe_conf = pxe_confs
     else:
-        raise Exception('Could not locate the PXE configuration for parsing')
+        pxe_conf = tftp_conf
 
     for host_conf in host_confs:
         drp_mach_conf = __get_drb_machine_config(
             host_conf, pxe_conf, bind_hosts_confs)
-        out.append(Machine(rebar_session, drp_mach_conf))
+        if drp_mach_conf:
+            out.append(Machine(rebar_session, drp_mach_conf))
 
     return out
 
 
 def __get_drb_machine_config(host_conf, pxe_conf, bind_host_confs):
 
-    operating_sys = None
-    for key, the_conf in pxe_conf.items():
-        operating_sys = the_conf.get('os')
+    operating_sys = pxe_conf.get('os')
 
     mac = None
     for bind_host_conf in bind_host_confs:
         if bind_host_conf['ip'] == host_conf['access_ip']:
             mac = bind_host_conf['mac']
 
-    if not operating_sys or not mac:
-        raise Exception('Cannot find the OS MAC configuration')
+    if operating_sys and mac:
+        # TODO/FIXME - os and workflow must be hardcoded now
+        drp_mach_dict = {
+            'ip': host_conf['access_ip'],
+            'mac': mac,
+            'name': host_conf['name'],
+            'os': 'ubuntu-16.04.5-server-amd64.iso',
+            'type': 'snaps-boot',
+            'workflow': 'snaps-ubuntu-16.04'
+        }
 
-    # TODO/FIXME - os and workflow must be hardcoded now
-    drp_mach_dict = {
-        'ip': host_conf['access_ip'],
-        'mac': mac,
-        'name': host_conf['name'],
-        'os': 'ubuntu-16.04.5-server-amd64.iso',
-        'type': 'snaps-boot',
-        'workflow': 'snaps-ubuntu-16.04'
-    }
+        logger.info('Instantiating a MachineModel object with %s', drp_mach_dict)
 
-    logger.info('Instantiating a MachineModel object with %s', drp_mach_dict)
-
-    return MachineModel(**drp_mach_dict)
+        return MachineModel(**drp_mach_dict)
+    else:
+        logger.warn('Unable to create machine with os [%s] and mac [%s]',
+                    operating_sys, mac)
