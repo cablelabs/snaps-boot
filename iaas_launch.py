@@ -64,7 +64,7 @@ def __run(arguments):
     prv_config = config.get('PROVISION')
     if not prv_config:
         raise Exception('Missing top-level config member PROVISION')
-    logger.info('PROVISION configuration %s', prv_config)
+    logger.debug('PROVISION configuration %s', prv_config)
 
     # TODO/FIXME - Hardcoding of user/pass should be configurable
     drp_config = prv_config.get('digitalRebar')
