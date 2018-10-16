@@ -72,7 +72,7 @@ def __teardown_drp():
     Installs DRP and creates required objects
     :raises Exceptions
     """
-    logger.info('Setting up Digital Rebar objects for DHCP/PXE booting')
+    logger.info('Stopping and disabling Digital Rebar')
     playbook_path = pkg_resources.resource_filename(
         'snaps_boot.ansible_p.setup', 'drp_teardown.yaml')
     ansible_utils.apply_playbook(playbook_path)
@@ -84,10 +84,9 @@ def __create_images():
     :raises Exceptions
     """
     # TODO/FIXME - find appropriate API to perform these tasks
-    logger.info('Creating content pack')
-    logger.info('Setting up Digital Rebar objects for DHCP/PXE booting')
+    logger.info('Setting up Digital Rebar images')
     playbook_path = pkg_resources.resource_filename(
-        'snaps_boot.ansible_p.setup', 'drp_workflows_create.yaml')
+        'snaps_boot.ansible_p.setup', 'drp_images_create.yaml')
     ansible_utils.apply_playbook(playbook_path)
 
 
@@ -97,8 +96,7 @@ def __create_workflows():
     :raises Exceptions
     """
     # TODO/FIXME - find appropriate API to perform these tasks
-    logger.info('Creating content pack')
-    logger.info('Setting up Digital Rebar objects for DHCP/PXE booting')
+    logger.info('Setting up Digital Rebar workflows')
     playbook_path = pkg_resources.resource_filename(
         'snaps_boot.ansible_p.setup', 'drp_workflows_create.yaml')
     ansible_utils.apply_playbook(playbook_path)
@@ -110,10 +108,9 @@ def __create_content_pack():
     :raises Exceptions
     """
     # TODO/FIXME - find appropriate API to perform these tasks
-    logger.info('Creating content pack')
+    logger.info('Creating Digital Rebar content pack')
     pack_dir = pkg_resources.resource_filename('snaps_boot', 'drp_content')
 
-    logger.info('Setting up Digital Rebar objects for DHCP/PXE booting')
     playbook_path = pkg_resources.resource_filename(
         'snaps_boot.ansible_p.setup', 'drp_content_pack_create.yaml')
     ansible_utils.apply_playbook(

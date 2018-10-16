@@ -12,6 +12,8 @@
 # limitations under the License.
 ---
 - hosts: localhost
+
+  tasks:
   - name: Upload Sledgehammer ISO to DRP
     command: drpcli bootenvs uploadiso sledgehammer
 
