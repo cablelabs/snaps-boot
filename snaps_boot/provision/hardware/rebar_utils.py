@@ -17,8 +17,8 @@ import time
 import pkg_resources
 from drp_python.model_layer.subnet_model import SubnetModel
 from drp_python.subnet import Subnet
-# from drp_python.model_layer.reservation_model import ReservationModel
-# from drp_python.reservation import Reservation
+from drp_python.model_layer.reservation_model import ReservationModel
+from drp_python.reservation import Reservation
 from drp_python.model_layer.machine_model import MachineModel
 from drp_python.machine import Machine
 from snaps_common.ansible_snaps import ansible_utils
@@ -230,6 +230,8 @@ def __create_reservations(rebar_session, boot_conf):
         logger.debug('Attempting to create DRP reservation %s', reservation)
         reservation.create()
 
+    logger.info('Completed creating %s reservations', len(reservations))
+
 
 def __delete_reservations(rebar_session, boot_conf):
     """
@@ -259,12 +261,24 @@ def __instantiate_drp_reservations(rebar_session, boot_conf):
     """
     out = list()
     # TODO/FIXME - Why are there multiple subnets configured
-    subnet_conf = boot_conf['PROVISION']['DHCP']['subnet'][0]
+    prov_confs = boot_conf['PROVISION']
+    subnet_conf = prov_confs['DHCP']['subnet'][0]
+    host_confs = prov_confs['STATIC']['host']
 
     bind_hosts = subnet_conf['bind_host']
-    # for bind_host in bind_hosts:
-    #     drp_res_conf = ReservationModel(**bind_host)
-    #     out.append(Reservation(rebar_session, drp_res_conf))
+    for bind_host in bind_hosts:
+        for host_conf in host_confs:
+            if host_conf['access_ip'] == bind_host['ip']:
+                res_conf = {
+                    'ip': bind_host['ip'],
+                    'mac': bind_host['mac'],
+                    'name': host_conf['name'],
+                    'type': 'admin',
+                }
+                logger.info('Creating DRP reservation %s', res_conf)
+                drp_res_conf = ReservationModel(**res_conf)
+                res = Reservation(rebar_session, drp_res_conf)
+                out.append(res)
 
     return out
 

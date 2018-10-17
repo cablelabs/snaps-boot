@@ -11,6 +11,8 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import logging
+import sys
 import unittest
 
 import mock
@@ -18,6 +20,8 @@ import pkg_resources
 from snaps_common.file import file_utils
 
 from snaps_boot.provision.hardware import rebar_utils
+
+logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
 
 
 class RebarUtilsTests(unittest.TestCase):
@@ -31,8 +35,12 @@ class RebarUtilsTests(unittest.TestCase):
     @mock.patch('drp_python.subnet.Subnet.create')
     @mock.patch('drp_python.machine.Machine.create')
     @mock.patch('drp_python.machine.Machine.get')
+    @mock.patch('drp_python.reservation.Reservation.__init__',
+                return_value=None)
+    @mock.patch('drp_python.reservation.Reservation.create')
     @mock.patch('snaps_common.ansible_snaps.ansible_utils.apply_playbook')
-    def test_setup_dhcp_service(self, m1, m2, m3, m4, m5, m6, m7):
+    @mock.patch('time.sleep')
+    def test_setup_dhcp_service(self, m1, m2, m3, m4, m5, m6, m7, m8, m9,m10):
         """
         Tests the rebar_utils.
         :return:
