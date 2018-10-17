@@ -13,6 +13,9 @@
 
 ---
 PROVISION:
+  digitalRebar:
+    user: rocketskates
+    password: r0cketsk8ts
   DHCP:
     subnet:
       -

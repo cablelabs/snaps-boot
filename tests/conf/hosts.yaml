@@ -1,0 +1,236 @@
+--- 
+PROVISION: 
+  DHCP: 
+    subnet: 
+      - 
+        address: "10.0.1.0"
+        bind_host: 
+          - 
+            ip: "10.0.1.12"
+            mac: "ec:b1:d7:7f:5a:6c"
+          - 
+            ip: "10.0.1.13"
+            mac: "ec:b1:d7:7f:8a:9c"
+          #- 
+          #  ip: "10.0.1.14"
+          #  mac: "ec:b1:d7:7f:4a:08"
+          - 
+            ip: "10.0.1.15"
+            mac: "ec:b1:d7:7f:5a:40"
+          - 
+            ip: "10.0.1.16"
+            mac: "ec:b1:d7:7f:6a:14"
+
+        broadcast-address: "10.0.1.255"
+        default-lease: 7600
+        dn: cablelabs.com
+        dns: "8.8.8.8"
+        listen_iface: eno1
+        max-lease: 7200
+        name: Managment_SUBNET
+        netmask: "255.255.255.0"
+        range: "10.0.1.17 10.0.1.19"
+        router: "10.0.1.1"
+        type: management
+
+  PROXY: 
+    ftp_proxy: ""
+    http_proxy: "http://10.0.1.11:3128"
+    https_proxy: ""
+  PXE: 
+    password: cable123
+    serverIp: "10.0.1.11"
+    user: ubuntu
+  STATIC:
+    host:
+     -
+       access_ip: 10.0.1.12
+       name: Controller
+       interfaces:
+         -
+           address: "10.0.1.12"
+           dn: ""
+           dns: ""
+           gateway: "0.0.0.0"
+           iface: eno1
+           name: Admin_Interface
+           netmask: "255.255.255.0"
+           type: management
+         -
+           address: "10.0.2.12"
+           dn: ""
+           dns: ""
+           gateway: "0.0.0.0"
+           iface: ens1f0
+           name: Tenant_Interface
+           netmask: "255.255.255.0"
+           type: tenant
+         -
+           address: "10.0.3.12"
+           dn: "cablelabs.com"
+           dns: "8.8.8.8"
+           gateway: "10.0.3.1"
+           iface: ens1f1
+           name: External_Interface
+           netmask: "255.255.255.0"
+           type: data
+     -
+       access_ip: 10.0.1.13
+       name: Compute0
+       interfaces:
+         -
+           address: "10.0.1.13"
+           dn: ""
+           dns: ""
+           gateway: "0.0.0.0"
+           iface: eno1
+           name: Admin_Interface
+           netmask: "255.255.255.0"
+           type: management
+         -
+           address: "10.0.2.13"
+           dn: ""
+           dns: ""
+           gateway: "0.0.0.0"
+           iface: ens1f0
+           name: Tenant_Interface
+           netmask: "255.255.255.0"
+           type: tenant
+         -
+           address: "10.0.3.13"
+           dn: "cablelabs.com"
+           dns: "8.8.8.8"
+           gateway: "10.0.3.1"
+           iface: ens1f1
+           name: External_Interface
+           netmask: "255.255.255.0"
+           type: data
+     -
+       access_ip: 10.0.1.14
+       name: Compute1
+       interfaces:
+         -
+           address: "10.0.1.14"
+           dn: ""
+           dns: ""
+           gateway: "0.0.0.0"
+           iface: eno1
+           name: Admin_Interface
+           netmask: "255.255.255.0"
+           type: management
+         -
+           address: "10.0.2.14"
+           dn: ""
+           dns: ""
+           gateway: "0.0.0.0"
+           iface: ens1f0
+           name: Tenant_Interface
+           netmask: "255.255.255.0"
+           type: tenant
+         -
+           address: "10.0.3.14"
+           dn: "cablelabs.com"
+           dns: "8.8.8.8"
+           gateway: "10.0.3.1"
+           iface: ens1f1
+           name: External_Interface
+           netmask: "255.255.255.0"
+           type: data
+     -
+       access_ip: 10.0.1.15
+       name: Compute2
+       interfaces:
+         -
+           address: "10.0.1.15"
+           dn: ""
+           dns: ""
+           gateway: "0.0.0.0"
+           iface: eno1
+           name: Admin_Interface
+           netmask: "255.255.255.0"
+           type: management
+         -
+           address: "10.0.2.15"
+           dn: ""
+           dns: ""
+           gateway: "0.0.0.0"
+           iface: ens1f0
+           name: Tenant_Interface
+           netmask: "255.255.255.0"
+           type: tenant
+         -
+           address: "10.0.3.15"
+           dn: "cablelabs.com"
+           dns: "8.8.8.8"
+           gateway: "10.0.3.1"
+           iface: ens1f1
+           name: External_Interface
+           netmask: "255.255.255.0"
+           type: data
+     -
+       access_ip: 10.0.1.16
+       name: Compute3
+       interfaces:
+         -
+           address: "10.0.1.16"
+           dn: ""
+           dns: ""
+           gateway: "0.0.0.0"
+           iface: eno1
+           name: Admin_Interface
+           netmask: "255.255.255.0"
+           type: management
+         -
+           address: "10.0.2.16"
+           dn: ""
+           dns: ""
+           gateway: "0.0.0.0"
+           iface: ens1f0
+           name: Tenant_Interface
+           netmask: "255.255.255.0"
+           type: tenant
+         -
+           address: "10.0.3.16"
+           dn: "cablelabs.com"
+           dns: "8.8.8.8"
+           gateway: "10.0.3.1"
+           iface: ens1f1
+           name: External_Interface
+           netmask: "255.255.255.0"
+           type: data
+
+  BMC:
+     host:
+       - 
+         user: "admin"
+         password: "cable123"
+         ip: "10.0.4.22"
+         mac: "ec:b1:d7:88:a8:be" 
+       -  
+         user: "admin"
+         password: "cable123"
+         ip: "10.0.4.23"
+         mac: "ec:b1:d7:88:49:d6"
+       -
+         user: "admin"
+         password: "cable123"
+         ip: "10.0.4.24"
+         mac: "ec:b1:d7:88:d8:9a"
+       - 
+         user: "admin"
+         password: "cable123"
+         ip: "10.0.4.25"
+         mac: "ec:b1:d7:88:a8:aa" 
+       - 
+         user: "admin"
+         password: "cable123"
+         ip: "10.0.4.26"
+         mac: "ec:b1:d7:88:b8:02" 
+  TFTP: 
+    os: ubuntu-16.04.4-server-amd64.iso
+    password: cable123
+    seed: hwe-ubuntu-server.seed
+    timezone: America/Denver
+    user: ubuntu
+    fullname: ubuntu_user
+

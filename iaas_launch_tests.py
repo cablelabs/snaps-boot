@@ -61,6 +61,6 @@ class IaasLaunchTests(unittest.TestCase):
 
         config = {'foo': 'bar'}
         with mock.patch('os.path.dirname', return_value='/'),\
-                mock.patch('snaps_boot.common.utils.file_utils.read_yaml',
+                mock.patch('snaps_common.file.file_utils.read_yaml',
                            return_value=config):
             iaas_launch.main(parsed)
