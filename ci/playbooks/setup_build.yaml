@@ -47,33 +47,27 @@
       apt: name=python-pip
 
     - name: Install snaps-boot requirements-git.txt
-      command: pip install -r {{ src_copy_dir }}/snaps-boot/requirements-git.txt
       become: yes
       become_method: sudo
       become_user: root
+      command: pip install -r {{ src_copy_dir }}/snaps-boot/requirements-git.txt
 
     - name: Install snaps-boot
-      command: pip install -e {{ src_copy_dir }}/snaps-boot
       become: yes
       become_method: sudo
       become_user: root
+      command: pip install -e {{ src_copy_dir }}/snaps-boot
 
     - name: Apply template and copy hosts.yaml to {{ hosts_yaml_path }}
       action: template src=templates/hosts.yaml.tmplt dest={{ hosts_yaml_path }}
 
-#    - name: Clean just in case PXE & DHCP server - iaas_launch.py -pc
-#      become: yes
-#      become_method: sudo
-#      become_user: root
-#      command: "python {{ src_copy_dir }}/snaps-boot/iaas_launch.py -f {{ hosts_yaml_path }} -pc"
-#      register: out
-#    - debug: var=out.stderr_lines
+    - name: Clean just in case PXE & DHCP server - iaas_launch.py -pc (see output @ /tmp/snaps-boot.out)
+      shell: "python {{ src_copy_dir }}/snaps-boot/iaas_launch.py -f {{ hosts_yaml_path }} -pc >> /tmp/snaps-boot.out"
+      register: out
+    - debug: var=out.stderr_lines
 
-    - name: Config PXE & DHCP server - iaas_launch.py -p
-      become: yes
-      become_method: sudo
-      become_user: root
-      shell: "python {{ src_copy_dir }}/snaps-boot/iaas_launch.py -f {{ hosts_yaml_path }} -p > ~/snaps-boot.out"
+    - name: Config PXE & DHCP server - iaas_launch.py -p (see output @ /tmp/snaps-boot.out)
+      shell: "python {{ src_copy_dir }}/snaps-boot/iaas_launch.py -f {{ hosts_yaml_path }} -p >> /tmp/snaps-boot.out"
       register: out
       ignore_errors: True
     - debug: var=out.stderr_lines

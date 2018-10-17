@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import logging
+import time
 
 import pkg_resources
 from drp_python.model_layer.subnet_model import SubnetModel
@@ -32,13 +33,18 @@ def setup_dhcp_service(rebar_session, boot_conf):
     :param boot_conf: the configuration
     :raises Exceptions
     """
+    logger.info('Setting up Digital Rebar service and objects')
     __setup_drp()
     __create_images()
     __create_workflows()
-    __create_content_pack()
     __create_subnet(rebar_session, boot_conf)
     __create_reservations(rebar_session, boot_conf)
-    __create_machines(rebar_session, boot_conf)
+    __create_content_pack()
+
+    # TODO/FIXME - Remove this sleep once the race condition between content
+    # TODO/FIXME - content pack and machine creation is resolved
+    time.sleep(10)
+    __create_machines(rebar_session, boot_conf, 5)
 
 
 def cleanup_dhcp_service(rebar_session, boot_conf):
@@ -48,13 +54,13 @@ def cleanup_dhcp_service(rebar_session, boot_conf):
     :param boot_conf: the configuration
     :raises Exceptions
     """
-    logger.info('Removing Digital Rebar objects for DHCP/PXE booting')
+    logger.info('Cleaning up and disabling Digital Rebar')
     __delete_machines(rebar_session, boot_conf)
+    __delete_content_pack()
     __delete_reservations(rebar_session, boot_conf)
     __delete_subnet(rebar_session, boot_conf)
-    __delete_content_pack()
     __delete_workflows()
-    # __delete_images()
+    __delete_images()
     __teardown_drp()
 
 
@@ -74,10 +80,13 @@ def __teardown_drp():
     Installs DRP and creates required objects
     :raises Exceptions
     """
-    logger.info('Stopping and disabling Digital Rebar')
-    playbook_path = pkg_resources.resource_filename(
-        'snaps_boot.ansible_p.setup', 'drp_teardown.yaml')
-    ansible_utils.apply_playbook(playbook_path)
+    try:
+        logger.info('Stopping and disabling Digital Rebar')
+        playbook_path = pkg_resources.resource_filename(
+            'snaps_boot.ansible_p.setup', 'drp_teardown.yaml')
+        ansible_utils.apply_playbook(playbook_path)
+    except Exception as e:
+        logger.warn('Unable to teardown DRP - [%s]', e)
 
 
 def __create_images():
@@ -97,11 +106,14 @@ def __delete_images():
     Creates a Digital Rebar image objects
     :raises Exceptions
     """
-    # TODO/FIXME - find appropriate API to perform these tasks
-    logger.info('Deleting Digital Rebar images')
-    playbook_path = pkg_resources.resource_filename(
-        'snaps_boot.ansible_p.setup', 'drp_images_destroy.yaml')
-    ansible_utils.apply_playbook(playbook_path)
+    try:
+        # TODO/FIXME - find appropriate API to perform these tasks
+        logger.info('Deleting Digital Rebar images')
+        playbook_path = pkg_resources.resource_filename(
+            'snaps_boot.ansible_p.setup', 'drp_images_destroy.yaml')
+        ansible_utils.apply_playbook(playbook_path)
+    except Exception as e:
+        logger.warn('Unable to delete all images - [%s]', e)
 
 
 def __create_workflows():
@@ -121,11 +133,14 @@ def __delete_workflows():
     Creates a Digital Rebar workflow objects
     :raises Exceptions
     """
-    # TODO/FIXME - find appropriate API to perform these tasks
-    logger.info('Deleting up Digital Rebar workflows')
-    playbook_path = pkg_resources.resource_filename(
-        'snaps_boot.ansible_p.setup', 'drp_workflows_destroy.yaml')
-    ansible_utils.apply_playbook(playbook_path)
+    try:
+        # TODO/FIXME - find appropriate API to perform these tasks
+        logger.info('Deleting up Digital Rebar workflows')
+        playbook_path = pkg_resources.resource_filename(
+            'snaps_boot.ansible_p.setup', 'drp_workflows_destroy.yaml')
+        ansible_utils.apply_playbook(playbook_path)
+    except Exception as e:
+        logger.warn('Unable to delete workflows - [%s]', e)
 
 
 def __create_content_pack():
@@ -178,9 +193,12 @@ def __delete_subnet(rebar_session, boot_conf):
     :param boot_conf: the boot configuration
     :raises Exceptions
     """
-    subnet = __instantiate_drp_subnet(rebar_session, boot_conf)
-    logger.info('Attempting to delete DRP subnet')
-    subnet.delete()
+    try:
+        subnet = __instantiate_drp_subnet(rebar_session, boot_conf)
+        logger.info('Attempting to delete DRP subnet')
+        subnet.delete()
+    except Exception as e:
+        logger.warn('Unable to delete subnet - [%s]', e)
 
 
 def __instantiate_drp_subnet(rebar_session, boot_conf):
@@ -220,11 +238,15 @@ def __delete_reservations(rebar_session, boot_conf):
     :param boot_conf: the boot configuration
     :raises Exceptions
     """
-    reservations = __instantiate_drp_reservations(rebar_session, boot_conf)
-    logger.info('Attempting to delete DRP reservations')
-    for reservation in reservations:
-        logger.debug('Attempting to delete DRP reservation %s', reservation)
-        reservation.delete()
+    try:
+        reservations = __instantiate_drp_reservations(rebar_session, boot_conf)
+        logger.info('Attempting to delete DRP reservations')
+        for reservation in reservations:
+            logger.debug('Attempting to delete DRP reservation %s',
+                         reservation)
+            reservation.delete()
+    except Exception as e:
+        logger.warn('Unable to delete all reservations - [%s]', e)
 
 
 def __instantiate_drp_reservations(rebar_session, boot_conf):
@@ -247,11 +269,18 @@ def __instantiate_drp_reservations(rebar_session, boot_conf):
     return out
 
 
-def __create_machines(rebar_session, boot_conf, retry=False):
+def __create_machines(rebar_session, boot_conf, retries=0):
     """
     Creates all of the DHCP reservations for PXE booting
     :param rebar_session: the HTTP session to Digital Rebar
     :param boot_conf: the boot configuration
+    :param retries: the number of times to re-attempt on failure which will
+                    also recreate the content pack which is ultimately the
+                    reason why machines fail to create as it has shown itself
+                    to be unavailable. This could be related to a race
+                    condition
+                    TODO - remove once content/machine race condition has been
+                    TODO - resolved
     :raises Exceptions
     """
     machines = __instantiate_drp_machines(rebar_session, boot_conf)
@@ -265,14 +294,17 @@ def __create_machines(rebar_session, boot_conf, retry=False):
             # TODO/FIXME - Why do we need to delete the content pack and
             # TODO/FIXME - recreate in order for the workflows to be properly
             # TODO/FIXME - created? Race condition?
-            if retry:
+            if retries == 0:
+                logger.error('Failed retrying to create machines')
                 raise e
 
             logger.warn('Unexpected error creating machine with error %s. '
-                        'Recreating content pack and retrying', e)
+                        'Recreating content pack and retrying %s more times',
+                        e, retries)
             __delete_content_pack()
             __create_content_pack()
-            __create_machines(rebar_session, boot_conf, True)
+            time.sleep(10)
+            __create_machines(rebar_session, boot_conf, retries - 1)
             break
 
 
@@ -283,11 +315,14 @@ def __delete_machines(rebar_session, boot_conf):
     :param boot_conf: the boot configuration
     :raises Exceptions
     """
-    machines = __instantiate_drp_machines(rebar_session, boot_conf)
-    logger.info('Attempting to create DRP machines')
-    for machine in machines:
-        logger.debug('Attempting to delete DRP machine %s', machine)
-        machine.delete()
+    try:
+        machines = __instantiate_drp_machines(rebar_session, boot_conf)
+        logger.info('Attempting to create DRP machines')
+        for machine in machines:
+            logger.debug('Attempting to delete DRP machine %s', machine)
+            machine.delete()
+    except Exception as e:
+        logger.warn('Unable to delete all machines - [%s]', e)
 
 
 def __instantiate_drp_machines(rebar_session, boot_conf):
@@ -333,7 +368,7 @@ def __get_drb_machine_config(host_conf, pxe_conf, bind_host_confs):
         if bind_host_conf['ip'] == host_conf['access_ip']:
             mac = bind_host_conf['mac']
 
-    if operating_sys and mac:
+    if mac:
         # TODO/FIXME - os and workflow must be hardcoded now
         drp_mach_dict = {
             'ip': host_conf['access_ip'],
@@ -344,7 +379,8 @@ def __get_drb_machine_config(host_conf, pxe_conf, bind_host_confs):
             'workflow': 'snaps-ubuntu-16.04'
         }
 
-        logger.info('Instantiating a MachineModel object with %s', drp_mach_dict)
+        logger.info('Instantiating a MachineModel object with %s',
+                    drp_mach_dict)
 
         return MachineModel(**drp_mach_dict)
     else:
