@@ -18,10 +18,7 @@ Date :21/04/2017
 Created By :Yashwant Bhandari
 """
 import logging
-import os.path
-import re
 
-import os
 import pkg_resources
 
 from snaps_common.ansible_snaps import ansible_utils
@@ -34,7 +31,6 @@ def run(config, operation):
     proxy_dict = prov_dict.get('PROXY')
     tftp_dict = prov_dict.get('TFTP')
     static_dict = prov_dict.get('STATIC')
-    bmc_dict = prov_dict.get('BMC')
     cpu_core_dict = prov_dict.get('CPUCORE')
     pxe_config = tftp_dict.get('pxe_server_configuration')
     build_pxe_server = None
@@ -61,34 +57,7 @@ def run(config, operation):
 
     logger.info("buildPxeServer is :" + str(build_pxe_server))
 
-    if operation == "boot":
-        if build_pxe_server == "ubuntu + centos":
-            operation = "ubuntu"
-            __modify_file_for_os(operation)
-        __pxe_boot(bmc_dict)
-    elif operation == "ubuntu":
-        if build_pxe_server == "ubuntu + centos":
-            __modify_file_for_os(operation)
-            __pxe_boot(bmc_dict)
-        elif build_pxe_server == "ubuntu":
-            __pxe_boot(bmc_dict)
-        else:
-            logger.error('PXE SERVER IS CENTOS. UBUNTU CANNOT BE INSTALLED '
-                         'ON HOST MACHINES')
-            exit(1)
-    elif operation == "centos":
-        if build_pxe_server == "ubuntu + centos":
-            __modify_file_for_os(operation)
-            __pxe_boot(bmc_dict)
-        elif build_pxe_server == "centos":
-            __pxe_boot(bmc_dict)
-        else:
-            logger.error('PXE SERVER IS UBUNTU. CENTOS CANNOT BE INSTALLED '
-                         'ON HOST MACHINES')
-            exit(1)
-    elif operation == "bootd":
-        __pxe_bootd(bmc_dict)
-    elif operation == "staticIPConfigure":
+    if operation == "staticIPConfigure":
         __static_ip_configure(static_dict, proxy_dict)
     elif operation == "staticIPCleanup":
         __static_ip_cleanup(static_dict)
@@ -103,87 +72,6 @@ def run(config, operation):
         logger.warn("The Host.yaml file is a deprecated format, please "
                     "update ASAP")
     logger.warn(deprecated_info)
-
-
-def __find_and_replace(fname, pat, s_after):
-    """
-    search a line start with pat in file fname  and replace that whole line by
-    string s_after
-    :param fname: filename
-    :param pat: string to search a line start with
-    :param s_after: string to replace the line
-    :return
-    """
-    # first, see if the pattern is even in the file.
-    # if line start with pat, then replace  whole line by subst
-    with open(fname) as f:
-        out_fname = fname + ".tmp"
-        out = open(out_fname, "w")
-        for line in f:
-            if re.match(pat, line):
-                logger.info("changing pattern " + pat + " --> " + s_after)
-                line = s_after + "\n"
-            out.write(line)
-        out.close()
-        os.rename(out_fname, fname)
-
-
-def __ipmi_power_status(bmc_ip, bmc_user, bmc_pass):
-    """
-    to  get the status of bmc
-    """
-    logger.info("ipmiPowerStatus function")
-    os.system(
-        'ipmitool -I lanplus -H ' + bmc_ip + ' -U ' + bmc_user + '  -P '
-        + bmc_pass + '  chassis power status')
-
-
-def __ipmi_set_boot_order_pxe(bmc_ip, bmc_user, bmc_pass, order):
-    """
-    to set the boot order pxe
-    """
-    logger.info("ipmiSetBootOrderPxe function")
-    os.system(
-        'ipmitool -I lanplus -H ' + bmc_ip + ' -U ' + bmc_user + '  -P '
-        + bmc_pass + '  chassis bootdev ' + order)
-
-
-def __ipmi_reboot_system(bmc_ip, bmc_user, bmc_pass):
-    """
-    to reboot the system via ipmi
-    """
-    logger.info("ipmiRebootSystem function")
-    os.system(
-        'ipmitool -I lanplus -H ' + bmc_ip + ' -U ' + bmc_user + '  -P '
-        + bmc_pass + '  chassis power cycle')
-
-
-def __pxe_boot(bmc_dict):
-    """
-    to start boot via ipmi
-    """
-    logger.info("pxeBoot function")
-    for host in bmc_dict.get('host'):
-        user = host.get('user')
-        password = host.get('password')
-        ip = host.get('ip')
-        __ipmi_power_status(ip, user, password)
-        __ipmi_set_boot_order_pxe(ip, user, password, "pxe")
-        __ipmi_reboot_system(ip, user, password)
-
-
-def __pxe_bootd(bmc_dict):
-    """
-    to start boot  via disk
-    """
-    logger.info("pxeBoot function")
-    for host in bmc_dict.get('host'):
-        user = host.get('user')
-        password = host.get('password')
-        ip = host.get('ip')
-        __ipmi_power_status(ip, user, password)
-        __ipmi_set_boot_order_pxe(ip, user, password, "disk")
-        __ipmi_reboot_system(ip, user, password)
 
 
 def __static_ip_configure(static_dict, proxy_dict):
@@ -347,19 +235,3 @@ def __del_isol_cpus(cpu_core_dict):
                 'isolcpus': isolcpus,
                 'hugepagesz': hugepagesz,
                 'hugepages': hugepages})
-
-
-def __modify_file_for_os(operation):
-    os_to_be_installed = operation
-    if os_to_be_installed == "centos":
-        logger.debug("configuring ftp proxy  in ks.cfg")
-        value = "ONTIMEOUT centos"
-        __find_and_replace(
-            '/var/lib/tftpboot/ubuntu-installer/amd64/pxelinux.cfg/default',
-            "ONTIMEOUT", value)
-    elif os_to_be_installed == "ubuntu":
-        logger.debug("configuring ftp proxy  in ks.cfg")
-        value = "ONTIMEOUT ubuntu"
-        __find_and_replace(
-            '/var/lib/tftpboot/ubuntu-installer/amd64/pxelinux.cfg/default',
-            "ONTIMEOUT", value)

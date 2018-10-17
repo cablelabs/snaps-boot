@@ -1,4 +1,4 @@
-# Copyright 2017 ARICENT HOLDINGS LUXEMBOURG SARL and Cable Television
+# Copyright 2018 ARICENT HOLDINGS LUXEMBOURG SARL and Cable Television
 # Laboratories, Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@ import mock
 import pkg_resources
 from snaps_common.file import file_utils
 
-from snaps_boot.provision.hardware import rebar_utils
+from snaps_boot.provision import rebar_utils
 
 logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
 

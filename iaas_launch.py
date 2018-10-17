@@ -25,7 +25,7 @@ from drp_python.network_layer.http_session import HttpSession
 from snaps_common.ansible_snaps import ansible_utils
 
 from snaps_common.file import file_utils
-from snaps_boot.provision.hardware import pxe_utils, rebar_utils
+from snaps_boot.provision import pxe_utils, rebar_utils, ipmi_utils
 
 logger = logging.getLogger('iaas_launch')
 
@@ -48,13 +48,6 @@ def __run(arguments):
     if arguments.log_level != 'INFO':
         log_level = logging.DEBUG
     logging.basicConfig(stream=sys.stdout, level=log_level)
-
-    logger.info('Install dependencies')
-    # TODO/FIXME - Should we support remove DRP instances or will it always
-    # TODO/FIXME - run on the build host?
-    playbook_path = pkg_resources.resource_filename(
-        'snaps_boot.ansible_p.setup', 'dependencies.yaml')
-    ansible_utils.apply_playbook(playbook_path)
 
     logger.info('Launching Operation Starts ........')
 
@@ -96,17 +89,11 @@ def __run(arguments):
         pxe_utils.run(config, "staticIPConfigure")
 
     if arguments.boot is not ARG_NOT_SET:
-        # Why 3 different means to perform a PXE reboot
-        if arguments.boot == "ubuntu":
-            pxe_utils.run(config, "ubuntu")
-        elif arguments.boot == "centos":
-            pxe_utils.run(config, "centos")
-        else:
-            pxe_utils.run(config, "boot")
+        ipmi_utils.reboot_pxe(config)
 
     if arguments.bootd is not ARG_NOT_SET:
         # This power cycles the nodes
-        pxe_utils.run(config, "bootd")
+        ipmi_utils.reboot_disk(config)
     if arguments.setIsolCpus is not ARG_NOT_SET:
         # This operation is unclear
         pxe_utils.run(config, "setIsolCpus")
