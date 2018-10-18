@@ -21,7 +21,7 @@ def reboot_pxe(boot_conf):
     """
     ip, user, password = __get_ipmi_creds(boot_conf)
     command = Command(ip, user, password)
-    __set_boot_order(command, 'hd')
+    __set_boot_order(command, 'network')
     __reboot(command)
 
 
@@ -32,7 +32,7 @@ def reboot_disk(boot_conf):
     """
     ip, user, password = __get_ipmi_creds(boot_conf)
     command = Command(ip, user, password)
-    __set_boot_order(command, 'network')
+    __set_boot_order(command, 'hd')
     __reboot(command)
 
 
