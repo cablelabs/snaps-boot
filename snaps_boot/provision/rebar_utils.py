@@ -43,6 +43,7 @@ def setup_dhcp_service(rebar_session, boot_conf):
 
     # TODO/FIXME - Remove this sleep once the race condition between content
     # TODO/FIXME - content pack and machine creation is resolved
+    # Check the bootenv 'ubuntu-16.04-install' Available=true & Validated=true
     time.sleep(10)
     __create_machines(rebar_session, boot_conf, 5)
 
@@ -60,7 +61,7 @@ def cleanup_dhcp_service(rebar_session, boot_conf):
     __delete_reservations(rebar_session, boot_conf)
     __delete_subnet(rebar_session, boot_conf)
     __delete_workflows()
-    __delete_images()
+    #__delete_images()
     __teardown_drp()
 
 
@@ -82,9 +83,12 @@ def __teardown_drp():
     """
     try:
         logger.info('Stopping and disabling Digital Rebar')
+        setup_dir = pkg_resources.resource_filename(
+            'snaps_boot.ansible_p.setup', 'tools')
         playbook_path = pkg_resources.resource_filename(
             'snaps_boot.ansible_p.setup', 'drp_teardown.yaml')
-        ansible_utils.apply_playbook(playbook_path)
+        ansible_utils.apply_playbook(
+            playbook_path, variables={'drp_install_wdir': setup_dir})
     except Exception as e:
         logger.warn('Unable to teardown DRP - [%s]', e)
 
