@@ -19,6 +19,3 @@
 
   - name: Destroy DRP Workflows for Ubuntu 16.04
     command: drpcli workflows destroy discovery
-
-#  - name: Set DRP Workflow Preferences
-#    command: drpcli prefs set defaultWorkflow discovery unknownBootEnv discovery defaultBootEnv sledgehammer defaultStage discover

@@ -14,8 +14,5 @@
 - hosts: localhost
 
   tasks:
-  - name: Delete Sledgehammer ISO to DRP
-    command: drpcli bootenvs destroy sledgehammer
-
   - name: Delete Ubuntu 16.04 ISO to DRP
     command: drpcli bootenvs destroy ubuntu-16.04-install

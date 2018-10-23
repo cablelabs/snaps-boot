@@ -14,23 +14,6 @@
 - hosts: localhost
 
   tasks:
-  - name: Check to ensure stage discover is available
-    shell: "drpcli stages show discover | jq -r '.Available'"
-    retries: 30
-    delay: 3
-    register: result
-    until: result.stdout == 'true'
-
-  - name: Check to stage sledgehammer-wait is available
-    shell: "drpcli stages show sledgehammer-wait | jq -r '.Available'"
-    retries: 30
-    delay: 3
-    register: result
-    until: result.stdout == 'true'
-
-  - name: Create DRP Workflows for Sledgehammer
-    command: "drpcli workflows create '{ \"Name\": \"discovery\", \"Stages\": [ \"discover\", \"sledgehammer-wait\" ] } '"
-
   - name: Check to ensure stage ubuntu-16.04-install is available
     shell: "drpcli stages show ubuntu-16.04-install | jq -r '.Available'"
     retries: 30
@@ -40,6 +23,3 @@
 
   - name: Create DRP Workflows for Ubuntu 16.04
     command: "drpcli workflows create '{ \"Name\": \"ubuntu16\", \"Stages\": [ \"ubuntu-16.04-install\", \"complete\" ] } '"
-
-  - name: Set DRP Workflow Preferences
-    command: drpcli prefs set defaultWorkflow discovery unknownBootEnv discovery defaultBootEnv sledgehammer defaultStage discover
