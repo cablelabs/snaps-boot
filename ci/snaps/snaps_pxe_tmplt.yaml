@@ -108,8 +108,8 @@ openstack:
           - subnet:
               name: admin-subnet
               cidr: {{ admin_ip_prfx }}.0/24
-              start: {{ admin_ip_prfx }}.2
-              end: {{ admin_ip_prfx }}.9
+              start: {{ admin_ip_prfx }}.11
+              end: {{ admin_ip_prfx }}.20
               enable_dhcp: False
               dns_nameservers: []
     - network:
@@ -126,8 +126,8 @@ openstack:
               name: priv-subnet
               project_name: pxe-proj-{{ build_num }}
               cidr: {{ priv_ip_prfx }}.0/24
-              start: {{ priv_ip_prfx }}.2
-              end: {{ priv_ip_prfx }}.9
+              start: {{ priv_ip_prfx }}.11
+              end: {{ priv_ip_prfx }}.20
               enable_dhcp: False
               dns_nameservers: []
     - network:
@@ -144,8 +144,8 @@ openstack:
               name: public-subnet
               project_name: pxe-proj-{{ build_num }}
               cidr: {{ pub_ip_prfx }}.0/24
-              start: {{ pub_ip_prfx }}.2
-              end: {{ pub_ip_prfx }}.9
+              start: {{ pub_ip_prfx }}.11
+              end: {{ pub_ip_prfx }}.20
               enable_dhcp: False
               dns_nameservers: [8.8.8.8]
   routers:

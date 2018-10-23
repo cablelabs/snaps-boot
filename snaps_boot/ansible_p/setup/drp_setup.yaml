@@ -12,18 +12,25 @@
 # limitations under the License.
 ---
 - hosts: localhost
+  become: yes
+  become_method: sudo
+  become_user: root
 
   tasks:
-  - name: Install Digital Rebar
-    become: yes
-    become_method: sudo
-    become_user: root
-    shell: "curl -fsSL get.rebar.digital/stable | bash -s -- install"
+  - name: Install jq used for parsing drpcli stdout in downstream playbooks
+    apt:
+      name: jq
 
-  - name: dr-provision
-    become: yes
-    become_method: sudo
-    become_user: root
+  - name: Check to see if DRP has been installed
+    command: drpcli
+    ignore_errors: True
+    register: result
+
+  - name: Install Digital Rebar
+    shell: "curl -fsSL get.rebar.digital/stable | bash -s -- install"
+    when: result.rc != 0
+
+  - name: Start and enable Digital Rebar Provisioning (dr-provision)
     systemd:
       state: restarted
       daemon_reload: yes
