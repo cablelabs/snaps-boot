@@ -36,16 +36,11 @@ def setup_dhcp_service(rebar_session, boot_conf):
     logger.info('Setting up Digital Rebar service and objects')
     __setup_drp()
     __create_images()
-    __create_workflows()
     __create_subnet(rebar_session, boot_conf)
+    __create_workflows()
     __create_reservations(rebar_session, boot_conf)
     __create_content_pack()
-
-    # TODO/FIXME - Remove this sleep once the race condition between content
-    # TODO/FIXME - content pack and machine creation is resolved
-    # Check the bootenv 'ubuntu-16.04-install' Available=true & Validated=true
-    time.sleep(10)
-    __create_machines(rebar_session, boot_conf, 5)
+    __create_machines(rebar_session, boot_conf)
 
 
 def cleanup_dhcp_service(rebar_session, boot_conf):
@@ -61,7 +56,7 @@ def cleanup_dhcp_service(rebar_session, boot_conf):
     __delete_reservations(rebar_session, boot_conf)
     __delete_subnet(rebar_session, boot_conf)
     __delete_workflows()
-    #__delete_images()
+    __delete_images()
     __teardown_drp()
 
 
@@ -83,12 +78,9 @@ def __teardown_drp():
     """
     try:
         logger.info('Stopping and disabling Digital Rebar')
-        setup_dir = pkg_resources.resource_filename(
-            'snaps_boot.ansible_p.setup', 'tools')
         playbook_path = pkg_resources.resource_filename(
             'snaps_boot.ansible_p.setup', 'drp_teardown.yaml')
-        ansible_utils.apply_playbook(
-            playbook_path, variables={'drp_install_wdir': setup_dir})
+        ansible_utils.apply_playbook(playbook_path)
     except Exception as e:
         logger.warn('Unable to teardown DRP - [%s]', e)
 
@@ -287,43 +279,42 @@ def __instantiate_drp_reservations(rebar_session, boot_conf):
     return out
 
 
-def __create_machines(rebar_session, boot_conf, retries=0):
+def __create_machines(rebar_session, boot_conf):
     """
     Creates all of the DHCP reservations for PXE booting
     :param rebar_session: the HTTP session to Digital Rebar
     :param boot_conf: the boot configuration
-    :param retries: the number of times to re-attempt on failure which will
-                    also recreate the content pack which is ultimately the
-                    reason why machines fail to create as it has shown itself
-                    to be unavailable. This could be related to a race
-                    condition
-                    TODO - remove once content/machine race condition has been
-                    TODO - resolved
     :raises Exceptions
     """
     machines = __instantiate_drp_machines(rebar_session, boot_conf)
     logger.info('Attempting to create DRP machines')
     for machine in machines:
-        try:
-            logger.debug('Attempting to create DRP machine %s', machine)
-            machine.create()
-            logger.info('Created machine %s', machine)
-        except Exception as e:
-            # TODO/FIXME - Why do we need to delete the content pack and
-            # TODO/FIXME - recreate in order for the workflows to be properly
-            # TODO/FIXME - created? Race condition?
-            if retries == 0:
-                logger.error('Failed retrying to create machines')
-                raise e
+        logger.debug('Attempting to create DRP machine %s', machine)
+        machine.create()
+        __add_machine_params(boot_conf, machine)
+        logger.info('Created machine %s', machine)
 
-            logger.warn('Unexpected error creating machine with error %s. '
-                        'Recreating content pack and retrying %s more times',
-                        e, retries)
-            __delete_content_pack()
-            __create_content_pack()
-            time.sleep(10)
-            __create_machines(rebar_session, boot_conf, retries - 1)
-            break
+
+def __add_machine_params(boot_conf, machine):
+    """
+    Adds parameters to machine object
+    :param boot_conf: the boot configuration
+    :raises Exception
+    """
+    params = __create_machine_params(boot_conf)
+    for param in params:
+        machine.add_param_values(param)
+
+
+def __create_machine_params(boot_conf):
+    """
+    Instantiates all drp-python ParamsConfigModel objects
+    :param boot_conf: the boot configuration
+    :return: list of all config models
+    """
+    out = list()
+
+    return out
 
 
 def __delete_machines(rebar_session, boot_conf):

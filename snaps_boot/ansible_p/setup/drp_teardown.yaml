@@ -23,11 +23,11 @@
       enabled: no
       name: dr-provision
 
-  - name: Check that the {{ drp_install_wdir }}/install.sh exists
+  - name: Check that /tmp/drp-install.sh exists
     stat:
-      path: "{{ drp_install_wdir }}/install.sh"
+      path: "/tmp/drp-install.sh"
     register: stat_result
 
-  - name: Run cleanup script {{ drp_install_wdir }}/install.sh
-    command: "{{ drp_install_wdir }}/install.sh --remove-data remove"
+  - name: Run cleanup script /tmp/drp-install.sh
+    command: "/tmp/drp-install.sh --remove-data remove"
     when: stat_result.stat.exists == True

@@ -26,8 +26,15 @@
     ignore_errors: True
     register: result
 
+  - name: Download Digital Rebar
+    get_url:
+      url: http://get.rebar.digital/stable
+      dest: /tmp/drp-install.sh
+      mode: 0755
+    when: result.rc != 0
+
   - name: Install Digital Rebar
-    shell: "curl -fsSL get.rebar.digital/stable | bash -s -- install"
+    command: /tmp/drp-install.sh install
     when: result.rc != 0
 
   - name: Start and enable Digital Rebar Provisioning (dr-provision)
