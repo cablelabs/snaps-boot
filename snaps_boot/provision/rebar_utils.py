@@ -12,9 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import logging
-import time
 
 import pkg_resources
+from drp_python.model_layer.params_model import ParamsModel
 from drp_python.model_layer.subnet_model import SubnetModel
 from drp_python.subnet import Subnet
 from drp_python.model_layer.reservation_model import ReservationModel
@@ -313,7 +313,7 @@ def __create_machine_params(boot_conf):
     :return: list of all config models
     """
     out = list()
-
+    out.append(ParamsModel(name='operating-system-disk', value='vda'))
     return out
 
 
