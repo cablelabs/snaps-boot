@@ -313,6 +313,11 @@ def __create_machine_params(boot_conf):
     :return: list of all config models
     """
     out = list()
+    # TODO/FIXME - extract all necessary values here from boot_conf
+
+    # TODO/FIXME - disk value must be configured in
+    # TODO/FIXME - TFTP.pxe_server_configuration should not be a list without
+    # TODO/FIXME - any means to configure at the host level
     out.append(ParamsModel(name='operating-system-disk', value='vda'))
     return out
 
