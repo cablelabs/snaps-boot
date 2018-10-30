@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import logging
+import os
 
 import pkg_resources
 from drp_python.model_layer.params_model import ParamsModel
@@ -26,7 +27,7 @@ from snaps_common.ansible_snaps import ansible_utils
 logger = logging.getLogger('rebar_utils')
 
 
-def setup_dhcp_service(rebar_session, boot_conf):
+def install_config_drp(rebar_session, boot_conf):
     """
     Creates a DHCP service
     :param rebar_session: the Digital Rebar session object
@@ -34,16 +35,17 @@ def setup_dhcp_service(rebar_session, boot_conf):
     :raises Exceptions
     """
     logger.info('Setting up Digital Rebar service and objects')
-    __setup_drp()
-    __create_images()
-    __create_subnet(rebar_session, boot_conf)
-    __create_workflows()
-    __create_reservations(rebar_session, boot_conf)
-    __create_content_pack()
+    # __setup_drp()
+    # __create_images()
+    # __create_subnet(rebar_session, boot_conf)
+    # __create_workflows()
+    # __create_reservations(rebar_session, boot_conf)
+    # __create_content_pack()
+    # __generate_ssh_keys()
     __create_machines(rebar_session, boot_conf)
 
 
-def cleanup_dhcp_service(rebar_session, boot_conf):
+def cleanup_drp(rebar_session, boot_conf):
     """
     Creates a DHCP service
     :param rebar_session: the Digital Rebar session object
@@ -279,6 +281,21 @@ def __instantiate_drp_reservations(rebar_session, boot_conf):
     return out
 
 
+def __generate_ssh_keys():
+    """
+    Ensures that the build server has SSH keys to inject into nodes
+    :return:
+    """
+    logger.info('Generate SSH keys')
+    playbook_path = pkg_resources.resource_filename(
+        'snaps_boot.ansible_p.setup', 'generate_keys.yaml')
+
+    # TODO/FIXME - Make this key location configurable
+    ansible_utils.apply_playbook(
+        playbook_path,
+        variables={'pk_file': os.path.expanduser('~/.ssh/id_rsa')})
+
+
 def __create_machines(rebar_session, boot_conf):
     """
     Creates all of the DHCP reservations for PXE booting
@@ -287,7 +304,7 @@ def __create_machines(rebar_session, boot_conf):
     :raises Exceptions
     """
     machines = __instantiate_drp_machines(rebar_session, boot_conf)
-    logger.info('Attempting to create DRP machines')
+    logger.info('Attempting to create {} DRP machines', len(machines))
     for machine in machines:
         logger.debug('Attempting to create DRP machine %s', machine)
         machine.create()
@@ -301,8 +318,10 @@ def __add_machine_params(boot_conf, machine):
     :param boot_conf: the boot configuration
     :raises Exception
     """
+    logger.info('Adding parameters to machine {}', machine)
     params = __create_machine_params(boot_conf)
     for param in params:
+        logger.info('Adding param {}', param)
         machine.add_param_values(param)
 
 
@@ -313,12 +332,28 @@ def __create_machine_params(boot_conf):
     :return: list of all config models
     """
     out = list()
-    # TODO/FIXME - extract all necessary values here from boot_conf
+    prov_conf = boot_conf['PROVISION']
+    pxe_confs = prov_conf['TFTP']['pxe_server_configuration']
+    install_disk = None
+    for key, value in pxe_confs.items():
+        install_disk = value['boot_disk']
 
-    # TODO/FIXME - disk value must be configured in
-    # TODO/FIXME - TFTP.pxe_server_configuration should not be a list without
-    # TODO/FIXME - any means to configure at the host level
-    out.append(ParamsModel(name='operating-system-disk', value='vda'))
+    out.append(ParamsModel(name='operating-system-disk', value=install_disk))
+
+    # This has been breaking port 22
+    out.append(ParamsModel(name='access-ssh-root-mode', value='with-password'))
+
+    out.append(ParamsModel(name='seed/password', value='cable123'))
+    out.append(ParamsModel(name='kernel-console', value='ttyS1,115200'))
+
+    # TODO/FIXME - this should not be hardcoded
+    id_rsa_priv_file = os.path.expanduser('~/.ssh/id_rsa')
+    with open(id_rsa_priv_file, 'r') as ssh_priv_key_file:
+        key_contents = ssh_priv_key_file.readlines()
+
+    # out.append(ParamsModel(
+    #     name='access-keys',
+    #     values={'root': key_contents}))
     return out
 
 
@@ -351,13 +386,14 @@ def __instantiate_drp_machines(rebar_session, boot_conf):
     host_confs = prov_conf['STATIC']['host']
     tftp_conf = prov_conf['TFTP']
     dhcp_conf = prov_conf['DHCP']
+
     # TODO/FIXME - Why are there multiple subnets configured
     subnet_conf = dhcp_conf['subnet'][0]
     bind_hosts_confs = subnet_conf['bind_host']
     pxe_confs = tftp_conf.get('pxe_server_configuration')
+
     if pxe_confs:
         if isinstance(pxe_confs, list):
-            # TODO/FIXME - Determine how to deal with multiple PXE configs???
             pxe_conf = pxe_confs[0]
         else:
             pxe_conf = pxe_confs
@@ -368,6 +404,7 @@ def __instantiate_drp_machines(rebar_session, boot_conf):
         drp_mach_conf = __get_drb_machine_config(
             host_conf, pxe_conf, bind_hosts_confs)
         if drp_mach_conf:
+            logger.info('Creating machine object [%s]', drp_mach_conf)
             out.append(Machine(rebar_session, drp_mach_conf))
 
     return out
@@ -375,12 +412,15 @@ def __instantiate_drp_machines(rebar_session, boot_conf):
 
 def __get_drb_machine_config(host_conf, pxe_conf, bind_host_confs):
 
-    operating_sys = pxe_conf.get('os')
-
     mac = None
     for bind_host_conf in bind_host_confs:
         if bind_host_conf['ip'] == host_conf['access_ip']:
             mac = bind_host_conf['mac']
+
+    if 'ubuntu' in pxe_conf:
+        boot_os = 'ubuntu-16.04.5-server-amd64.iso'
+    else:
+        raise Exception('Ubuntu is currently only supported')
 
     if mac:
         # TODO/FIXME - os and workflow must be hardcoded now
@@ -388,7 +428,7 @@ def __get_drb_machine_config(host_conf, pxe_conf, bind_host_confs):
             'ip': host_conf['access_ip'],
             'mac': mac,
             'name': host_conf['name'],
-            'os': 'ubuntu-16.04.5-server-amd64.iso',
+            'os': boot_os,
             'type': 'snaps-boot',
             'workflow': 'snaps-ubuntu-16.04'
         }
@@ -399,4 +439,4 @@ def __get_drb_machine_config(host_conf, pxe_conf, bind_host_confs):
         return MachineModel(**drp_mach_dict)
     else:
         logger.warn('Unable to create machine with os [%s] and mac [%s]',
-                    operating_sys, mac)
+                    boot_os, mac)

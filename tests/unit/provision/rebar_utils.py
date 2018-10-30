@@ -40,11 +40,14 @@ class RebarUtilsTests(unittest.TestCase):
     @mock.patch('drp_python.reservation.Reservation.create')
     @mock.patch('snaps_common.ansible_snaps.ansible_utils.apply_playbook')
     @mock.patch('time.sleep')
-    def test_setup_dhcp_service(self, m1, m2, m3, m4, m5, m6, m7, m8, m9,m10):
+    @mock.patch('drp_python.translation_layer.machines_translation.'
+                'MachineTranslation.add_machine_params')
+    def test_setup_dhcp_service(self, m1, m2, m3, m4, m5, m6, m7, m8, m9, m10,
+                                m11):
         """
         Tests the rebar_utils.
         :return:
         """
         conf_file = pkg_resources.resource_filename('tests.conf', 'hosts.yaml')
         conf = file_utils.read_yaml(conf_file)
-        rebar_utils.setup_dhcp_service(None, conf)
+        rebar_utils.install_config_drp(None, conf)

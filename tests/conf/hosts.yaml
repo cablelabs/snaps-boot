@@ -226,11 +226,14 @@ PROVISION:
          password: "cable123"
          ip: "10.0.4.26"
          mac: "ec:b1:d7:88:b8:02" 
-  TFTP: 
-    os: ubuntu-16.04.4-server-amd64.iso
-    password: cable123
-    seed: hwe-ubuntu-server.seed
-    timezone: America/Denver
-    user: ubuntu
-    fullname: ubuntu_user
+  TFTP:
+    pxe_server_configuration:
+      ubuntu:
+        os: ubuntu-16.04.4-server-amd64.iso
+        password: cable123
+        seed: hwe-ubuntu-server.seed
+        timezone: America/Denver
+        user: ubuntu
+        fullname: ubuntu_user
+        boot_disk: foo
 

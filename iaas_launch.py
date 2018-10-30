@@ -74,10 +74,10 @@ def __run(arguments):
         'https://localhost:8092', user, password)
 
     if arguments.hardware is not ARG_NOT_SET:
-        rebar_utils.setup_dhcp_service(rebar_session, config)
+        rebar_utils.install_config_drp(rebar_session, config)
 
     if arguments.provisionClean is not ARG_NOT_SET:
-        rebar_utils.cleanup_dhcp_service(rebar_session, config)
+        rebar_utils.cleanup_drp(rebar_session, config)
 
     if arguments.staticIPCleanup is not ARG_NOT_SET:
         # Do we really need to support this function?

@@ -153,23 +153,12 @@ PROVISION:
          mac: "ec:b1:d7:88:a8:aa"
   TFTP:
      pxe_server_configuration:
-       -
         ubuntu:
-          os: ubuntu-16.04.4-server-amd64.iso
           password: ChangeME123
-          seed: ubuntu-uefi-server.seed
           timezone: America/Denver
           user: ubuntu
           fullname: ubuntu_user
-          server_type: UEFI
-       -
-        centos:
-           os: CentOS-7-x86_64-DVD-1708.iso
-           root_password: ChangeMe123
-           user: centos
-           user_password: ChangeMe123
-           timezone: America/Denver
-           boot_disk: sda
+          boot_disk: sda
   CPUCORE:
     host:
        -

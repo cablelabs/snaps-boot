@@ -173,24 +173,9 @@ PROVISION:
          mac: "ec:b1:d7:88:a8:aa"
   TFTP:
      pxe_server_configuration:
-{% if pxe_config == "centos" %}
-       -
-        centos:
-           os: boot-img.iso
-           root_password: {{ pxe_pass }}
-           user: centos
-           user_password: {{ pxe_pass }}
-           timezone: America/Denver
-           boot_disk: vda
-
-{% else %}
-       -
-        ubuntu:
-          os: boot-img.iso
-          password: {{ pxe_pass }}
-          seed: hwe-ubuntu-server.seed
-          timezone: America/Denver
-          user: ubuntu
-          fullname: ubuntu_user
-          server_type: BIOS
-{% endif %}
+       ubuntu:
+         password: {{ pxe_pass }}
+         timezone: America/Denver
+         user: ubuntu
+         fullname: ubuntu_user
+         boot_disk: vda
