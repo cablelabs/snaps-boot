@@ -35,13 +35,13 @@ def install_config_drp(rebar_session, boot_conf):
     :raises Exceptions
     """
     logger.info('Setting up Digital Rebar service and objects')
-    # __setup_drp()
-    # __create_images()
-    # __create_subnet(rebar_session, boot_conf)
-    # __create_workflows()
-    # __create_reservations(rebar_session, boot_conf)
-    # __create_content_pack()
-    # __generate_ssh_keys()
+    __setup_drp()
+    __create_images()
+    __create_subnet(rebar_session, boot_conf)
+    __create_workflows()
+    __create_reservations(rebar_session, boot_conf)
+    __create_content_pack()
+    __generate_ssh_keys()
     __create_machines(rebar_session, boot_conf)
 
 
@@ -337,23 +337,25 @@ def __create_machine_params(boot_conf):
     install_disk = None
     for key, value in pxe_confs.items():
         install_disk = value['boot_disk']
-
     out.append(ParamsModel(name='operating-system-disk', value=install_disk))
 
+    # TODO/FIXME - all of these should probably be a global params
     # This has been breaking port 22
-    out.append(ParamsModel(name='access-ssh-root-mode', value='with-password'))
-
+    # out.append(ParamsModel(name='access-ssh-root-mode',
+    #                        value='with-password'))
+    out.append(ParamsModel(name='access-ssh-root-mode',
+                           value='without-password'))
     out.append(ParamsModel(name='seed/password', value='cable123'))
     out.append(ParamsModel(name='kernel-console', value='ttyS1,115200'))
 
     # TODO/FIXME - this should not be hardcoded
-    id_rsa_priv_file = os.path.expanduser('~/.ssh/id_rsa')
-    with open(id_rsa_priv_file, 'r') as ssh_priv_key_file:
-        key_contents = ssh_priv_key_file.readlines()
+    id_rsa_pub = os.path.expanduser('~/.ssh/id_rsa.pub')
+    with open(id_rsa_pub, 'r') as ssh_pub_key_file:
+        key_contents = ssh_pub_key_file.readlines()
 
-    # out.append(ParamsModel(
-    #     name='access-keys',
-    #     values={'root': key_contents}))
+    out.append(ParamsModel(
+        name='access-keys',
+        values={'root': key_contents}))
     return out
 
 
