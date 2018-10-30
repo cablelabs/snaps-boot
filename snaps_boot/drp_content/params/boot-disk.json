@@ -1,0 +1,17 @@
+{
+  "Validated": false,
+  "Available": false,
+  "Errors": [],
+  "ReadOnly": false,
+  "Meta": {
+    "color": "red",
+    "icon": "pencil"
+  },
+  "Name": "seed/boot-disk",
+  "Description": "Server boot disk",
+  "Documentation": "Server boot disk",
+  "Secure": false,
+  "Schema": {
+    "type": "string"
+  }
+}
