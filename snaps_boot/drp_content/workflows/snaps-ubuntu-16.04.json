@@ -13,6 +13,7 @@
   "Documentation": "",
   "Stages": [
     "ubuntu-16.04-install",
+    "snaps-post-install",
     "complete"
   ]
 }
