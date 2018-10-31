@@ -347,6 +347,7 @@ def __create_machine_params(boot_conf):
                            value='without-password'))
     out.append(ParamsModel(name='seed/password', value='cable123'))
     out.append(ParamsModel(name='kernel-console', value='ttyS1,115200'))
+    out.append(ParamsModel(name='select-kickseed', value='snaps-net-seed.tmpl'))
 
     # TODO/FIXME - this should not be hardcoded
     id_rsa_pub = os.path.expanduser('~/.ssh/id_rsa.pub')
