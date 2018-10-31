@@ -339,6 +339,12 @@ def __create_machine_params(boot_conf):
         install_disk = value['boot_disk']
     out.append(ParamsModel(name='operating-system-disk', value=install_disk))
 
+    # TODO/FIXME - As subnets are a list and we are only using the first
+    # TODO/FIXME - we either need to change it to only one or find another
+    # TODO/FIXME - way to correlate which subnet entry to a host (dubious?)
+    boot_iface = prov_conf['DHCP']['subnet'][0]['listen_iface']
+    out.append(ParamsModel(name='seed/boot-interface', value=boot_iface))
+
     # TODO/FIXME - all of these should probably be a global params
     # This has been breaking port 22
     # out.append(ParamsModel(name='access-ssh-root-mode',
