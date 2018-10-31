@@ -354,7 +354,7 @@ def __create_machine_params(boot_conf):
         key_contents = ssh_pub_key_file.readlines()
 
     out.append(ParamsModel(name='access-keys',
-        value={'root': key_contents[0]}))
+                           value={'root': key_contents[0]}))
     return out
 
 
