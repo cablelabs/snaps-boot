@@ -36,7 +36,7 @@ d-i clock-setup/ntp boolean false
 {{end -}}
 
 ### Partitioning
-d-i partman-auto/disk string {{.Param "seed/boot-disk"}} 
+d-i partman-auto/disk string /dev/{{.Param "operating-system-disk"}}
 
 # The presently available methods are:
 # - regular: use the usual partition types for your architecture
