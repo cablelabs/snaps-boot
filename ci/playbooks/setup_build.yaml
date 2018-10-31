@@ -61,10 +61,10 @@
     - name: Apply template and copy hosts.yaml to {{ hosts_yaml_path }}
       action: template src=templates/hosts.yaml.j2 dest={{ hosts_yaml_path }}
 
-#    - name: Clean just in case PXE & DHCP server - iaas_launch.py -pc (see output @ /tmp/snaps-boot.log)
-#      shell: "python {{ src_copy_dir }}/snaps-boot/iaas_launch.py -f {{ hosts_yaml_path }} -pc >> /tmp/snaps-boot.log"
-#      register: out
-#    - debug: var=out.stderr_lines
+    - name: Clean just in case PXE & DHCP server - iaas_launch.py -pc (see output @ /tmp/snaps-boot.log)
+      shell: "python {{ src_copy_dir }}/snaps-boot/iaas_launch.py -f {{ hosts_yaml_path }} -pc >> /tmp/snaps-boot.log"
+      register: out
+    - debug: var=out.stderr_lines
 
     - name: Config PXE & DHCP server - iaas_launch.py -p (see output @ /tmp/snaps-boot.log)
       shell: "python {{ src_copy_dir }}/snaps-boot/iaas_launch.py -f {{ hosts_yaml_path }} -p >> /tmp/snaps-boot.log"

@@ -318,7 +318,7 @@ def __add_machine_params(boot_conf, machine):
     :param boot_conf: the boot configuration
     :raises Exception
     """
-    logger.info('Adding parameters to machine {}', machine)
+    logger.info('Adding parameters to machine %s', machine)
     params = __create_machine_params(boot_conf)
     for param in params:
         logger.info('Adding param %s', param)
@@ -353,9 +353,8 @@ def __create_machine_params(boot_conf):
     with open(id_rsa_pub, 'r') as ssh_pub_key_file:
         key_contents = ssh_pub_key_file.readlines()
 
-    # out.append(ParamsModel(
-    #     name='access-keys',
-    #     values={'root': key_contents}))
+    out.append(ParamsModel(name='access-keys',
+        value={'root': key_contents[0]}))
     return out
 
 
