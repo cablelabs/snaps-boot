@@ -304,7 +304,7 @@ def __create_machines(rebar_session, boot_conf):
     :raises Exceptions
     """
     machines = __instantiate_drp_machines(rebar_session, boot_conf)
-    logger.info('Attempting to create {} DRP machines', len(machines))
+    logger.info('Attempting to create %s DRP machines', len(machines))
     for machine in machines:
         logger.debug('Attempting to create DRP machine %s', machine)
         machine.create()
