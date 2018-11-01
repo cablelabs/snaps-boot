@@ -1,0 +1,17 @@
+{
+  "Validated": false,
+  "Available": false,
+  "Errors": [],
+  "ReadOnly": false,
+  "Meta": {
+    "color": "red",
+    "icon": "pencil"
+  },
+  "Name": "post/https-proxy",
+  "Description": "https proxy URL",
+  "Documentation": "https proxy URL",
+  "Secure": false,
+  "Schema": {
+    "type": "string"
+  }
+}

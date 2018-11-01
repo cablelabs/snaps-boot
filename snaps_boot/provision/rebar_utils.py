@@ -350,6 +350,11 @@ def __create_machine_params(boot_conf):
     out.append(ParamsModel(name='seed/root-password', value=root_password))
     out.append(ParamsModel(name='seed/server-ip', value=server_ip))
 
+    http_proxy = prov_conf['PROXY']['http_proxy']
+    https_proxy = prov_conf['PROXY']['https_proxy']
+    out.append(ParamsModel(name='post/http-proxy', value=http_proxy))
+    out.append(ParamsModel(name='post/https-proxy', value=https_proxy))
+
     # TODO/FIXME - all of these should probably be a global params
     # This has been breaking port 22
     # out.append(ParamsModel(name='access-ssh-root-mode',
