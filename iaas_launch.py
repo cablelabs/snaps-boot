@@ -190,13 +190,13 @@ if __name__ == '__main__':
         help='When used, the pxe server environment will be removed')
     args = parser.parse_args()
 
-    if (args.hardware is ARG_NOT_SET and args.boot is ARG_NOT_SET
-            and args.bootd is ARG_NOT_SET
-            and args.provisionClean is ARG_NOT_SET
-            and args.setIsolCpus is ARG_NOT_SET
-            and args.delIsolCpus is ARG_NOT_SET
-            and args.staticIPConfigure is ARG_NOT_SET
-            and args.staticIPCleanup is ARG_NOT_SET):
+    if (args.hardware is ARG_NOT_SET and args.boot is ARG_NOT_SET and
+            args.bootd is ARG_NOT_SET and
+            args.provisionClean is ARG_NOT_SET and
+            args.setIsolCpus is ARG_NOT_SET and
+            args.delIsolCpus is ARG_NOT_SET and
+            args.staticIPConfigure is ARG_NOT_SET and
+            args.staticIPCleanup is ARG_NOT_SET):
         print 'Must enter either -p for provision hardware or -pc for clean ' \
               'provision hardware or -b for boot or -i for isolate cpu ' \
               'provision or -bd for boot from disk'
