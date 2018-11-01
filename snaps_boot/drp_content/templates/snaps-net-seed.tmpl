@@ -122,7 +122,7 @@ tasksel	tasksel/force-tasks	string server
 
 
 # Individual additional packages to install
-d-i pkgsel/include string openssh-server build-essential curl wget ntp python cloud-init libltdl7 {{if .ParamExists "extra-packages"}}{{ range $index, $element := (.Param "extra-packages") }}{{if $index}} {{end}}{{$element}}{{end}}{{end}}
+d-i pkgsel/include string openssh-server build-essential curl wget ntp python libltdl7 {{if .ParamExists "extra-packages"}}{{ range $index, $element := (.Param "extra-packages") }}{{if $index}} {{end}}{{$element}}{{end}}{{end}}
 #d-i pkgsel/language-packs multiselect en
 d-i 	pkgsel/language-pack-patterns	string
 d-i 	pkgsel/install-language-support	boolean false
