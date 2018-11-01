@@ -336,14 +336,19 @@ def __create_machine_params(boot_conf):
     pxe_confs = prov_conf['TFTP']['pxe_server_configuration']
     install_disk = None
     for key, value in pxe_confs.items():
+        user_password = value['password']
+        user = value['user']
+        fullname = value['fullname']
         install_disk = value['boot_disk']
+    out.append(ParamsModel(name='seed/user-password', value=user_password))
+    out.append(ParamsModel(name='seed/username', value=user))
+    out.append(ParamsModel(name='seed/user-fullname', value=fullname))
     out.append(ParamsModel(name='operating-system-disk', value=install_disk))
 
-    # TODO/FIXME - As subnets are a list and we are only using the first
-    # TODO/FIXME - we either need to change it to only one or find another
-    # TODO/FIXME - way to correlate which subnet entry to a host (dubious?)
-    boot_iface = prov_conf['DHCP']['subnet'][0]['listen_iface']
-    out.append(ParamsModel(name='seed/boot-interface', value=boot_iface))
+    root_password = prov_conf['PXE']['password']
+    server_ip = prov_conf['PXE']['serverIp']
+    out.append(ParamsModel(name='seed/root-password', value=root_password))
+    out.append(ParamsModel(name='seed/server-ip', value=server_ip))
 
     # TODO/FIXME - all of these should probably be a global params
     # This has been breaking port 22
@@ -351,7 +356,6 @@ def __create_machine_params(boot_conf):
     #                        value='with-password'))
     out.append(ParamsModel(name='access-ssh-root-mode',
                            value='without-password'))
-    out.append(ParamsModel(name='seed/password', value='cable123'))
     out.append(ParamsModel(name='kernel-console', value='ttyS1,115200'))
     out.append(ParamsModel(name='select-kickseed', value='snaps-net-seed.tmpl'))
 
