@@ -337,9 +337,9 @@ ansible:
     post_processing:
       sleep: 15
       reboot:
-        - pxe-vm-1
-        - pxe-vm-2
-        - pxe-vm-3
+      - pxe-vm-1
+      - pxe-vm-2
+      - pxe-vm-3
     variables:
       pxe_config:
         type: string
@@ -476,13 +476,10 @@ ansible:
         type: string
         value: {{ hosts_yaml_target_path }}
 
-# TODO - REMOVE CONDITIONAL AFTER DRP CHANGES WORK FOR REAL VALIDATION
-{% if 1 == 2 %}
-
   # Verify admin interface on pxe-vm-1 was configured
   - playbook_location: {{ local_snaps_boot_dir }}/ci/playbooks/verify_intfs.yaml
     hosts:
-      - build-vm
+    - build-vm
     variables:
       snaps_boot_dir:
         type: string
@@ -502,7 +499,7 @@ ansible:
   # Verify admin interface on pxe-vm-2 was configured
   - playbook_location: {{ local_snaps_boot_dir }}/ci/playbooks/verify_intfs.yaml
     hosts:
-      - build-vm
+    - build-vm
     variables:
       snaps_boot_dir:
         type: string
@@ -522,7 +519,7 @@ ansible:
   # Verify admin interface on pxe-vm-3 was configured
   - playbook_location: {{ local_snaps_boot_dir }}/ci/playbooks/verify_intfs.yaml
     hosts:
-      - build-vm
+    - build-vm
     variables:
       snaps_boot_dir:
         type: string
@@ -542,7 +539,7 @@ ansible:
   # Statically configure interfaces
   - playbook_location: {{ local_snaps_boot_dir }}/ci/playbooks/config_intfs.yaml
     hosts:
-      - build-vm
+    - build-vm
     post_processing:
       sleep: 120
     variables:
@@ -556,7 +553,7 @@ ansible:
   # Verify admin interface on pxe-vm-1 was configured
   - playbook_location: {{ local_snaps_boot_dir }}/ci/playbooks/verify_intfs.yaml
     hosts:
-      - build-vm
+    - build-vm
     variables:
       snaps_boot_dir:
         type: string
@@ -576,7 +573,7 @@ ansible:
   # Verify admin interface on pxe-vm-2 was configured
   - playbook_location: {{ local_snaps_boot_dir }}/ci/playbooks/verify_intfs.yaml
     hosts:
-      - build-vm
+    - build-vm
     variables:
       snaps_boot_dir:
         type: string
@@ -596,7 +593,7 @@ ansible:
   # Verify admin interface on pxe-vm-3 was configured
   - playbook_location: {{ local_snaps_boot_dir }}/ci/playbooks/verify_intfs.yaml
     hosts:
-      - build-vm
+    - build-vm
     variables:
       snaps_boot_dir:
         type: string
@@ -616,7 +613,7 @@ ansible:
   # Verify private interface on pxe-vm-1 was configured
   - playbook_location: {{ local_snaps_boot_dir }}/ci/playbooks/verify_intfs.yaml
     hosts:
-      - build-vm
+    - build-vm
     variables:
       snaps_boot_dir:
         type: string
@@ -636,7 +633,7 @@ ansible:
   # Verify private interface on pxe-vm-2 was configured
   - playbook_location: {{ local_snaps_boot_dir }}/ci/playbooks/verify_intfs.yaml
     hosts:
-      - build-vm
+    - build-vm
     variables:
       snaps_boot_dir:
         type: string
@@ -656,7 +653,7 @@ ansible:
   # Verify private interface on pxe-vm-3 was configured
   - playbook_location: {{ local_snaps_boot_dir }}/ci/playbooks/verify_intfs.yaml
     hosts:
-      - build-vm
+    - build-vm
     variables:
       snaps_boot_dir:
         type: string
@@ -676,7 +673,7 @@ ansible:
   # Verify public interface on pxe-vm-1 was configured
   - playbook_location: {{ local_snaps_boot_dir }}/ci/playbooks/verify_intfs.yaml
     hosts:
-      - build-vm
+    - build-vm
     variables:
       snaps_boot_dir:
         type: string
@@ -696,7 +693,7 @@ ansible:
   # Verify private interface on pxe-vm-2 was configured
   - playbook_location: {{ local_snaps_boot_dir }}/ci/playbooks/verify_intfs.yaml
     hosts:
-      - build-vm
+    - build-vm
     variables:
       snaps_boot_dir:
         type: string
@@ -732,4 +729,3 @@ ansible:
       timeout:
         type: string
         value: 120
-{% endif %}

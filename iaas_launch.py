@@ -20,10 +20,7 @@ import logging
 import os
 import sys
 
-import pkg_resources
 from drp_python.network_layer.http_session import HttpSession
-from snaps_common.ansible_snaps import ansible_utils
-
 from snaps_common.file import file_utils
 from snaps_boot.provision import pxe_utils, rebar_utils, ipmi_utils
 
@@ -81,12 +78,12 @@ def __run(arguments):
 
     if arguments.staticIPCleanup is not ARG_NOT_SET:
         # Do we really need to support this function?
-        pxe_utils.run(config, "staticIPCleanup")
+        pxe_utils.static_ip_cleanup(config)
 
     if arguments.staticIPConfigure is not ARG_NOT_SET:
         # Is this something that we should do with cloud-init or other means
         # immediately after the OS is laid down?
-        pxe_utils.run(config, "staticIPConfigure")
+        pxe_utils.static_ip_configure(config)
 
     if arguments.boot is not ARG_NOT_SET:
         ipmi_utils.reboot_pxe(config)
@@ -96,10 +93,10 @@ def __run(arguments):
         ipmi_utils.reboot_disk(config)
     if arguments.setIsolCpus is not ARG_NOT_SET:
         # This operation is unclear
-        pxe_utils.run(config, "setIsolCpus")
+        pxe_utils.set_isol_cpus(config)
     if arguments.delIsolCpus is not ARG_NOT_SET:
         # This operation is unclear
-        pxe_utils.run(config, "delIsolCpus")
+        pxe_utils.del_isol_cpus(config)
     logger.info('Completed operation successfully')
 
 
