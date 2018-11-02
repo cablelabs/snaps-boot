@@ -16,7 +16,7 @@ from pyghmi.ipmi.command import Command
 
 def reboot_pxe(boot_conf):
     """
-    Sets the boot order to 'disk' then reboots all configured nodes
+    Sets the boot order to 'pxe' then reboots all configured nodes
     :param boot_conf: the boot configuration
     """
     __reboot_all(boot_conf, 'network')
@@ -24,7 +24,7 @@ def reboot_pxe(boot_conf):
 
 def reboot_disk(boot_conf):
     """
-    Sets the boot order to 'pxe' then reboots all configured nodes
+    Sets the boot order to 'disk' then reboots all configured nodes
     :param boot_conf: the boot configuration
     """
     __reboot_all(boot_conf, 'hd')
