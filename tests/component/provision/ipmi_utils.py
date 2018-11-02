@@ -36,8 +36,8 @@ class IpmiUtilsTests(unittest.TestCase):
         conf_file = pkg_resources.resource_filename('tests.conf', 'hosts.yaml')
         self.boot_conf = file_utils.read_yaml(conf_file)
 
-    @mock.patch('snaps_boot.provision.ipmi_utils.__get_ipmi_creds',
-                return_value=('localhost', 'ADMIN', 'ADMIN'))
+    @mock.patch('snaps_boot.provision.ipmi_utils.get_ipmi_creds',
+                return_value=([('localhost', 'ADMIN', 'ADMIN')]))
     def test_reboot_pxe(self, m1):
         """
         Tests the ipmi_utils#reboot_pxe.
@@ -45,11 +45,18 @@ class IpmiUtilsTests(unittest.TestCase):
         """
         ipmi_utils.reboot_pxe(self.boot_conf)
 
-    @mock.patch('snaps_boot.provision.ipmi_utils.__get_ipmi_creds',
-                return_value=('localhost', 'ADMIN', 'ADMIN'))
+    @mock.patch('snaps_boot.provision.ipmi_utils.get_ipmi_creds',
+                return_value=([('localhost', 'ADMIN', 'ADMIN')]))
     def test_reboot_disk(self, m1):
         """
         Tests the ipmi_utils#reboot_pxe.
         :return:
         """
         ipmi_utils.reboot_disk(self.boot_conf)
+
+    def test_get_ipmi_creds(self):
+        conf_file = pkg_resources.resource_filename('tests.conf', 'hosts.yaml')
+        conf = file_utils.read_yaml(conf_file)
+        creds = ipmi_utils.get_ipmi_creds(conf)
+        self.assertEqual(5, len(creds))
+

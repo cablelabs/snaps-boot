@@ -16,33 +16,39 @@ from pyghmi.ipmi.command import Command
 
 def reboot_pxe(boot_conf):
     """
-    Sets the boot order to 'disk' then reboots
+    Sets the boot order to 'disk' then reboots all configured nodes
     :param boot_conf: the boot configuration
     """
-    ip, user, password = __get_ipmi_creds(boot_conf)
-    command = Command(ip, user, password)
-    __set_boot_order(command, 'network')
-    __reboot(command)
+    __reboot_all(boot_conf, 'network')
 
 
 def reboot_disk(boot_conf):
     """
-    Sets the boot order to 'pxe' then reboots
+    Sets the boot order to 'pxe' then reboots all configured nodes
     :param boot_conf: the boot configuration
     """
-    ip, user, password = __get_ipmi_creds(boot_conf)
-    command = Command(ip, user, password)
-    __set_boot_order(command, 'hd')
-    __reboot(command)
+    __reboot_all(boot_conf, 'hd')
 
 
-def __get_ipmi_creds(boot_conf):
+def __reboot_all(boot_conf, boot_order):
+    creds = get_ipmi_creds(boot_conf)
+    for ip, user, password in creds:
+        command = Command(ip, user, password)
+        __set_boot_order(command, boot_order)
+        __reboot(command)
+
+
+def get_ipmi_creds(boot_conf):
     """
-    Returns a tuple 3 containing the IPMI credentials where index 0 is the IP,
-    1 is the username, and 2 is the password
+    Returns a list of tuple 3 objects containing the IPMI credentials where
+    index 0 is the IP, 1 is the username, and 2 is the password
     :param boot_conf: the boot configuration
     """
-    return boot_conf['ip'], boot_conf['user'], boot_conf['password']
+    out = list()
+    hosts_dict = boot_conf['PROVISION']['BMC']['host']
+    for host_dict in hosts_dict:
+        out.append((host_dict['ip'], host_dict['user'], host_dict['password']))
+    return out
 
 
 def __set_boot_order(command, order):
