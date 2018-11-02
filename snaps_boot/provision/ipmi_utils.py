@@ -11,6 +11,8 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import time
+
 from pyghmi.ipmi.command import Command
 
 
@@ -55,12 +57,16 @@ def __set_boot_order(command, order):
     command.set_bootdev(order)
 
 
-def __reboot(command):
+def __reboot(command, timeout=30):
     power = command.get_power()
-    if 'on' == power['powerstate']:
+    if power['powerstate'] == 'on':
         command.set_power('off')
 
-    power = command.get_power()
+    start_time = time.time()
+    while time.time() - start_time > timeout or power['powerstate'] != 'off':
+        power = command.get_power()
+
     if 'on' == power['powerstate']:
         raise Exception('Chassis never powered down')
+
     command.set_power('on')
