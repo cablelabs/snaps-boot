@@ -209,6 +209,8 @@ def __instantiate_drp_subnet(rebar_session, boot_conf):
     """
     # TODO/FIXME - Why are there multiple subnets configured
     subnet_conf = boot_conf['PROVISION']['DHCP']['subnet'][0]
+    # Add the PXE server IP as next server for DHCP (required for shared build server to work)
+    subnet_conf['next_server'] = boot_conf['PROVISION']['PXE']['serverIp']
     # TODO/FIXME - Create function to return a SubnetModel so we can support
     # TODO/FIXME - different types of configurations
     logger.info('Instantiating DRP subnet object with values %s', subnet_conf)
