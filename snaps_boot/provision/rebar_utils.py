@@ -338,7 +338,7 @@ def __create_machine_params(boot_conf):
     prov_conf = boot_conf['PROVISION']
     pxe_confs = prov_conf['TFTP']['pxe_server_configuration']
     install_disk = None
-    for key, value in pxe_confs.items():
+    for value in pxe_confs.values():
         user_password = value['password']
         user = value['user']
         fullname = value['fullname']
