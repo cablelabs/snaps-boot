@@ -35,7 +35,7 @@ def install_config_drp(rebar_session, boot_conf):
     :raises Exceptions
     """
     logger.info('Setting up Digital Rebar service and objects')
-    __setup_drp()
+    __setup_drp(boot_conf)
     __create_images()
     __create_subnet(rebar_session, boot_conf)
     __create_workflows()
@@ -62,7 +62,7 @@ def cleanup_drp(rebar_session, boot_conf):
     __teardown_drp()
 
 
-def __setup_drp():
+def __setup_drp(boot_conf):
     """
     Installs DRP and creates required objects
     :raises Exceptions
@@ -70,7 +70,8 @@ def __setup_drp():
     logger.info('Setting up Digital Rebar objects for DHCP/PXE booting')
     playbook_path = pkg_resources.resource_filename(
         'snaps_boot.ansible_p.setup', 'drp_setup.yaml')
-    ansible_utils.apply_playbook(playbook_path)
+    ansible_utils.apply_playbook(playbook_path, variables={
+        'serverIp': boot_conf['PROVISION']['PXE']['serverIp']})
 
 
 def __teardown_drp():

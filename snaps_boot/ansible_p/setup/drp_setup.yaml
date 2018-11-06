@@ -37,6 +37,12 @@
     command: /tmp/drp-install.sh install
     when: result.rc != 0
 
+  - name: Add static IP to Digital Rebar service configuration file
+    lineinfile:
+      path: /etc/systemd/system/dr-provision.service
+      regexp: '^ExecStart=/usr/local/bin/dr-provision$'
+      line: "ExecStart=/usr/local/bin/dr-provision --static-ip={{ serverIp }} --force-static"
+
   - name: Start and enable Digital Rebar Provisioning (dr-provision)
     systemd:
       state: restarted
