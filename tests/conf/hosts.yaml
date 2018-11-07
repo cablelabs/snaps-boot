@@ -39,7 +39,7 @@ PROVISION:
     https_proxy: ""
   PXE: 
     password: cable123
-    serverIp: "10.0.1.11"
+    server_ip: "10.0.1.11"
     user: ubuntu
   STATIC:
     host:

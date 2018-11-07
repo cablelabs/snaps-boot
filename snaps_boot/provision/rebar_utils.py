@@ -71,7 +71,7 @@ def __setup_drp(boot_conf):
     playbook_path = pkg_resources.resource_filename(
         'snaps_boot.ansible_p.setup', 'drp_setup.yaml')
     ansible_utils.apply_playbook(playbook_path, variables={
-        'serverIp': boot_conf['PROVISION']['PXE']['serverIp']})
+        'server_ip': boot_conf['PROVISION']['PXE']['server_ip']})
 
 
 def __teardown_drp():
@@ -210,7 +210,7 @@ def __instantiate_drp_subnet(rebar_session, boot_conf):
     # TODO/FIXME - Why are there multiple subnets configured
     subnet_conf = boot_conf['PROVISION']['DHCP']['subnet'][0]
     # Add the PXE server IP as next server for DHCP (required for shared build server to work)
-    subnet_conf['next_server'] = boot_conf['PROVISION']['PXE']['serverIp']
+    subnet_conf['next_server'] = boot_conf['PROVISION']['PXE']['server_ip']
     # TODO/FIXME - Create function to return a SubnetModel so we can support
     # TODO/FIXME - different types of configurations
     logger.info('Instantiating DRP subnet object with values %s', subnet_conf)
@@ -349,7 +349,7 @@ def __create_machine_params(boot_conf):
     out.append(ParamsModel(name='operating-system-disk', value=install_disk))
 
     root_password = prov_conf['PXE']['password']
-    server_ip = prov_conf['PXE']['serverIp']
+    server_ip = prov_conf['PXE']['server_ip']
     out.append(ParamsModel(name='seed/root-password', value=root_password))
     out.append(ParamsModel(name='seed/server-ip', value=server_ip))
 

@@ -189,7 +189,7 @@ Configuration parameter defined here are used by PXE server, usually the Build S
 
 | Parameter | Required | Description |
 | --------- | ----------- | ----------- |
-| serverIp | Y | IP of Build Server where PXE server is running. |
+| server_ip | Y | IP of Build Server where PXE server is running. |
 | user | Y | User of PXE server (User of Build Server). |
 | password | Y | Password for user of PXE server. |
 

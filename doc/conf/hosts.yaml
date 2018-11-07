@@ -58,7 +58,7 @@ PROVISION:
 
   PXE:
     password: cable123
-    serverIp: "10.197.121.21"
+    server_ip: "10.197.121.21"
     user: ubuntu
   STATIC:
     host:

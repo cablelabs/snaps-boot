@@ -41,7 +41,7 @@
     lineinfile:
       path: /etc/systemd/system/dr-provision.service
       regexp: '^ExecStart=/usr/local/bin/dr-provision$'
-      line: "ExecStart=/usr/local/bin/dr-provision --static-ip={{ serverIp }} --force-static"
+      line: "ExecStart=/usr/local/bin/dr-provision --static-ip={{ server_ip }} --force-static"
 
   - name: Start and enable Digital Rebar Provisioning (dr-provision)
     systemd:
