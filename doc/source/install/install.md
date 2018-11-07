@@ -35,11 +35,13 @@ The acronyms expanded in below are fundamental to the information in this docume
 | TFTP | Trivial FTP |
 | UEFI | Unified Extensible Firmware Interface |
 | BIOS | Basic Input Output System |
+| DRP | Digital Rebar Provision |
 
 ### 1.3 References
 
 1. OpenStack Installation Guide: https://docs.openstack.org/newton/install-guide-ubuntu/
 2. UEFI PXE Netboot/Install Procedure: https://wiki.ubuntu.com/UEFI/PXE-netboot-install
+3. Digital Rebar Provision Quick Start: https://provision.readthedocs.io/en/stable/doc/quickstart.html#rs-quickstart
 
 ## 2 Environment Prerequisites
 
@@ -73,8 +75,8 @@ The current release of SNAPS-Boot is tested on the following platform.
 | Category | Software version |
 | -------- | ---------------- |
 | Operating System |  Ubuntu 16.04 |
-| Scripting | Python 2.6.X |
-| Framework |  Ansible 2.3.0. |
+| Scripting | Python 2.7.X |
+| Framework |  Ansible 2.3.3.0 |
 
 ### 2.3 Network configuration
 
@@ -101,26 +103,16 @@ Ubuntu 16.04 Xenial as host OS. This host needs to be able to reach the Internet
 to download the software.
 
 1. Install Ubuntu on the Build Server
-1. Download SNAPS-boot from GitHub
-```
-wget https://github.com/cablelabs/snaps-boot/archive/master.zip
-```
-1. Extract the files
-```
-unzip master.zip
-```
-
-> Note: Git can also be used to clone the repository.
-
+2. Download SNAPS-boot from GitHub
 ```
 git clone https://github.com/cablelabs/snaps-boot.git
 ```
 
-1. Install
+3. Install
 
 ```
 sudo apt install python-pip
-sudo pip install -r snaps-boot/requirements-drb.txt
+sudo pip install -r snaps-boot/requirements-git.txt
 sudo pip install -e snaps-boot/
 ```
 
@@ -237,36 +229,32 @@ Parameters defined here are used by SNAPS-Boot IPMI agents to communicate with h
 
 #### TFTP:
 
-This section defines parameters to specify the host OS image and SEED file to be used for remote booting of host machines.
+This section defines parameters used in preseed configuration to automate Linux OS installation.
 
 | Parameter | Required | Description |
 | --------- | ----------- | ----------- |
-| pxe_server_configuration |  | Details of OS to be used in PXE server installation.  |
+| pxe_server_configuration |  | Details of OS to be used in PXE based installation.  |
 
 ##### Ubuntu
 | Parameter | Required | Description |
 | --------- | ----------- | ----------- |
 | ubuntu |  | Details of Ubuntu OS. |
-| os | N | ISO of ubuntu OS image to be installed on host machines. |
-| password | N | Password for the default user created by SNAPS-Boot. |
-| seed | N | Seed file to be used for host OS installation. |
-| timezone | N | Time zone configuration for host machines. |
-| user | N | Default user for all host machines. SNAPS-Boot creates this user. |
-| fullname | N | Description of user created by SNAPS-Boot. |
-| server_type | N | Tells the bootloader the type of the target system, UEFI or BIOS.  Defaults to BIOS. 
+| password | Y | Password for the default user created by SNAPS-Boot. |
+| timezone | Y | Time zone configuration for host machines. |
+| user | Y | Default user for all host machines. SNAPS-Boot creates this user. |
+| fullname | Y | Description of user created by SNAPS-Boot. |
+| boot_disk | Y | Disk name where OS is installed, e.g., sda |
 
 ##### CentOS
 | Parameter | Required | Description |
 | --------- | ----------- | ----------- |
 | centos |  | Details of Centos OS. |
-| os | N | ISO of centos OS image to be installed on host machines. |
-| root_password | N | Password for the root user created by SNAPS-Boot. |
-| user | N | Default user for all host machines. SNAPS-Boot creates this user. |
-| user_password | N | Password for the default user created by SNAPS-Boot. |
-| timezone | N | Time zone configuration for host machines. |
-| boot_disk | N | The device name of the boot disk (default is sda) |
+| password | Y | Password for the default user created by SNAPS-Boot. |
+| timezone | Y | Time zone configuration for host machines. |
+| user | Y | Default user for all host machines. SNAPS-Boot creates this user. |
+| fullname | Y | Description of user created by SNAPS-Boot. |
+| boot_disk | Y | Disk name where OS is installed, e.g., sda |
 
->:exclamation: Note: If you installing to a UEFI system, make sure your seed file is `ubuntu-uefi-server.seed`.
 > Note: User has to give details of at least one OS(either Ubuntu OS or Centos OS or Both) as per the PXE requirement.
 
 #### CPUCORE:
@@ -307,8 +295,8 @@ sudo apt install python-pip
 Clone this git repository and install into your Python 2.7 runtime
 ```
 git clone https://github.com/cablelabs/snaps-boot
-pip install -r snaps-boot/requirements-git.txt
-pip install -e snaps-boot/
+sudo pip install -r snaps-boot/requirements-git.txt
+sudo pip install -e snaps-boot/
 ```
 
 #### Step 3 - Configure your rack
