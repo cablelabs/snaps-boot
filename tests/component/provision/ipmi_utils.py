@@ -59,4 +59,3 @@ class IpmiUtilsTests(unittest.TestCase):
         conf = file_utils.read_yaml(conf_file)
         creds = ipmi_utils.get_ipmi_creds(conf)
         self.assertEqual(5, len(creds))
-
