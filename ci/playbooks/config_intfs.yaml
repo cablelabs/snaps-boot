@@ -17,6 +17,9 @@
 
   tasks:
     - name: Statically configure PXE machines' NICs
+      become: yes
+      become_method: sudo
+      become_user: root
       shell: "python {{ snaps_boot_dir }}//iaas_launch.py -f {{ hosts_yaml_path }} -s >> /tmp/snaps-boot.log"
       register: out
       ignore_errors: True
