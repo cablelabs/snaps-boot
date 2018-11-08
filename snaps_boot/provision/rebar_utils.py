@@ -209,7 +209,8 @@ def __instantiate_drp_subnet(rebar_session, boot_conf):
     """
     # TODO/FIXME - Why are there multiple subnets configured
     subnet_conf = boot_conf['PROVISION']['DHCP']['subnet'][0]
-    # Add the PXE server IP as next server for DHCP (required for shared build server to work)
+    # Add the PXE server IP as next server for DHCP
+    # (required for shared build server to work)
     subnet_conf['next_server'] = boot_conf['PROVISION']['PXE']['server_ip']
     # TODO/FIXME - Create function to return a SubnetModel so we can support
     # TODO/FIXME - different types of configurations
@@ -363,7 +364,8 @@ def __create_machine_params(boot_conf):
     out.append(ParamsModel(name='access-ssh-root-mode',
                            value='without-password'))
     out.append(ParamsModel(name='kernel-console', value='ttyS1,115200'))
-    out.append(ParamsModel(name='select-kickseed', value='snaps-net-seed.tmpl'))
+    out.append(ParamsModel(name='select-kickseed',
+                           value='snaps-net-seed.tmpl'))
 
     # TODO/FIXME - can we avoid using root key file location?
     with open('/root/.ssh/id_rsa.pub', 'r') as ssh_pub_key_file:
