@@ -68,5 +68,4 @@ def __reboot(command, timeout=30):
 
     if 'on' == power['powerstate']:
         raise Exception('Chassis never powered down')
-
     command.set_power('on')
