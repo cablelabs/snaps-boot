@@ -44,9 +44,9 @@ openstack:
     - flavor:
         os_creds_name: admin-creds
         name: build-flavor-{{ build_num }}
-        ram: 4096
+        ram: 8192
         disk: 80
-        vcpus: 2
+        vcpus: 4
 {% if flavor_metadata is defined %}
         metadata:
         {% for key, value in flavor_metadata.iteritems() %}
@@ -108,8 +108,8 @@ openstack:
           - subnet:
               name: admin-subnet
               cidr: {{ admin_ip_prfx }}.0/24
-              start: {{ admin_ip_prfx }}.2
-              end: {{ admin_ip_prfx }}.9
+              start: {{ admin_ip_prfx }}.11
+              end: {{ admin_ip_prfx }}.20
               enable_dhcp: False
               dns_nameservers: []
     - network:
@@ -126,8 +126,8 @@ openstack:
               name: priv-subnet
               project_name: pxe-proj-{{ build_num }}
               cidr: {{ priv_ip_prfx }}.0/24
-              start: {{ priv_ip_prfx }}.2
-              end: {{ priv_ip_prfx }}.9
+              start: {{ priv_ip_prfx }}.11
+              end: {{ priv_ip_prfx }}.20
               enable_dhcp: False
               dns_nameservers: []
     - network:
@@ -144,8 +144,8 @@ openstack:
               name: public-subnet
               project_name: pxe-proj-{{ build_num }}
               cidr: {{ pub_ip_prfx }}.0/24
-              start: {{ pub_ip_prfx }}.2
-              end: {{ pub_ip_prfx }}.9
+              start: {{ pub_ip_prfx }}.11
+              end: {{ pub_ip_prfx }}.20
               enable_dhcp: False
               dns_nameservers: [8.8.8.8]
   routers:
@@ -337,13 +337,10 @@ ansible:
     post_processing:
       sleep: 15
       reboot:
-        - pxe-vm-1
-        - pxe-vm-2
-        - pxe-vm-3
+      - pxe-vm-1
+      - pxe-vm-2
+      - pxe-vm-3
     variables:
-      install_iso_url:
-        type: string
-        value: {{ install_iso_url }}
       pxe_config:
         type: string
         value: {{ install_type }}
@@ -353,9 +350,6 @@ ansible:
       src_copy_dir:
         type: string
         value: {{ src_copy_dir }}
-      local_snaps_boot_dir:
-        type: string
-        value: {{ local_snaps_boot_dir }}
       priv_addr:
         type: network
         network_name: admin-net
@@ -485,7 +479,7 @@ ansible:
   # Verify admin interface on pxe-vm-1 was configured
   - playbook_location: {{ local_snaps_boot_dir }}/ci/playbooks/verify_intfs.yaml
     hosts:
-      - build-vm
+    - build-vm
     variables:
       snaps_boot_dir:
         type: string
@@ -505,7 +499,7 @@ ansible:
   # Verify admin interface on pxe-vm-2 was configured
   - playbook_location: {{ local_snaps_boot_dir }}/ci/playbooks/verify_intfs.yaml
     hosts:
-      - build-vm
+    - build-vm
     variables:
       snaps_boot_dir:
         type: string
@@ -525,7 +519,7 @@ ansible:
   # Verify admin interface on pxe-vm-3 was configured
   - playbook_location: {{ local_snaps_boot_dir }}/ci/playbooks/verify_intfs.yaml
     hosts:
-      - build-vm
+    - build-vm
     variables:
       snaps_boot_dir:
         type: string
@@ -541,11 +535,11 @@ ansible:
       timeout:
         type: string
         value: 300
-{% if install_type == "ubuntu" %}
+
   # Statically configure interfaces
   - playbook_location: {{ local_snaps_boot_dir }}/ci/playbooks/config_intfs.yaml
     hosts:
-      - build-vm
+    - build-vm
     post_processing:
       sleep: 120
     variables:
@@ -559,7 +553,7 @@ ansible:
   # Verify admin interface on pxe-vm-1 was configured
   - playbook_location: {{ local_snaps_boot_dir }}/ci/playbooks/verify_intfs.yaml
     hosts:
-      - build-vm
+    - build-vm
     variables:
       snaps_boot_dir:
         type: string
@@ -579,7 +573,7 @@ ansible:
   # Verify admin interface on pxe-vm-2 was configured
   - playbook_location: {{ local_snaps_boot_dir }}/ci/playbooks/verify_intfs.yaml
     hosts:
-      - build-vm
+    - build-vm
     variables:
       snaps_boot_dir:
         type: string
@@ -599,7 +593,7 @@ ansible:
   # Verify admin interface on pxe-vm-3 was configured
   - playbook_location: {{ local_snaps_boot_dir }}/ci/playbooks/verify_intfs.yaml
     hosts:
-      - build-vm
+    - build-vm
     variables:
       snaps_boot_dir:
         type: string
@@ -619,7 +613,7 @@ ansible:
   # Verify private interface on pxe-vm-1 was configured
   - playbook_location: {{ local_snaps_boot_dir }}/ci/playbooks/verify_intfs.yaml
     hosts:
-      - build-vm
+    - build-vm
     variables:
       snaps_boot_dir:
         type: string
@@ -639,7 +633,7 @@ ansible:
   # Verify private interface on pxe-vm-2 was configured
   - playbook_location: {{ local_snaps_boot_dir }}/ci/playbooks/verify_intfs.yaml
     hosts:
-      - build-vm
+    - build-vm
     variables:
       snaps_boot_dir:
         type: string
@@ -659,7 +653,7 @@ ansible:
   # Verify private interface on pxe-vm-3 was configured
   - playbook_location: {{ local_snaps_boot_dir }}/ci/playbooks/verify_intfs.yaml
     hosts:
-      - build-vm
+    - build-vm
     variables:
       snaps_boot_dir:
         type: string
@@ -679,7 +673,7 @@ ansible:
   # Verify public interface on pxe-vm-1 was configured
   - playbook_location: {{ local_snaps_boot_dir }}/ci/playbooks/verify_intfs.yaml
     hosts:
-      - build-vm
+    - build-vm
     variables:
       snaps_boot_dir:
         type: string
@@ -699,7 +693,7 @@ ansible:
   # Verify private interface on pxe-vm-2 was configured
   - playbook_location: {{ local_snaps_boot_dir }}/ci/playbooks/verify_intfs.yaml
     hosts:
-      - build-vm
+    - build-vm
     variables:
       snaps_boot_dir:
         type: string
@@ -735,4 +729,3 @@ ansible:
       timeout:
         type: string
         value: 120
-{% endif %}

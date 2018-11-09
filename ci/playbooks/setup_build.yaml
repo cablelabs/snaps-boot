@@ -17,6 +17,9 @@
 
   tasks:
     - name: Delete {{ src_copy_dir }}/snaps-boot directory
+      become: yes
+      become_method: sudo
+      become_user: root
       file:
         state: absent
         dest: "{{ src_copy_dir }}/snaps-boot"
@@ -26,7 +29,9 @@
         src: "{{ src_snaps_boot_dir }}"
         dest: "{{ src_copy_dir }}"
         dirs: yes
-    
+        rsync_opts:
+          - "--exclude=.idea"
+
     - name: Check if {{ src_copy_dir }}/snaps-boot exists
       stat: path={{ src_copy_dir }}/snaps-boot
       register: dir
@@ -41,60 +46,39 @@
       become_user: root
       apt: name=python-pip
 
-    - name: Install snaps-boot
-      command: pip install -e {{ src_copy_dir }}/snaps-boot
+    - name: Install snaps-boot requirements-git.txt
       become: yes
       become_method: sudo
       become_user: root
+      command: pip install -r {{ src_copy_dir }}/snaps-boot/requirements-git.txt
 
-    - name: Make directory {{ src_copy_dir }}/snaps-boot/packages/images
-      file:
-        path: "{{ src_copy_dir }}/snaps-boot/packages/images"
-        state: directory
-
-    - name: Download ISO image
-      get_url:
-        url: "{{ install_iso_url }}"
-        dest: "{{ src_copy_dir }}/snaps-boot/packages/images/boot-img.iso"
-        timeout: 1000
+    - name: Install snaps-boot
+      become: yes
+      become_method: sudo
+      become_user: root
+      command: pip install -e {{ src_copy_dir }}/snaps-boot
 
     - name: Apply template and copy hosts.yaml to {{ hosts_yaml_path }}
-      action: template src=templates/hosts.yaml.tmplt dest={{ hosts_yaml_path }}
+      action: template src=templates/hosts.yaml.j2 dest={{ hosts_yaml_path }}
 
-    - name: Complete build host setup - PreRequisite.sh
+    - name: Clean just in case PXE & DHCP server - iaas_launch.py -pc (see output @ /tmp/snaps-boot.log)
       become: yes
       become_method: sudo
       become_user: root
-      command: "sh {{ src_copy_dir }}/snaps-boot/scripts/PreRequisite.sh"
-      register: out
-    - debug: var=out.stderr_lines
-
-    - name: Clean just in case PXE & DHCP server - iaas_launch.py -pc
-      become: yes
-      become_method: sudo
-      become_user: root
-      command: "python {{ src_copy_dir }}/snaps-boot/iaas_launch.py -f {{ hosts_yaml_path }} -pc"
-      register: out
-    - debug: var=out.stderr_lines
-
-    - name: Config PXE & DHCP server - iaas_launch.py -p
-      become: yes
-      become_method: sudo
-      become_user: root
-      command: "python {{ src_copy_dir }}/snaps-boot/iaas_launch.py -f {{ hosts_yaml_path }} -p"
+      shell: "python {{ src_copy_dir }}/snaps-boot/iaas_launch.py -f {{ hosts_yaml_path }} -pc >> /tmp/snaps-boot.log"
       register: out
       ignore_errors: True
     - debug: var=out.stderr_lines
-    - debug: var=out.stdout_lines
 
-    - name: Validating iaas_launch returned 0
-      fail: msg="iaas_launch.py -d command failed"
-      when: out.rc != 0
-
-    - name: Make sure isc-dhcp-server is running
+    - name: Config PXE & DHCP server - iaas_launch.py -p (see output @ /tmp/snaps-boot.log)
       become: yes
       become_method: sudo
       become_user: root
-      systemd:
-        name: isc-dhcp-server
-        state: started
+      shell: "python {{ src_copy_dir }}/snaps-boot/iaas_launch.py -f {{ hosts_yaml_path }} -p >> /tmp/snaps-boot.log"
+      register: out
+      ignore_errors: True
+    - debug: var=out.stderr_lines
+
+    - name: Validating iaas_launch returned 0
+      fail: msg="iaas_launch.py -f {{ hosts_yaml_path }} -p command failed"
+      when: out.rc != 0

@@ -20,4 +20,12 @@
       become: yes
       become_method: sudo
       become_user: root
-      command: "python {{ snaps_boot_dir }}//iaas_launch.py -f {{ hosts_yaml_path }} -s"
+      shell: "python {{ snaps_boot_dir }}//iaas_launch.py -f {{ hosts_yaml_path }} -s >> /tmp/snaps-boot.log"
+      register: out
+      ignore_errors: True
+    - debug: var=out.stdout_lines
+    - debug: var=out.stderr_lines
+
+    - name: Validating iaas_launch returned 0
+      fail: msg="iaas_launch.py -s command failed"
+      when: out.rc != 0

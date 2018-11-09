@@ -35,11 +35,13 @@ The acronyms expanded in below are fundamental to the information in this docume
 | TFTP | Trivial FTP |
 | UEFI | Unified Extensible Firmware Interface |
 | BIOS | Basic Input Output System |
+| DRP | Digital Rebar Provision |
 
 ### 1.3 References
 
 1. OpenStack Installation Guide: https://docs.openstack.org/newton/install-guide-ubuntu/
 2. UEFI PXE Netboot/Install Procedure: https://wiki.ubuntu.com/UEFI/PXE-netboot-install
+3. Digital Rebar Provision Quick Start: https://provision.readthedocs.io/en/stable/doc/quickstart.html#rs-quickstart
 
 ## 2 Environment Prerequisites
 
@@ -73,8 +75,8 @@ The current release of SNAPS-Boot is tested on the following platform.
 | Category | Software version |
 | -------- | ---------------- |
 | Operating System |  Ubuntu 16.04 |
-| Scripting | Python 2.6.X |
-| Framework |  Ansible 2.3.0. |
+| Scripting | Python 2.7.X |
+| Framework |  Ansible 2.3.3.0 |
 
 ### 2.3 Network configuration
 
@@ -103,31 +105,31 @@ to download the software.
 1. Install Ubuntu on the Build Server
 2. Download SNAPS-boot from GitHub
 ```
-wget https://github.com/cablelabs/snaps-boot/archive/master.zip
-```
-3. Extract the files
-```
-unzip master.zip
-```
-
-> Note: Git can also be used to clone the repository.
-
-```
 git clone https://github.com/cablelabs/snaps-boot.git
+```
+
+3. Install
+
+```
+sudo apt install python-pip
+sudo pip install -r snaps-boot/requirements-git.txt
+sudo pip install -e snaps-boot/
 ```
 
 >:warning: Note:  If you use git, make sure not to push your changes back to the repository.
 ## 3 Configuration
 
-### 3.1 conf/pxe-cluster/hosts.yaml
-
-Save a copy of hosts.yaml before modifying it.
-`cp hosts.yaml origional-hosts.yaml`
+### 3.1 snaps-boot Configuration
 
 Configuration file used for hardware provisioning. Options defined here
- are used by deployment layer to discover and net boot host machines,
- allocate IP addresses, set proxies and install operating system on
-  these machines.
+are used by deployment layer to discover and net boot host machines,
+allocate IP addresses, set proxies and install operating system on
+these machines.
+
+Use the doc/conf/hosts.yaml file as a template for configuring your
+environment for use as your -f argument to iaas_launch.py. (note: the
+file does not need to be called hosts.yaml or reside in any particular
+directory)
 
 #### DHCP:
 
@@ -152,19 +154,12 @@ Configuration parameters for the subnet section are explained below.
 
 | Parameter | Required | Description |
 | --------- | ----------- | ----------- |
-| address | Y | Subnet address e.g. 10.10.10.0 |
-| bind_host | Y | This section defines group of mac and ip address. One such group is required for each host machine. The ip addresses defined here are allocated by the SNAPS-Boot during OS provisioning. The ip addresses defined here should be from the subnet defined by parameter ‘address’. |
-| broadcast-address | N | Broadcast address for the subnet |
-| default-lease | Y | Lease time (in seconds) to be used by DHCP server on Build Server. |
+| subnet | Y | Subnet address e.g. 10.10.10.0 |
 | dn | Y | Domain name of Build Server. |
 | dns | Y | IP of domain name server. |
-| listen_iface | Y | Name of interface to which DHCP server will bind for IP requests. |
-| max-lease | Y | Maximum lease time (in seconds) for DHCP server running on Build Server. |
-| Name | Y | Human readable name for this subnet. |
 | netmask | Y | Netmask of the subnet. |
 | range | Y | IP range to be used on this subnet. User is required to define a string of first and last ip address, see example below "172.16.109.210 172.16.109.224" |
-| routers | Y | IP of external router (gateway ip). |
-| Type | Y | Type of network this subnet will serve. Possible values are: **management**, **ipmi** (to be used only if user wants to modify IP address allocated to IPMI interfaces), **data**, **external**. |
+| router | Y | IP of external router (gateway ip). |
 
 > Note: For optional parameters, use null value **“”** if not required.
 
@@ -194,7 +189,7 @@ Configuration parameter defined here are used by PXE server, usually the Build S
 
 | Parameter | Required | Description |
 | --------- | ----------- | ----------- |
-| serverIp | Y | IP of Build Server where PXE server is running. |
+| server_ip | Y | IP of Build Server where PXE server is running. |
 | user | Y | User of PXE server (User of Build Server). |
 | password | Y | Password for user of PXE server. |
 
@@ -234,36 +229,32 @@ Parameters defined here are used by SNAPS-Boot IPMI agents to communicate with h
 
 #### TFTP:
 
-This section defines parameters to specify the host OS image and SEED file to be used for remote booting of host machines.
+This section defines parameters used in preseed configuration to automate Linux OS installation.
 
 | Parameter | Required | Description |
 | --------- | ----------- | ----------- |
-| pxe_server_configuration |  | Details of OS to be used in PXE server installation.  |
+| pxe_server_configuration |  | Details of OS to be used in PXE based installation.  |
 
 ##### Ubuntu
 | Parameter | Required | Description |
 | --------- | ----------- | ----------- |
 | ubuntu |  | Details of Ubuntu OS. |
-| os | N | ISO of ubuntu OS image to be installed on host machines. |
-| password | N | Password for the default user created by SNAPS-Boot. |
-| seed | N | Seed file to be used for host OS installation. |
-| timezone | N | Time zone configuration for host machines. |
-| user | N | Default user for all host machines. SNAPS-Boot creates this user. |
-| fullname | N | Description of user created by SNAPS-Boot. |
-| server_type | N | Tells the bootloader the type of the target system, UEFI or BIOS.  Defaults to BIOS. 
+| password | Y | Password for the default user created by SNAPS-Boot. |
+| timezone | Y | Time zone configuration for host machines. |
+| user | Y | Default user for all host machines. SNAPS-Boot creates this user. |
+| fullname | Y | Description of user created by SNAPS-Boot. |
+| boot_disk | Y | Disk name where OS is installed, e.g., sda |
 
 ##### CentOS
 | Parameter | Required | Description |
 | --------- | ----------- | ----------- |
 | centos |  | Details of Centos OS. |
-| os | N | ISO of centos OS image to be installed on host machines. |
-| root_password | N | Password for the root user created by SNAPS-Boot. |
-| user | N | Default user for all host machines. SNAPS-Boot creates this user. |
-| user_password | N | Password for the default user created by SNAPS-Boot. |
-| timezone | N | Time zone configuration for host machines. |
-| boot_disk | N | The device name of the boot disk (default is sda) |
+| password | Y | Password for the default user created by SNAPS-Boot. |
+| timezone | Y | Time zone configuration for host machines. |
+| user | Y | Default user for all host machines. SNAPS-Boot creates this user. |
+| fullname | Y | Description of user created by SNAPS-Boot. |
+| boot_disk | Y | Disk name where OS is installed, e.g., sda |
 
->:exclamation: Note: If you installing to a UEFI system, make sure your seed file is `ubuntu-uefi-server.seed`.
 > Note: User has to give details of at least one OS(either Ubuntu OS or Centos OS or Both) as per the PXE requirement.
 
 #### CPUCORE:
@@ -293,189 +284,50 @@ Note:  All of the following steps are executed within the root directory of your
 snaps-boot project.  This will usually be snaps-boot/, so it assumed you are in this 
 directory. 
 
-#### Step 1
+#### Step 1 - Build host setup
+Setup your Python 2.7 runtime (script example below is for Ubuntu)
+```
+sudo apt install python
+sudo apt install python-pip
+```
 
-##### PXE BIOS Install
+#### Step 2 - Obtaining the snaps-boot source
+Clone this git repository and install into your Python 2.7 runtime
+```
+git clone https://github.com/cablelabs/snaps-boot
+sudo pip install -r snaps-boot/requirements-git.txt
+sudo pip install -e snaps-boot/
+```
+
+#### Step 3 - Configure your rack
 Go to root directory of the project (e.g. `snaps-boot`)
 
-Download `ubuntu16.04` or `CentOS-7` server image from internet and need to place it
-in folder `snaps-boot/packages/images/`. 
-Use following download links for ISO:
-##### For ubuntu
- http://releases.ubuntu.com/16.04/ubuntu-16.04.4-server-amd64.iso
-##### For centos
- Download the latest "Everything ISO" from https://www.centos.org/download/
-
-```
-mkdir -p packages/images
-cd packages/images
-wget http://releases.ubuntu.com/16.04/ubuntu-16.04.4-server-amd64.iso
-wget http://mirror.umd.edu/centos/7/isos/x86_64/CentOS-7-x86_64-Everything-1804.iso
-```
-Note: Please ensure that Ubuntu 16.04 server will be used to configure CentOS 7 PXE Server.
-
-##### PXE UEFI Install
->:exclamation:CentOS is not yet supported for UEFI Installs
- 
-Go to root directory of the project (e.g. `snaps-boot`)
-
-Download `grubnetx64.efi.signed` from internet and need to place it
-in folder `packages/images/`.  
-Use this download link:  
-    http://archive.ubuntu.com/ubuntu/dists/xenial/main/uefi/grub2-amd64/current/grubnetx64.efi.signed
-
-Download `ubuntu16.04 server image` from internet and need to place it
-in folder `packages/images/`.  
-Use this download link for ISO:  
-    http://releases.ubuntu.com/16.04/ubuntu-16.04.4-server-amd64.iso.
-    
-```
-mkdir -p packages/images
-cd packages/images
-wget http://archive.ubuntu.com/ubuntu/dists/xenial/main/uefi/grub2-amd64/current/grubnetx64.efi.signed
-wget http://releases.ubuntu.com/16.04/ubuntu-16.04.4-server-amd64.iso
-```
-
-#### Step 2
-Go to root directory of the project (e.g. `snaps-boot`)
-
-Go to directory `conf/pxe_cluster`.
-
-Modify file `hosts.yaml` for provisioning of OS (Operating System) on
-cloud cluster host machines (controller node, compute nodes). Modify
-this file according to your set up environment only.
+Create a configuration file based on `doc/conf/hosts.yaml` for provisioning
+of the Operating System on these nodes
 
 Note:
-For provisioning only ubuntu PXE Server, Keep ubuntu list under TFTP section in hosts.yaml.  
-For provisioning only centos PXE Server, Keep centos list under TFTP section in hosts.yaml.  
+For provisioning only ubuntu PXE Server, Keep ubuntu list under TFTP section in hosts.yaml.
+For provisioning only centos PXE Server, Keep centos list under TFTP section in hosts.yaml.
 For provisioning both, Keep both ubuntu and centos lists under TFTP section in hosts.yaml.
       
-#### Step 3
-
-Go to root directory of the project (e.g. `snaps-boot`)
-
-Run `PreRequisite.sh` as shown below:
-
-```
-sudo ./scripts/PreRequisite.sh
-```
-
-If you see failures or errors, update your software, remove obsolete
-packages and reboot your server.
-
-```
-sudo apt-get update
-sudo apt-get upgrade
-sudo apt-get auto-remove
-sudo reboot
-```
-
-#### Step 4
+#### Step 4 - Deploy
 
 Steps to configure PXE and DHCP server.
 
-Go to root directory of the project (e.g. `snaps-boot`)
-
-
-Run `iaas_launch.py` as shown below:
+Run `iaas_launch.py` as shown below as a passwordless sudo user:
 
 ```
-sudo -i python $PWD/iaas_launch.py -f $PWD/conf/pxe_cluster/hosts.yaml -p
+python {git dir}/snaps-boot/iaas_launch.py -f {location of your configuration} -p
 ```
 
-Note: This updates the networking on the server and may cause your
-ssh session to be terminated.
-
-##### Step 4a
->:warning: This step is only if you require custom or proprietary drivers, such as ethernet.  If not you should skip this step. 
-
-If your target servers require custom or proprietary drivers, you will need to provide your own initrd.gz file
-for both the installer and the installation. 
-
-For more on injecting driver modules into an initrd.gz file see
-
->http://www.linux-admins.net/2014/02/injecting-kernel-modules-in-initrdgz.html
-
-Once you have a customized initrd.gz, make a backup of the existing initrd.gz
-
-```
-sudo cp <tftpdirectory>/ubuntu-installer/amd64/initrd.gz <tftpdirectory>/ubuntu-installer/amd64/initrd.gz.backup
-sudo cp <www/html directory>/ubuntu/install/netboot/ubuntu-installer/amd64/initrd.gz <www/html directory>/ubuntu/install/netboot/ubuntu-installer/amd64/initrd.gz.backup
-```
-
-Now copy your initrd.gz file to each location
-```
-sudo cp initrd.gz <tftpdirectory>/ubuntu-installer/amd64/initrd.gz 
-sudo cp initrd.gz <www/html directory>/ubuntu/install/netboot/ubuntu-installer/amd64/initrd.gz 
-```
-
-#### Step 5
-
-Manually verify DHCP server is running or not, using the given command below:
-
-```
-sudo systemctl status isc-dhcp-server.service
-```
-
-State should be active running.
-If it is not running, then double check the hosts.yaml file and look
-at /var/log/syslog for error messages.
-
-Manually verify tftp-hpa service is running or not, using the given
-command below:
-
-```
-sudo systemctl status tftpd-hpa
-```
-
-State should be active running.
-
-Manually verify apache2 service is running or not, using the given
-command below:
-
-```
-sudo systemctl status apache2
-```
-
-State should be active running.
-
-#### Step 6
-Go to root directory of the project (e.g. `snaps-boot`)
-
-##### When PXE Server is either ubuntu or centos
-Run `iaas_launch.py` as shown below:
-```
-sudo -i python $PWD/iaas_launch.py -f $PWD/conf/pxe_cluster/hosts.yaml -b
-```
-This will provision either ubuntu or centos OS on host machines, depending on the PXE Server.
-
-##### When PXE Server is both ubuntu and centos
-To provision ubuntu OS on host machines, Run `iaas_launch.py` as shown below:
-```
-sudo -i python $PWD/iaas_launch.py -f $PWD/conf/pxe_cluster/hosts.yaml -b ubuntu
-```
-or  
-
-To provision ubuntu OS on host machines, Run `iaas_launch.py` as shown below:
-```
-sudo -i python $PWD/iaas_launch.py -f $PWD/conf/pxe_cluster/hosts.yaml -b centos
-```
-
-This will boot host machines (controller/compute nodes), select
-NIC Controller (PXE client enabled) to use network booting.
-
-Your OS provisioning will start and will get completed in about 20
-minutes.  The time will vary depending on your network speed and
-ip aserver boot times.
-
-#### Step 7
+#### Step 7 - Static NIC Configuration
 Go to root directory of the project (e.g. `snaps-boot`)
 
 Execute this step only if static IPs to be assigned to host machines.
 
 Run `iaas_launch.py` as shown below:
 ```
-sudo -i python $PWD/iaas_launch.py -f $PWD/conf/pxe_cluster/hosts.yaml -s
+python {git dir}/snaps-boot/iaas_launch.py -f {location of your configuration} -s
 ```
 >:warning: This step will reboot each target server when it is done.  
 Wait a few minutes then ping and/or ssh each management server to verify  
@@ -488,7 +340,7 @@ Execute this step either for defining large memory pages or for
 isolating CPUs between host and guest OS.
 
 ```
-sudo -i python $PWD/iaas_launch.py -f $PWD/conf/pxe_cluster/hosts.yaml -i
+python {git dir}/snaps-boot/iaas_launch.py -f {location of your configuration} -i
 ```
 
 > Note: This step is optional and should be executed only if CPU
@@ -499,7 +351,7 @@ isolation or large memory page provisioning is required.
 ### 5.1 Roll-back Isolated CPUs and Huge Pages
 
 ```
-sudo -i python $PWD/iaas_launch.py -f $PWD/conf/pxe_cluster/hosts.yaml -ic
+python {git dir}/snaps-boot/iaas_launch.py -f {location of your configuration} -ic
 ```
 
 This will modify grub file on all host machines to remove isolated cpu
@@ -510,7 +362,7 @@ configuration.
 Back to Management Interface
 
 ```
-sudo -i python $PWD/iaas_launch.py -f $PWD/conf/pxe_cluster/hosts.yaml -sc
+python {git dir}/snaps-boot/iaas_launch.py -f {location of your configuration} -sc
 ```
 
 This will modify etc/network/interfaces file to remove static entries of the interfaces and will change back default route to management interface.
@@ -518,7 +370,7 @@ This will modify etc/network/interfaces file to remove static entries of the int
 ### 5.3 Roll-back of SNAPS-Boot Installation
 
 ```
-sudo -i python $PWD/iaas_launch.py -f $PWD/conf/pxe_cluster/hosts.yaml -pc
+python {git dir}/snaps-boot/iaas_launch.py -f {location of your configuration} -pc
 ```
 
 This will stop DHCP, PXE and TFTP services on Build Server.

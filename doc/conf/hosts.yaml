@@ -1,0 +1,168 @@
+# Copyright 2017 ARICENT HOLDINGS LUXEMBOURG SARL and Cable Television Laboratories, Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+PROVISION:
+  digitalRebar:
+    user: rocketskates
+    password: r0cketsk8ts
+  DHCP:
+    subnet:
+      -
+        address: "10.197.121.0"
+        bind_host:
+          -
+            ip: "10.197.121.22"
+            mac: "ec:b1:d7:7f:5a:6c"
+          -
+            ip: "10.197.121.23"
+            mac: "ec:b1:d7:7f:8a:9c"
+          -
+            ip: "10.197.121.24"
+            mac: "ec:b1:d7:7f:4a:08"
+          -
+            ip: "10.197.121.25"
+            mac: "ec:b1:d7:7f:5a:40"
+          -
+            ip: "10.197.121.26"
+            mac: "ec:b1:d7:7f:6a:14"
+
+        broadcast-address: "10.197.121.255"
+        default-lease: 7600
+        dn: cablelabs.com
+        dns: "8.8.8.8"
+        listen_iface: eno1
+        max-lease: 7200
+        name: Managment_SUBNET
+        netmask: "255.255.255.0"
+        range: "10.197.121.22 10.197.121.26"
+        router: "10.197.121.1"
+        type: management
+  PROXY:
+    ftp_proxy: ""
+    http_proxy: ""
+    https_proxy: ""
+    #user to provide ngcacher_proxy only in case when servers are behind company
+    #firewall, else left blank.
+    ngcacher_proxy: ""
+
+  PXE:
+    password: cable123
+    server_ip: "10.197.121.21"
+    user: ubuntu
+  STATIC:
+    host:
+     -
+       access_ip: 10.197.121.23
+       name: Controller
+       interfaces:
+         -
+           address: "10.197.122.23"
+           dn: ""
+           dns: ""
+           gateway: "0.0.0.0"
+           iface: eno2
+           name: Tenant_Interface
+           netmask: "255.255.255.0"
+           type: tenant
+         -
+           address: "10.197.123.23"
+           dn: ""
+           dns: ""
+           gateway: "10.197.123.1"
+           iface: eno3
+           name: Tenant_Interface
+           netmask: "255.255.255.0"
+           type: data
+     -
+       access_ip: 10.197.121.24
+       name: Compute1
+       interfaces:
+         -
+           address: "10.197.122.24"
+           dn: ""
+           dns: ""
+           gateway: "0.0.0.0"
+           iface: eno2
+           name: Tenant_Interface
+           netmask: "255.255.255.0"
+           type: tenant
+         -
+           address: "10.197.123.24"
+           dn: ""
+           dns: ""
+           gateway: "10.197.123.1"
+           iface: eno3
+           name: Tenant_Interface
+           netmask: "255.255.255.0"
+           type: data
+     -
+       access_ip: 10.197.121.25
+       name: Compute2
+       interfaces:
+         -
+           address: "10.197.122.25"
+           dn: ""
+           dns: ""
+           gateway: "0.0.0.0"
+           iface: eno2
+           name: Tenant_Interface
+           netmask: "255.255.255.0"
+           type: tenant
+         -
+           address: "10.197.123.25"
+           dn: ""
+           dns: ""
+           gateway: "10.197.123.1"
+           iface: eno3
+           name: Tenant_Interface
+           netmask: "255.255.255.0"
+           type: data
+
+  BMC:
+     host:
+       -
+         user: "admin"
+         password: "cable123"
+         ip: "10.197.124.22"
+         mac: "ec:b1:d7:88:a8:be"
+       -
+         user: "admin"
+         password: "cable123"
+         ip: "10.197.124.23"
+         mac: "ec:b1:d7:88:49:d6"
+       -
+         user: "admin"
+         password: "cable123"
+         ip: "10.197.124.24"
+         mac: "ec:b1:d7:88:d8:9a"
+       -
+         user: "admin"
+         password: "cable123"
+         ip: "10.197.124.25"
+         mac: "ec:b1:d7:88:a8:aa"
+  TFTP:
+     pxe_server_configuration:
+        ubuntu:
+          password: ChangeME123
+          timezone: America/Denver
+          user: ubuntu
+          fullname: ubuntu_user
+          boot_disk: sda
+  CPUCORE:
+    host:
+       -
+         ip: "10.197.121.21"
+         isolcpus: "0-20,1-22"
+         hugepagesz: "2M"
+         hugepages: "2048"

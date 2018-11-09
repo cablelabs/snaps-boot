@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+
+cat > /etc/apt/apt.conf <<EOF
+Acquire::http::Proxy "{{.Param "post/http-proxy"}}";
+Acquire::https::Proxy "{{.Param "post/https-proxy"}}";
+Acquire::ftp::Proxy "";
+EOF
+
+cat > /etc/apt/sources.list <<EOF
+deb http://archive.ubuntu.com/ubuntu/ xenial main restricted
+deb http://archive.ubuntu.com/ubuntu/ xenial-updates main restricted
+deb http://archive.ubuntu.com/ubuntu/ xenial universe
+deb http://archive.ubuntu.com/ubuntu/ xenial-updates universe
+deb http://archive.ubuntu.com/ubuntu/ xenial multiverse
+deb http://archive.ubuntu.com/ubuntu/ xenial-updates multiverse
+deb http://archive.ubuntu.com/ubuntu/ xenial-backports main restricted universe multiverse
+deb http://security.ubuntu.com/ubuntu xenial-security main restricted
+deb http://security.ubuntu.com/ubuntu xenial-security universe
+deb http://security.ubuntu.com/ubuntu xenial-security multiverse
+EOF
+
+sed -i 's/prohibit-password/yes/' /etc/ssh/sshd_config
+service sshd restart
+
+cat >> /etc/modprobe.d/nest.conf <<EOF
+options kvm_intel nested=1
+EOF

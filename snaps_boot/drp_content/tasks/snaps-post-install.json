@@ -1,0 +1,26 @@
+{
+  "Available": true,
+  "Description": "A task to perform post install actions",
+  "Documentation": "",
+  "Errors": [],
+  "Meta": {
+    "color": "blue",
+    "feature-flags": "sane-exit-codes",
+    "icon": "key",
+    "title": "Snaps Content"
+  },
+  "Name": "snaps-post-install",
+  "OptionalParams": [],
+  "ReadOnly": false,
+  "RequiredParams": [],
+  "Templates": [
+    {
+      "Contents": "",
+      "ID": "snaps-net-post-install.sh.tmpl",
+      "Meta": {},
+      "Name": "Run post install script",
+      "Path": ""
+    }
+  ],
+  "Validated": true
+}

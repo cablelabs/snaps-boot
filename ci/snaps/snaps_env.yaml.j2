@@ -1,21 +1,21 @@
 ---
-build_num: {{ build_num }}
+build_num: {{ build_id }}
 
+# These values are variable
 admin_user: admin
 admin_proj: admin
-admin_pass: {{ admin_pass }}
-auth_url: {{ auth_url }}
+admin_pass: {{ os_pass }}
+auth_url: {{ os_auth_url }}
 id_api_version: 3
 proxy_host:
 proxy_port:
 ssh_proxy_cmd:
 
-ext_net: {{ external_network_name }}
-ext_subnet: {{ external_subnet_name }}
+ext_net: {{ ext_net }}
+ext_subnet: {{ ext_subnet }}
 
-src_snaps_boot_dir: {{ src_snaps_boot_dir }}
 src_copy_dir: /tmp
-local_snaps_boot_dir: /tmp/snaps-boot
+local_snaps_boot_dir: {{ path_to_this_repo }}
 
 os_pxe_user_pass: password
 
@@ -24,8 +24,8 @@ admin_ip_prfx: 10.1.0
 priv_ip_prfx: 10.1.1
 pub_ip_prfx: 10.1.2
 
-build_kp_pub_path: /tmp/pxe-kp-lab3.pub
-build_kp_priv_path: /tmp/pxe-kp-lab3
+build_kp_pub_path: /tmp/pxe-kp-launcher.pub
+build_kp_priv_path: /tmp/pxe-kp-launcher
 
 pxe_machine_user: root
 pxe_machine_pass: Pa$$w0rd
@@ -33,4 +33,4 @@ pxe_machine_pass: Pa$$w0rd
 hosts_yaml_target_path: /tmp/hosts.yaml
 
 # install_typ is centos or ubuntu
-install_type: ubuntu
+install_type: centos

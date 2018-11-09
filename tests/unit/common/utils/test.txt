@@ -1,3 +1,0 @@
-hello world
-foo bar
-this is just a test

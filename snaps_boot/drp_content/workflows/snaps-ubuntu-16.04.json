@@ -1,0 +1,19 @@
+{
+  "Validated": false,
+  "Available": false,
+  "Errors": [],
+  "ReadOnly": false,
+  "Meta": {
+    "color": "red",
+    "icon": "tag",
+    "title": ""
+  },
+  "Name": "snaps-ubuntu-16.04",
+  "Description": "Install ubuntu 16.04",
+  "Documentation": "",
+  "Stages": [
+    "ubuntu-16.04-install",
+    "snaps-post-install",
+    "complete"
+  ]
+}

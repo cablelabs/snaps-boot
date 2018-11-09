@@ -18,28 +18,18 @@ import argparse
 import logging
 
 import os
+import sys
 
-from snaps_boot.common.utils import file_utils
-from snaps_boot.provision.hardware import pxe_utils
+from drp_python.network_layer.http_session import HttpSession
+from snaps_common.file import file_utils
+from snaps_boot.provision import pxe_utils, rebar_utils, ipmi_utils
 
 logger = logging.getLogger('iaas_launch')
 
 ARG_NOT_SET = "argument not set"
 
 
-def __read_hw_config(config, operation):
-    """
-     This will launch the provisioning of PXE setup on the configuration node.
-     :param config : This configuration data extracted from the host.yaml.
-    """
-    if config:
-        logger.info(
-            'Read & Validate functionality for Hardware Provisioning - %s',
-            operation)
-        pxe_utils.__main(config, operation)
-
-
-def main(arguments):
+def __run(arguments):
     """
      This will launch the provisioning of Bare metat & IaaS.
      There is pxe based configuration defined to provision the bare metal.
@@ -54,45 +44,59 @@ def main(arguments):
     log_level = logging.INFO
     if arguments.log_level != 'INFO':
         log_level = logging.DEBUG
-    logging.basicConfig(level=log_level)
+    logging.basicConfig(stream=sys.stdout, level=log_level)
 
     logger.info('Launching Operation Starts ........')
 
-    dir_path = os.path.dirname(os.path.realpath(__file__))
-    export_path = dir_path + "/"
-    os.environ['CWD_IAAS'] = export_path
-    print '===========================Current Exported Relevant Path' \
-          '=================================='
-    logger.info('export CWD_IAAS=%s', export_path)
-
     config = file_utils.read_yaml(arguments.config)
-    logger.info('Read configuration file - ' + arguments.config)
+    logger.info('Read configuration file [%s]', arguments.config)
+
+    prv_config = config.get('PROVISION')
+    if not prv_config:
+        raise Exception('Missing top-level config member PROVISION')
+    logger.debug('PROVISION configuration %s', prv_config)
+
+    # TODO/FIXME - Hardcoding of user/pass should be configurable
+    drp_config = prv_config.get('digitalRebar')
+    if drp_config:
+        logger.info('Rebar configuration %s', drp_config)
+        user = drp_config.get('user', 'rocketskates')
+        password = drp_config.get('password', 'r0cketsk8ts')
+    else:
+        user = 'rocketskates'
+        password = 'r0cketsk8ts'
+
+    # TODO/FIXME - DRP host and port should be configurable
+    rebar_session = HttpSession(
+        'https://localhost:8092', user, password)
+
     if arguments.hardware is not ARG_NOT_SET:
-        __read_hw_config(config, "hardware")
+        rebar_utils.install_config_drp(rebar_session, config)
 
     if arguments.provisionClean is not ARG_NOT_SET:
-        __read_hw_config(config, "provisionClean")
+        rebar_utils.cleanup_drp(rebar_session, config)
 
     if arguments.staticIPCleanup is not ARG_NOT_SET:
-        __read_hw_config(config, "staticIPCleanup")
+        # Do we really need to support this function?
+        pxe_utils.static_ip_cleanup(config)
 
     if arguments.staticIPConfigure is not ARG_NOT_SET:
-        __read_hw_config(config, "staticIPConfigure")
+        # Is this something that we should do with cloud-init or other means
+        # immediately after the OS is laid down?
+        pxe_utils.static_ip_configure(config)
 
     if arguments.boot is not ARG_NOT_SET:
-        if arguments.boot == "ubuntu":
-            __read_hw_config(config, "ubuntu")
-        elif arguments.boot == "centos":
-            __read_hw_config(config, "centos")
-        else:
-            __read_hw_config(config, "boot")
+        ipmi_utils.reboot_pxe(config)
 
     if arguments.bootd is not ARG_NOT_SET:
-        __read_hw_config(config, "bootd")
+        # This power cycles the nodes
+        ipmi_utils.reboot_disk(config)
     if arguments.setIsolCpus is not ARG_NOT_SET:
-        __read_hw_config(config, "setIsolCpus")
+        # This operation is unclear
+        pxe_utils.set_isol_cpus(config)
     if arguments.delIsolCpus is not ARG_NOT_SET:
-        __read_hw_config(config, "delIsolCpus")
+        # This operation is unclear
+        pxe_utils.del_isol_cpus(config)
     logger.info('Completed operation successfully')
 
 
@@ -137,6 +141,9 @@ if __name__ == '__main__':
         dest='bootd',
         nargs='?',
         default=ARG_NOT_SET,
+        # TODO/FIXME - Does this operation really do anything differently
+        # CI just calls -b in other contexts and those machines are booting
+        # from the internal storage
         help='When used, to boot the system via hdd')
     parser.add_argument(
         '-pc',
@@ -144,49 +151,49 @@ if __name__ == '__main__':
         dest='provisionClean',
         nargs='?',
         default=ARG_NOT_SET,
-        help='When used, the pxe server environment will be '
-        'removed')
+        # TODO/FIXME - Description is incorrect
+        help='When used, the pxe server environment will be removed')
     parser.add_argument(
         '-s',
         '--staticIPConfigure',
         dest='staticIPConfigure',
         nargs='?',
         default=ARG_NOT_SET,
-        help='When used, the pxe server environment will be '
-        'removed')
+        # TODO/FIXME - Description is incorrect
+        help='When used, the pxe server environment will be removed')
     parser.add_argument(
         '-sc',
         '--staticIPCleanup',
         dest='staticIPCleanup',
         nargs='?',
         default=ARG_NOT_SET,
-        help='When used, the pxe server environment will be '
-        'removed')
+        # TODO/FIXME - Description is incorrect
+        help='When used, the pxe server environment will be removed')
     parser.add_argument(
         '-i',
         '--setIsolCpus',
         dest='setIsolCpus',
         nargs='?',
         default=ARG_NOT_SET,
-        help='When used, the pxe server environment will be '
-        'removed')
+        # TODO/FIXME - Description is incorrect
+        help='When used, the pxe server environment will be removed')
     parser.add_argument(
         '-ic',
         '--cleanIsolCpus',
         dest='delIsolCpus',
         nargs='?',
         default=ARG_NOT_SET,
-        help='When used, the pxe server environment will be '
-        'removed')
+        # TODO/FIXME - Description is incorrect
+        help='When used, the pxe server environment will be removed')
     args = parser.parse_args()
 
-    if (args.hardware is ARG_NOT_SET and args.boot is ARG_NOT_SET
-            and args.bootd is ARG_NOT_SET
-            and args.provisionClean is ARG_NOT_SET
-            and args.setIsolCpus is ARG_NOT_SET
-            and args.delIsolCpus is ARG_NOT_SET
-            and args.staticIPConfigure is ARG_NOT_SET
-            and args.staticIPCleanup is ARG_NOT_SET):
+    if (args.hardware is ARG_NOT_SET and args.boot is ARG_NOT_SET and
+            args.bootd is ARG_NOT_SET and
+            args.provisionClean is ARG_NOT_SET and
+            args.setIsolCpus is ARG_NOT_SET and
+            args.delIsolCpus is ARG_NOT_SET and
+            args.staticIPConfigure is ARG_NOT_SET and
+            args.staticIPCleanup is ARG_NOT_SET):
         print 'Must enter either -p for provision hardware or -pc for clean ' \
               'provision hardware or -b for boot or -i for isolate cpu ' \
               'provision or -bd for boot from disk'
@@ -196,4 +203,4 @@ if __name__ == '__main__':
               ' and -f/--file'
         exit(1)
 
-    main(args)
+    __run(args)

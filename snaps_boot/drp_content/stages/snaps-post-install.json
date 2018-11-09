@@ -1,0 +1,23 @@
+{
+  "Available": true,
+  "BootEnv": "",
+  "Description": "",
+  "Documentation": "",
+  "Errors": [],
+  "Meta": {
+    "color": "black",
+    "icon": "sitemap"
+  },
+  "Name": "snaps-post-install",
+  "OptionalParams": [],
+  "Profiles": [],
+  "ReadOnly": false,
+  "Reboot": false,
+  "RequiredParams": [],
+  "RunnerWait": true,
+  "Tasks": [
+    "snaps-post-install"
+  ],
+  "Templates": [],
+  "Validated": true
+}

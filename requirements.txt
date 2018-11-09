@@ -1,6 +1,7 @@
-pbr
-ansible<2.4,>=2.1.0
 cryptography
 mock
 paramiko
 PyYAML
+requests
+netaddr
+pyghmi
