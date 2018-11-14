@@ -264,27 +264,19 @@ def __instantiate_drp_reservations(rebar_session, boot_conf):
     # TODO/FIXME - Why are there multiple subnets configured
     prov_confs = boot_conf['PROVISION']
     subnet_conf = prov_confs['DHCP']['subnet'][0]
-    host_confs = prov_confs['STATIC']['host']
 
     bind_hosts = subnet_conf['bind_host']
     for bind_host in bind_hosts:
-        for host_conf in host_confs:
-            if host_conf['access_ip'] == bind_host['ip']:
-                res_conf = {
-                    'ip': bind_host['ip'],
-                    'mac': bind_host['mac'],
-                    'name': host_conf['name'],
-                    'type': 'admin',
-                }
-                logger.info('Creating DRP reservation %s', res_conf)
-                drp_res_conf = ReservationModel(**res_conf)
-                res = Reservation(rebar_session, drp_res_conf)
-                out.append(res)
-
-    if len(host_confs) != len(out):
-        raise Exception(
-            "{} reservations expected, {} reservations created".format(
-                len(host_confs), len(out)))
+        res_conf = {
+            'ip': bind_host['ip'],
+            'mac': bind_host['mac'],
+            'name': bind_host['mac'],
+            'type': 'admin',
+        }
+        logger.info('Creating DRP reservation %s', res_conf)
+        drp_res_conf = ReservationModel(**res_conf)
+        res = Reservation(rebar_session, drp_res_conf)
+        out.append(res)
 
     return out
 
