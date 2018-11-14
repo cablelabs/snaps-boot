@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import logging
-import os
 
 import pkg_resources
 from drp_python.model_layer.params_model import ParamsModel
@@ -281,6 +280,11 @@ def __instantiate_drp_reservations(rebar_session, boot_conf):
                 drp_res_conf = ReservationModel(**res_conf)
                 res = Reservation(rebar_session, drp_res_conf)
                 out.append(res)
+
+    if len(host_confs) != len(out):
+        raise Exception(
+            "{} reservations expected, {} reservations created".format(
+                len(host_confs), len(out)))
 
     return out
 

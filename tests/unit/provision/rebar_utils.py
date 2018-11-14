@@ -42,8 +42,9 @@ class RebarUtilsTests(unittest.TestCase):
     @mock.patch('time.sleep')
     @mock.patch('drp_python.translation_layer.machines_translation.'
                 'MachineTranslation.add_machine_params')
+    @mock.patch('snaps_boot.provision.rebar_utils.__create_machine_params')
     def test_setup_dhcp_service(self, m1, m2, m3, m4, m5, m6, m7, m8, m9, m10,
-                                m11):
+                                m11, m12):
         """
         Tests the rebar_utils.
         :return:
