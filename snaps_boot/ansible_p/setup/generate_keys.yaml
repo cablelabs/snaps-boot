@@ -12,22 +12,17 @@
 # limitations under the License.
 ---
 - hosts: localhost
-  become: yes
-  become_user: root
-  vars:
-    public_key_file : "/root/.ssh/id_rsa.pub"
-    priv_key_file : "/root/.ssh/id_rsa"
 
   tasks:
-  - name: Check that the public ssh key exists
+  - name: Check that the {{ pk_file }} exists
     stat:
-      path: "{{ public_key_file }}"
+      path: "{{ pk_file }}"
     register: pub_key_exists
 
   - name: Creates ssh keys if one does not exist
     user:
-        name: root
-        generate_ssh_key: yes
-        ssh_key_bits: 2048
-        ssh_key_file: .ssh/id_rsa
+      name: "{{ ansible_user_id }}"
+      generate_ssh_key: yes
+      ssh_key_bits: 2048
+      ssh_key_file: "{{ pk_file }}"
     when: pub_key_exists.stat.exists == False

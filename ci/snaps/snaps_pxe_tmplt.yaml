@@ -331,6 +331,7 @@ openstack:
                   ip: {{ pub_ip_prfx }}.13
 ansible:
   # Install and configure snaps-boot to build host
+{% if run_build | default(True) %}
   - playbook_location: {{ local_snaps_boot_dir }}/ci/playbooks/setup_build.yaml
     hosts:
       - build-vm
@@ -475,8 +476,13 @@ ansible:
       hosts_yaml_path:
         type: string
         value: {{ hosts_yaml_target_path }}
+      run_as:
+        type: string
+        value: {{ run_as  | default('root') }}
+{% endif %}
 
   # Verify admin interface on pxe-vm-1 was configured
+{% if run_validation | default(True) %}
   - playbook_location: {{ local_snaps_boot_dir }}/ci/playbooks/verify_intfs.yaml
     hosts:
     - build-vm
@@ -495,6 +501,9 @@ ansible:
       timeout:
         type: string
         value: 1800
+      run_as:
+        type: string
+        value: {{ run_as | default('yes') }}
 
   # Verify admin interface on pxe-vm-2 was configured
   - playbook_location: {{ local_snaps_boot_dir }}/ci/playbooks/verify_intfs.yaml
@@ -515,6 +524,9 @@ ansible:
       timeout:
         type: string
         value: 300
+      run_as:
+        type: string
+        value: {{ run_as | default('yes') }}
 
   # Verify admin interface on pxe-vm-3 was configured
   - playbook_location: {{ local_snaps_boot_dir }}/ci/playbooks/verify_intfs.yaml
@@ -535,8 +547,13 @@ ansible:
       timeout:
         type: string
         value: 300
+      run_as:
+        type: string
+        value: {{ run_as | default('yes') }}
+{% endif %}
 
   # Statically configure interfaces
+{% if run_static_intf | default(True) %}
   - playbook_location: {{ local_snaps_boot_dir }}/ci/playbooks/config_intfs.yaml
     hosts:
     - build-vm
@@ -549,8 +566,13 @@ ansible:
       hosts_yaml_path:
         type: string
         value: {{ hosts_yaml_target_path }}
+      run_as:
+        type: string
+        value: {{ run_as | default('yes') }}
+{% endif %}
 
   # Verify admin interface on pxe-vm-1 was configured
+{% if run_validation | default(True) %}
   - playbook_location: {{ local_snaps_boot_dir }}/ci/playbooks/verify_intfs.yaml
     hosts:
     - build-vm
@@ -569,6 +591,9 @@ ansible:
       timeout:
         type: string
         value: 120
+      run_as:
+        type: string
+        value: {{ run_as | default('yes') }}
 
   # Verify admin interface on pxe-vm-2 was configured
   - playbook_location: {{ local_snaps_boot_dir }}/ci/playbooks/verify_intfs.yaml
@@ -589,6 +614,9 @@ ansible:
       timeout:
         type: string
         value: 120
+      run_as:
+        type: string
+        value: {{ run_as | default('yes') }}
 
   # Verify admin interface on pxe-vm-3 was configured
   - playbook_location: {{ local_snaps_boot_dir }}/ci/playbooks/verify_intfs.yaml
@@ -609,6 +637,9 @@ ansible:
       timeout:
         type: string
         value: 120
+      run_as:
+        type: string
+        value: {{ run_as | default('yes') }}
 
   # Verify private interface on pxe-vm-1 was configured
   - playbook_location: {{ local_snaps_boot_dir }}/ci/playbooks/verify_intfs.yaml
@@ -629,6 +660,9 @@ ansible:
       timeout:
         type: string
         value: 120
+      run_as:
+        type: string
+        value: {{ run_as | default('yes') }}
 
   # Verify private interface on pxe-vm-2 was configured
   - playbook_location: {{ local_snaps_boot_dir }}/ci/playbooks/verify_intfs.yaml
@@ -649,6 +683,9 @@ ansible:
       timeout:
         type: string
         value: 120
+      run_as:
+        type: string
+        value: {{ run_as | default('yes') }}
 
   # Verify private interface on pxe-vm-3 was configured
   - playbook_location: {{ local_snaps_boot_dir }}/ci/playbooks/verify_intfs.yaml
@@ -669,6 +706,9 @@ ansible:
       timeout:
         type: string
         value: 120
+      run_as:
+        type: string
+        value: {{ run_as | default('yes') }}
 
   # Verify public interface on pxe-vm-1 was configured
   - playbook_location: {{ local_snaps_boot_dir }}/ci/playbooks/verify_intfs.yaml
@@ -689,6 +729,9 @@ ansible:
       timeout:
         type: string
         value: 120
+      run_as:
+        type: string
+        value: {{ run_as | default('yes') }}
 
   # Verify private interface on pxe-vm-2 was configured
   - playbook_location: {{ local_snaps_boot_dir }}/ci/playbooks/verify_intfs.yaml
@@ -709,6 +752,9 @@ ansible:
       timeout:
         type: string
         value: 120
+      run_as:
+        type: string
+        value: {{ run_as | default('yes') }}
 
   # Verify private interface on pxe-vm-3 was configured
   - playbook_location: {{ local_snaps_boot_dir }}/ci/playbooks/verify_intfs.yaml
@@ -729,3 +775,7 @@ ansible:
       timeout:
         type: string
         value: 120
+      run_as:
+        type: string
+        value: {{ run_as | default('yes') }}
+{% endif %}

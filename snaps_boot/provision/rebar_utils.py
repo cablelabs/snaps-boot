@@ -294,8 +294,10 @@ def __generate_ssh_keys():
     playbook_path = pkg_resources.resource_filename(
         'snaps_boot.ansible_p.setup', 'generate_keys.yaml')
 
-    # TODO/FIXME - can we avoid using root key file location?
-    ansible_utils.apply_playbook(playbook_path)
+    # TODO/FIXME - Make this key location configurable
+    ansible_utils.apply_playbook(
+        playbook_path,
+        variables={'pk_file': os.path.expanduser('~/.ssh/id_rsa')})
 
 
 def __create_machines(rebar_session, boot_conf):
@@ -367,8 +369,9 @@ def __create_machine_params(boot_conf):
     out.append(ParamsModel(name='select-kickseed',
                            value='snaps-net-seed.tmpl'))
 
-    # TODO/FIXME - can we avoid using root key file location?
-    with open('/root/.ssh/id_rsa.pub', 'r') as ssh_pub_key_file:
+    # TODO/FIXME - this should not be hardcoded
+    id_rsa_pub = os.path.expanduser('~/.ssh/id_rsa.pub')
+    with open(id_rsa_pub, 'r') as ssh_pub_key_file:
         key_contents = ssh_pub_key_file.readlines()
 
     out.append(ParamsModel(name='access-keys',
