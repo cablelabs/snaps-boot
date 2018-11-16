@@ -71,17 +71,17 @@
     shell: "python {{ src_copy_dir }}/snaps-boot/iaas_launch.py -f {{ hosts_yaml_path }} -pc >> /tmp/snaps-boot.log"
     register: out
     ignore_errors: True
-    when: run_as_root == 'True'
+    when: run_as_root
 
   - name: Clean just in case PXE & DHCP server - iaas_launch.py -pc (see output @ /tmp/snaps-boot.log)
     shell: "python {{ src_copy_dir }}/snaps-boot/iaas_launch.py -f {{ hosts_yaml_path }} -pc -or >> /tmp/snaps-boot.log"
     register: out
     ignore_errors: True
-    when: run_as_root != 'True'
+    when: not run_as_root
 
   - debug:
       msg: "Running as {{ run_as_root }}"
-    when: run_as_root == 'True'
+    when: run_as_root
 
   - name: Config PXE & DHCP server as ROOT - iaas_launch.py -p (see output @ /tmp/snaps-boot.log)
     become: yes
@@ -90,22 +90,22 @@
     shell: "python {{ src_copy_dir }}/snaps-boot/iaas_launch.py -f {{ hosts_yaml_path }} -p -or >> /tmp/snaps-boot.log"
     register: out_root
     ignore_errors: True
-    when: run_as_root == 'True'
+    when: run_as_root
 
   - debug:
       var: out_root.stderr_lines
-    when: run_as_root == 'True' and out_root.rc != 0
+    when: run_as_root and out_root.rc != 0
 
   - name: Config PXE & DHCP server - iaas_launch.py -p (see output @ /tmp/snaps-boot.log)
     shell: "python {{ src_copy_dir }}/snaps-boot/iaas_launch.py -f {{ hosts_yaml_path }} -p -or >> /tmp/snaps-boot.log"
     register: out_user
     ignore_errors: True
-    when: run_as_root != 'True'
+    when: not run_as_root
 
   - debug:
       var: out_user.stderr_lines
-    when: run_as_root != 'True' and out_user.rc != 0
+    when: not run_as_root and out_user.rc != 0
 
   - name: Validating iaas_launch returned 0
     fail: msg="iaas_launch.py -f {{ hosts_yaml_path }} -p command failed"
-    when: (run_as_root == 'True' and out_root.rc != 0) or (run_as_root != 'True' and out_user.rc != 0)
+    when: (run_as_root and out_root.rc != 0) or (not run_as_root and out_user.rc != 0)
