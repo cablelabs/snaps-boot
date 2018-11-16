@@ -16,7 +16,7 @@
 - hosts: all
 
   vars:
-    run_as: "{{ run_as | default('root') }}"
+    run_as_root: "{{ run_as_root | default('True') }}"
 
   tasks:
   - name: Attempting to obtain an SSH connection to {{ ip_addr }} as ROOT with {{ username }}
@@ -24,8 +24,8 @@
     become_method: sudo
     become_user: root
     command: "python {{ snaps_boot_dir }}/ci/scripts/validate_ssh_ip.py -u {{ username }} -i {{ ip_addr }} -t {{ timeout }}"
-    when: run_as == 'root'
+    when: run_as_root == True
 
   - name: Attempting to obtain an SSH connection to {{ ip_addr }}
     command: "python {{ snaps_boot_dir }}/ci/scripts/validate_ssh_ip.py -u {{ username }} -i {{ ip_addr }} -t {{ timeout }}"
-    when: run_as != 'root'
+    when: run_as_root != True
