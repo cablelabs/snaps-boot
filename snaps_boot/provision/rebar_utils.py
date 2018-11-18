@@ -159,8 +159,8 @@ def __create_content_pack():
 
     playbook_path = pkg_resources.resource_filename(
         'snaps_boot.ansible_p.setup', 'drp_content_pack_create.yaml')
-    ansible_utils.apply_playbook(
-        playbook_path, variables={'content_dir': pack_dir})
+    ansible_utils.apply_playbook(playbook_path, variables={
+        'content_dir': pack_dir, 'content_pkg': 'drp_content'})
 
 
 def __delete_content_pack():
@@ -294,7 +294,7 @@ def __instantiate_drp_reservations(rebar_session, boot_conf):
 def __generate_ssh_keys():
     """
     Ensures that the build server has SSH keys to inject into nodes
-    :return:
+    :return: the public key value
     """
     logger.info('Generate SSH keys')
     public_key, private_key, created = __create_keys()
@@ -408,11 +408,19 @@ def __create_machine_params(boot_conf, public_key):
     prov_conf = boot_conf['PROVISION']
     pxe_confs = prov_conf['TFTP']['pxe_server_configuration']
     install_disk = None
+    user_password = None
+    user = None
+    fullname = None
     for value in pxe_confs.values():
         user_password = value['password']
         user = value['user']
         fullname = value['fullname']
         install_disk = value['boot_disk']
+        break
+
+    if not install_disk or not user_password or not user or not user:
+        raise Exception('Cannot set expected seed values')
+
     out.append(ParamsModel(name='seed/user-password', value=user_password))
     out.append(ParamsModel(name='seed/username', value=user))
     out.append(ParamsModel(name='seed/user-fullname', value=fullname))

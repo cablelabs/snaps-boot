@@ -80,7 +80,7 @@
     when: not run_as_root
 
   - debug:
-      msg: "Running as {{ run_as_root }}"
+      msg: "Running as root - {{ run_as_root }}"
     when: run_as_root
 
   - name: Config PXE & DHCP server as ROOT - iaas_launch.py -p (see output @ /tmp/snaps-boot.log)
