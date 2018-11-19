@@ -49,7 +49,17 @@ def main(arguments):
             ssh_client = ssh_utils.ssh_client(
                 arguments.ip_addr, arguments.username)
             if ssh_client:
-                exit(0)
+                if arguments.command:
+                    stdin1, stdout1, sterr1 = ssh_client.exec_command(
+                        arguments.command)
+                    if stdout1.channel.recv_exit_status() == 0:
+                        logger.info('Command [%s] success', arguments.command)
+                        exit(0)
+                    else:
+                        raise Exception('Command {} failed', arguments.command)
+                else:
+                    logger.info('Obtained SSH client')
+                    exit(0)
         except Exception as e:
             logger.info('Retry obtaining connection - %s', e)
 
@@ -81,6 +91,8 @@ if __name__ == '__main__':
     parser.add_argument(
         '-pi', '--poll-interval', dest='poll_interval', default=10,
         help='The number of seconds before next retry')
+    parser.add_argument(
+        '-c', '--command', dest='command', help='The command to issue via ssh')
     args = parser.parse_args()
 
     main(args)

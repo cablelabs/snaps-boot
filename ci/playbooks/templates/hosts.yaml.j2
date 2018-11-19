@@ -10,7 +10,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 ---
 PROVISION:
   digitalRebar:
@@ -18,31 +17,25 @@ PROVISION:
     password: r0cketsk8ts
   DHCP:
     subnet:
-      -
-        address: {{ priv_addr }}
-        bind_host:
-          -
-            ip: {{ admin_ip_1 }}
-            mac: {{ admin_mac_1 }}
-          -
-            ip: {{ admin_ip_2 }}
-            mac: {{ admin_mac_2 }}
-          -
-            ip: {{ admin_ip_3 }}
-            mac: {{ admin_mac_3 }}
-
-        broadcast-address: {{ broadcast_addr }}
-        default-lease: 7600
-        dn: {{ domain_name }}
-        dns: {{ dns_addr }}
-        listen_iface: {{ listen_iface }}
-        max-lease: {{ max_lease }}
-        name: Managment_SUBNET
-        netmask: {{ netmask }}
-        range: {{ ip_range }}
-        router: {{ router_ip }}
-        type: management
-
+    - address: {{ priv_addr }}
+      bind_host:
+      - ip: {{ admin_ip_1 }}
+        mac: {{ admin_mac_1 }}
+      - ip: {{ admin_ip_2 }}
+        mac: {{ admin_mac_2 }}
+      - ip: {{ admin_ip_3 }}
+        mac: {{ admin_mac_3 }}
+      broadcast-address: {{ broadcast_addr }}
+      default-lease: 7600
+      dn: {{ domain_name }}
+      dns: {{ dns_addr }}
+      listen_iface: {{ listen_iface }}
+      max-lease: {{ max_lease }}
+      name: Managment_SUBNET
+      netmask: {{ netmask }}
+      range: {{ ip_range }}
+      router: {{ router_ip }}
+      type: management
   PROXY:
     ftp_proxy: ""
     http_proxy: http://{{ build_admin_ip }}:{{ http_proxy_port }}
@@ -55,127 +48,110 @@ PROVISION:
     user: foo
   STATIC:
     host:
-     -
-       access_ip: {{ admin_ip_1 }}
-       name: Controller
-       interfaces:
-         -
-           address: {{ admin_ip_1 }}
-           dn: ""
-           dns: ""
-           gateway: "0.0.0.0"
-           iface: {{ admin_iface }}
-           name: Admin_Interface
-           netmask: {{ netmask }}
-           type: tenant
-         -
-           address: {{ private_ip_1 }}
-           dn: ""
-           dns: ""
-           gateway: "0.0.0.0"
-           iface: {{ priv_iface }}
-           name: Private_Interface
-           netmask: {{ netmask }}
-           type: tenant
-         -
-           address: {{ public_ip_1 }}
-           dn: "cablelabs.com"
-           dns: {{ dns_addr }}
-           gateway: {{ public_gateway }}
-           iface: {{ pub_iface }}
-           name: Public_Interface
-           netmask: {{ netmask }}
-           type: data
-     -
-       access_ip: {{ admin_ip_2 }}
-       name: Compute1
-       interfaces:
-         -
-           address: {{ admin_ip_2 }}
-           dn: ""
-           dns: ""
-           gateway: "0.0.0.0"
-           iface: {{ admin_iface }}
-           name: Admin_Interface
-           netmask: {{ netmask }}
-           type: tenant
-         -
-           address: {{ private_ip_2 }}
-           dn: ""
-           dns: ""
-           gateway: "0.0.0.0"
-           iface: {{ priv_iface }}
-           name: Private_Interface
-           netmask: {{ netmask }}
-           type: tenant
-         -
-           address: {{ public_ip_2 }}
-           dn: "cablelabs.com"
-           dns: {{ dns_addr }}
-           gateway: {{ public_gateway }}
-           iface: {{ pub_iface }}
-           name: Public_Interface
-           netmask: {{ netmask }}
-           type: data
-     -
-       access_ip: {{ admin_ip_3 }}
-       name: Compute2
-       interfaces:
-         -
-           address: {{ admin_ip_3 }}
-           dn: ""
-           dns: ""
-           gateway: "0.0.0.0"
-           iface: {{ admin_iface }}
-           name: Admin_Interface
-           netmask: {{ netmask }}
-           type: tenant
-         -
-           address: {{ private_ip_3 }}
-           dn: ""
-           dns: ""
-           gateway: "0.0.0.0"
-           iface: {{ priv_iface }}
-           name: Private_Interface
-           netmask: {{ netmask }}
-           type: tenant
-         -
-           address: {{ public_ip_3 }}
-           dn: "cablelabs.com"
-           dns: {{ dns_addr }}
-           gateway: {{ public_gateway }}
-           iface: {{ pub_iface }}
-           name: Public_Interface
-           netmask: {{ netmask }}
-           type: data
-
+    - access_ip: {{ admin_ip_1 }}
+      name: Controller
+      interfaces:
+        - address: {{ admin_ip_1 }}
+          dn: ""
+          dns: ""
+          gateway: "0.0.0.0"
+          iface: {{ admin_iface }}
+          name: Admin_Interface
+          netmask: {{ netmask }}
+          type: tenant
+        - address: {{ private_ip_1 }}
+          dn: ""
+          dns: ""
+          gateway: "0.0.0.0"
+          iface: {{ priv_iface }}
+          name: Private_Interface
+          netmask: {{ netmask }}
+          type: tenant
+        - address: {{ public_ip_1 }}
+          dn: "cablelabs.com"
+          dns: {{ dns_addr }}
+          gateway: {{ public_gateway }}
+          iface: {{ pub_iface }}
+          name: Public_Interface
+          netmask: {{ netmask }}
+          type: data
+    - access_ip: {{ admin_ip_2 }}
+      name: Compute1
+      interfaces:
+      - address: {{ admin_ip_2 }}
+        dn: ""
+        dns: ""
+        gateway: "0.0.0.0"
+        iface: {{ admin_iface }}
+        name: Admin_Interface
+        netmask: {{ netmask }}
+        type: tenant
+      - address: {{ private_ip_2 }}
+        dn: ""
+        dns: ""
+        gateway: "0.0.0.0"
+        iface: {{ priv_iface }}
+        name: Private_Interface
+        netmask: {{ netmask }}
+        type: tenant
+      - address: {{ public_ip_2 }}
+        dn: "cablelabs.com"
+        dns: {{ dns_addr }}
+        gateway: {{ public_gateway }}
+        iface: {{ pub_iface }}
+        name: Public_Interface
+        netmask: {{ netmask }}
+        type: data
+    - access_ip: {{ admin_ip_3 }}
+      name: Compute2
+      interfaces:
+      - address: {{ admin_ip_3 }}
+        dn: ""
+        dns: ""
+        gateway: "0.0.0.0"
+        iface: {{ admin_iface }}
+        name: Admin_Interface
+        netmask: {{ netmask }}
+        type: tenant
+      - address: {{ private_ip_3 }}
+        dn: ""
+        dns: ""
+        gateway: "0.0.0.0"
+        iface: {{ priv_iface }}
+        name: Private_Interface
+        netmask: {{ netmask }}
+        type: tenant
+      - address: {{ public_ip_3 }}
+        dn: "cablelabs.com"
+        dns: {{ dns_addr }}
+        gateway: {{ public_gateway }}
+        iface: {{ pub_iface }}
+        name: Public_Interface
+        netmask: {{ netmask }}
+        type: data
   BMC:
-     host:
-       -
-         user: "admin"
-         password: "password"
-         ip: "10.197.124.22"
-         mac: "ec:b1:d7:88:a8:be"
-       -
-         user: "admin"
-         password: "password"
-         ip: "10.197.124.23"
-         mac: "ec:b1:d7:88:49:d6"
-       -
-         user: "admin"
-         password: "password"
-         ip: "10.197.124.24"
-         mac: "ec:b1:d7:88:d8:9a"
-       -
-         user: "admin"
-         password: "password"
-         ip: "10.197.124.25"
-         mac: "ec:b1:d7:88:a8:aa"
+    host:
+    - user: "admin"
+      password: "password"
+      ip: "10.197.124.22"
+      mac: "ec:b1:d7:88:a8:be"
+    - user: "admin"
+      password: "password"
+      ip: "10.197.124.23"
+      mac: "ec:b1:d7:88:49:d6"
+    - user: "admin"
+      password: "password"
+      ip: "10.197.124.24"
+      mac: "ec:b1:d7:88:d8:9a"
+    - user: "admin"
+      password: "password"
+      ip: "10.197.124.25"
+      mac: "ec:b1:d7:88:a8:aa"
   TFTP:
-     pxe_server_configuration:
-       ubuntu:
-         password: {{ pxe_pass }}
-         timezone: America/Denver
-         user: ubuntu
-         fullname: ubuntu_user
-         boot_disk: vda
+    pxe_server_configuration:
+      ubuntu:
+        password: {{ pxe_pass }}
+        timezone: America/Denver
+        user: ubuntu
+        fullname: ubuntu_user
+        boot_disk: vda

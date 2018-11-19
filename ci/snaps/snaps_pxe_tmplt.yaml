@@ -778,4 +778,71 @@ ansible:
       run_as_root:
         type: string
         value: {{ run_as_root | default(True) }}
+
+  - playbook_location: {{ local_snaps_boot_dir }}/ci/playbooks/verify_apt.yaml
+    hosts:
+    - build-vm
+    variables:
+      snaps_boot_dir:
+        type: string
+        value: {{ src_copy_dir }}/snaps-boot
+      ip_addr:
+        type: port
+        vm_name: pxe-vm-1
+        port_name: pxe-pub-port-1
+        port_value: ip_address
+      username:
+        type: string
+        value: {{ pxe_machine_user }}
+      timeout:
+        type: string
+        value: 120
+      run_as_root:
+        type: string
+        value: {{ run_as_root | default(True) }}
+
+  - playbook_location: {{ local_snaps_boot_dir }}/ci/playbooks/verify_apt.yaml
+    hosts:
+    - build-vm
+    variables:
+      snaps_boot_dir:
+        type: string
+        value: {{ src_copy_dir }}/snaps-boot
+      ip_addr:
+        type: port
+        vm_name: pxe-vm-2
+        port_name: pxe-pub-port-2
+        port_value: ip_address
+      username:
+        type: string
+        value: {{ pxe_machine_user }}
+      timeout:
+        type: string
+        value: 120
+      run_as_root:
+        type: string
+        value: {{ run_as_root | default(True) }}
+
+  - playbook_location: {{ local_snaps_boot_dir }}/ci/playbooks/verify_apt.yaml
+    hosts:
+    - build-vm
+    variables:
+      snaps_boot_dir:
+        type: string
+        value: {{ src_copy_dir }}/snaps-boot
+      ip_addr:
+        type: port
+        vm_name: pxe-vm-3
+        port_name: pxe-pub-port-3
+        port_value: ip_address
+      username:
+        type: string
+        value: {{ pxe_machine_user }}
+      timeout:
+        type: string
+        value: 120
+      run_as_root:
+        type: string
+        value: {{ run_as_root | default(True) }}
+
 {% endif %}
