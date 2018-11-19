@@ -31,12 +31,12 @@
     when: run_as_root
 
   - name: Attempting to Install python-pip to {{ ip_addr }}
-    command: "python {{ snaps_boot_dir }}/ci/scripts/validate_ssh_ip.py -u {{ username }} -i {{ ip_addr }} -c 'sudo apt install python-pip' -t {{ timeout }}"
+    command: "python {{ snaps_boot_dir }}/ci/scripts/validate_ssh_ip.py -u {{ username }} -i {{ ip_addr }} -c 'sudo apt install python-pip -y' -t {{ timeout }}"
     when: not run_as_root
 
   - name: Attempting to Install python-pip to {{ ip_addr }} as ROOT
     become: yes
     become_method: sudo
     become_user: root
-    command: "python {{ snaps_boot_dir }}/ci/scripts/validate_ssh_ip.py -u {{ username }} -i {{ ip_addr }} -c 'sudo apt install python-pip' -t {{ timeout }}"
+    command: "python {{ snaps_boot_dir }}/ci/scripts/validate_ssh_ip.py -u {{ username }} -i {{ ip_addr }} -c 'sudo apt install python-pip -y' -t {{ timeout }}"
     when: run_as_root
