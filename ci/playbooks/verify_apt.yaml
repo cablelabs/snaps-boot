@@ -23,7 +23,7 @@
     command: "python {{ snaps_boot_dir }}/ci/scripts/validate_ssh_ip.py -u {{ username }} -i {{ ip_addr }} -c 'sudo apt update' -t {{ timeout }}"
     when: not run_as_root
 
-  - name: Updating apt on {{ ip_addr }} {{ ip_addr }} as ROOT
+  - name: Updating apt on {{ ip_addr }} as ROOT
     become: yes
     become_method: sudo
     become_user: root

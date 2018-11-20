@@ -51,7 +51,7 @@
           line: "nameserver {{ dns }}\nsearch {{ dn }}"
      when: is_ext|bool and true
    - name: Backing up apt.conf
-     command: mv /etc/apt/apt.conf /etc/apt/apt.conf.bak
+     command: cp /etc/apt/apt.conf /etc/apt/apt.conf.bak
      ignore_errors: True
      when: is_ext|bool and true
 

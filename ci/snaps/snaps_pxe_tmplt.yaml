@@ -157,14 +157,6 @@ openstack:
         external_gateway: {{ ext_net }}
         internal_subnets:
           - ctrl-subnet
-    - router:
-        os_user:
-          name: pxe-user-{{ build_num }}
-          project_name: pxe-proj-{{ build_num }}
-        name: pxe-router
-        external_gateway: {{ ext_net }}
-        internal_subnets:
-          - public-subnet
   keypairs:
     - keypair:
         os_user:
