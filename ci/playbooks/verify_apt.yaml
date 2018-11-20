@@ -42,12 +42,12 @@
     when: run_as_root
 
   - name: Attempting to Install pyOpenSSL to {{ ip_addr }}
-    command: "python {{ snaps_boot_dir }}/ci/scripts/validate_ssh_ip.py -u {{ username }} -i {{ ip_addr }} -c 'sudo pip install pyOpenSSL -y' -t {{ timeout }}"
+    shell: "python {{ snaps_boot_dir }}/ci/scripts/validate_ssh_ip.py -u {{ username }} -i {{ ip_addr }} -c 'sudo pip install pyOpenSSL --proxy {{ build_admin_ip }}:{{ http_proxy_port }}' -t {{ timeout }}"
     when: not run_as_root
 
   - name: Attempting to Install pyOpenSSL to {{ ip_addr }} as ROOT
     become: yes
     become_method: sudo
     become_user: root
-    command: "python {{ snaps_boot_dir }}/ci/scripts/validate_ssh_ip.py -u {{ username }} -i {{ ip_addr }} -c 'sudo pip install pyOpenSSL -y' -t {{ timeout }}"
+    shell: "python {{ snaps_boot_dir }}/ci/scripts/validate_ssh_ip.py -u {{ username }} -i {{ ip_addr }} -c 'pip install pyOpenSSL --proxy {{ build_admin_ip }}:{{ http_proxy_port }}' -t {{ timeout }}"
     when: run_as_root

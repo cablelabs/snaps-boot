@@ -792,6 +792,14 @@ ansible:
       run_as_root:
         type: string
         value: {{ run_as_root | default(True) }}
+      build_admin_ip:
+        type: port
+        vm_name: build-vm
+        port_name: build-admin-port
+        port_value: ip_address
+      http_proxy_port:
+        type: string
+        value: 3142
 
   - playbook_location: {{ local_snaps_boot_dir }}/ci/playbooks/verify_apt.yaml
     hosts:
@@ -814,6 +822,14 @@ ansible:
       run_as_root:
         type: string
         value: {{ run_as_root | default(True) }}
+      build_admin_ip:
+        type: port
+        vm_name: build-vm
+        port_name: build-admin-port
+        port_value: ip_address
+      http_proxy_port:
+        type: string
+        value: 3142
 
   - playbook_location: {{ local_snaps_boot_dir }}/ci/playbooks/verify_apt.yaml
     hosts:
@@ -836,5 +852,13 @@ ansible:
       run_as_root:
         type: string
         value: {{ run_as_root | default(True) }}
+      build_admin_ip:
+        type: port
+        vm_name: build-vm
+        port_name: build-admin-port
+        port_value: ip_address
+      http_proxy_port:
+        type: string
+        value: 3142
 
 {% endif %}
