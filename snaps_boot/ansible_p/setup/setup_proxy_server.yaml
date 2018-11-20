@@ -30,7 +30,13 @@
       path: /etc/apt-cacher-ng/acng.conf
       line: "PassThroughPattern: .*"
 
-  - name: Start and enable Digital Rebar Provisioning (dr-provision)
+  - name: Configure apt-cacher-ng - PassThroughPattern
+    lineinfile:
+      path: /etc/apt-cacher-ng/acng.conf
+      line: "NoSSLChecks: 0"
+
+  - name: Restart and enable apt-cacher-ng
     systemd:
+      state: restarted
       enabled: yes
       name: apt-cacher-ng
