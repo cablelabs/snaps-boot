@@ -50,10 +50,6 @@
           dest: /etc/resolvconf/resolv.conf.d/base
           line: "nameserver {{ dns }}\nsearch {{ dn }}"
      when: is_ext|bool and true
-   - name: Backing up apt.conf
-     command: cp /etc/apt/apt.conf /etc/apt/apt.conf.bak
-     ignore_errors: True
-     when: is_ext|bool and true
 
    - name: restarting system
      shell: /sbin/shutdown -r 1 "Ansible restart"

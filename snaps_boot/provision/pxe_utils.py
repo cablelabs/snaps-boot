@@ -40,11 +40,7 @@ def static_ip_configure(config):
         exit(1)
     http_proxy = proxy_dict.get('http_proxy')
     https_proxy = proxy_dict.get('https_proxy')
-    # iplist = []
 
-    # for this_host in host:
-    #     target = this_host.get('access_ip')
-    #     iplist.append(target)
     for host in hosts:
         interfaces = host.get('interfaces')
         backup_var = "Y"
