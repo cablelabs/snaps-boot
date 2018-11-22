@@ -14,6 +14,7 @@
 - hosts: localhost
   become: yes
   become_user: root
+  become_method: sudo
   vars:
     public_key_file : "/root/.ssh/id_rsa.pub"
     priv_key_file : "/root/.ssh/id_rsa"
