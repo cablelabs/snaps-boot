@@ -44,9 +44,9 @@ openstack:
     - flavor:
         os_creds_name: admin-creds
         name: build-flavor-{{ build_num }}
-        ram: 8192
-        disk: 80
-        vcpus: 4
+        ram: {{ admin_ram | default(8192) }}
+        disk: {{ admin_disk | default(80) }}
+        vcpus: {{ admin_cpus | default(2) }}
 {% if flavor_metadata is defined %}
         metadata:
         {% for key, value in flavor_metadata.iteritems() %}
@@ -56,9 +56,9 @@ openstack:
     - flavor:
         os_creds_name: admin-creds
         name: pxe-flavor-{{ build_num }}
-        ram: 2048
-        disk: 40
-        vcpus: 1
+        ram: {{ pxe_ram | default(2048) }}
+        disk: {{ pxe_disk | default(40) }}
+        vcpus: {{ pxe_cpus | default(1) }}
 {% if flavor_metadata is defined %}
         metadata:
         {% for key, value in flavor_metadata.iteritems() %}

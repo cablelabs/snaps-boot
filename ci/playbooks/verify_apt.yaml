@@ -19,35 +19,41 @@
     run_as_root: "{{ run_as_root | default('True') }}"
 
   tasks:
-  - name: Updating apt on {{ ip_addr }}
-    command: "python {{ snaps_boot_dir }}/ci/scripts/validate_ssh_ip.py -u {{ username }} -i {{ ip_addr }} -c 'sudo apt update' -t {{ timeout }}"
-    when: not run_as_root
-
-  - name: Updating apt on {{ ip_addr }} as ROOT
+  - name: Configure apt with /etc/apt/apt.conf.bak
     become: yes
     become_method: sudo
     become_user: root
-    command: "python {{ snaps_boot_dir }}/ci/scripts/validate_ssh_ip.py -u {{ username }} -i {{ ip_addr }} -c 'sudo apt update' -t {{ timeout }}"
+    command: "python {{ snaps_boot_dir }}/ci/scripts/validate_ssh_ip.py -u {{ username }} -i {{ ip_addr }} -c 'sudo cp /etc/apt/apt.conf.bak /etc/apt/apt.conf' -t {{ timeout }}"
+
+  - name: Validate as ROOT
+    block:
+    - name: Updating apt on {{ ip_addr }} as ROOT
+      command: "python {{ snaps_boot_dir }}/ci/scripts/validate_ssh_ip.py -u {{ username }} -i {{ ip_addr }} -c 'sudo apt update' -t {{ timeout }}"
+
+    - name: Attempting to Install python-pip to {{ ip_addr }} as ROOT
+      command: "python {{ snaps_boot_dir }}/ci/scripts/validate_ssh_ip.py -u {{ username }} -i {{ ip_addr }} -c 'sudo apt install python-pip -y' -t {{ timeout }}"
+
+    - name: Attempting to Install pyOpenSSL to {{ ip_addr }} as ROOT
+      shell: "python {{ snaps_boot_dir }}/ci/scripts/validate_ssh_ip.py -u {{ username }} -i {{ ip_addr }} -c 'pip install pyOpenSSL --proxy {{ build_admin_ip }}:{{ http_proxy_port }}' -t {{ timeout }}"
     when: run_as_root
-
-  - name: Attempting to Install python-pip to {{ ip_addr }}
-    command: "python {{ snaps_boot_dir }}/ci/scripts/validate_ssh_ip.py -u {{ username }} -i {{ ip_addr }} -c 'sudo apt install python-pip -y' -t {{ timeout }}"
-    when: not run_as_root
-
-  - name: Attempting to Install python-pip to {{ ip_addr }} as ROOT
     become: yes
     become_method: sudo
     become_user: root
-    command: "python {{ snaps_boot_dir }}/ci/scripts/validate_ssh_ip.py -u {{ username }} -i {{ ip_addr }} -c 'sudo apt install python-pip -y' -t {{ timeout }}"
-    when: run_as_root
 
-  - name: Attempting to Install pyOpenSSL to {{ ip_addr }}
-    shell: "python {{ snaps_boot_dir }}/ci/scripts/validate_ssh_ip.py -u {{ username }} -i {{ ip_addr }} -c 'sudo pip install pyOpenSSL --proxy {{ build_admin_ip }}:{{ http_proxy_port }}' -t {{ timeout }}"
+  - name: Validate as {{ ansible_user_id }}
+    block:
+      - name: Updating apt on {{ ip_addr }}
+        command: "python {{ snaps_boot_dir }}/ci/scripts/validate_ssh_ip.py -u {{ username }} -i {{ ip_addr }} -c 'sudo apt update' -t {{ timeout }}"
+
+      - name: Attempting to Install python-pip to {{ ip_addr }}
+        command: "python {{ snaps_boot_dir }}/ci/scripts/validate_ssh_ip.py -u {{ username }} -i {{ ip_addr }} -c 'sudo apt install python-pip -y' -t {{ timeout }}"
+
+      - name: Attempting to Install pyOpenSSL to {{ ip_addr }}
+        shell: "python {{ snaps_boot_dir }}/ci/scripts/validate_ssh_ip.py -u {{ username }} -i {{ ip_addr }} -c 'sudo pip install pyOpenSSL --proxy {{ build_admin_ip }}:{{ http_proxy_port }}' -t {{ timeout }}"
     when: not run_as_root
 
-  - name: Attempting to Install pyOpenSSL to {{ ip_addr }} as ROOT
+  - name: Remove apt.conf
     become: yes
     become_method: sudo
     become_user: root
-    shell: "python {{ snaps_boot_dir }}/ci/scripts/validate_ssh_ip.py -u {{ username }} -i {{ ip_addr }} -c 'pip install pyOpenSSL --proxy {{ build_admin_ip }}:{{ http_proxy_port }}' -t {{ timeout }}"
-    when: run_as_root
+    command: "python {{ snaps_boot_dir }}/ci/scripts/validate_ssh_ip.py -u {{ username }} -i {{ ip_addr }} -c 'sudo rm -f /etc/apt/apt.conf' -t {{ timeout }}"
