@@ -316,20 +316,31 @@ Steps to configure PXE and DHCP server.
 
 Run `iaas_launch.py` as shown below as a passwordless sudo user:
 
+Execute as standard workflow:
 ```
-python {git dir}/snaps-boot/iaas_launch.py -f {location of your configuration} -p
+sudo -i python {git dir}/snaps-boot/iaas_launch.py -f {location of your configuration} -p
+```
+or execute as a sudo user:
+```
+python {git dir}/snaps-boot/iaas_launch.py -f {location of your configuration} -p -or
 ```
 
 #### Step 7 - Static NIC Configuration
+
 Go to root directory of the project (e.g. `snaps-boot`)
 
 Execute this step only if static IPs to be assigned to host machines.
 
-Run `iaas_launch.py` as shown below:
+Execute as standard workflow:
 ```
-python {git dir}/snaps-boot/iaas_launch.py -f {location of your configuration} -s
+sudo -i python {git dir}/snaps-boot/iaas_launch.py -f {location of your configuration} -s
 ```
->:warning: This step will reboot each target server when it is done.  
+or execute as a sudo user:
+```
+python {git dir}/snaps-boot/iaas_launch.py -f {location of your configuration} -s -or
+```
+
+>:warning: This step will reboot each target server when it is done.
 Wait a few minutes then ping and/or ssh each management server to verify  
 it is back up. 
 
@@ -339,8 +350,13 @@ Go to root directory of the project (e.g. `snaps-boot`)
 Execute this step either for defining large memory pages or for
 isolating CPUs between host and guest OS.
 
+Execute as standard workflow:
 ```
-python {git dir}/snaps-boot/iaas_launch.py -f {location of your configuration} -i
+sudo -i python {git dir}/snaps-boot/iaas_launch.py -f {location of your configuration} -i
+```
+or execute as a sudo user:
+```
+python {git dir}/snaps-boot/iaas_launch.py -f {location of your configuration} -i -or
 ```
 
 > Note: This step is optional and should be executed only if CPU
@@ -350,8 +366,13 @@ isolation or large memory page provisioning is required.
 
 ### 5.1 Roll-back Isolated CPUs and Huge Pages
 
+Execute as standard workflow:
 ```
-python {git dir}/snaps-boot/iaas_launch.py -f {location of your configuration} -ic
+sudo -i python {git dir}/snaps-boot/iaas_launch.py -f {location of your configuration} -ic
+```
+or execute as a sudo user:
+```
+python {git dir}/snaps-boot/iaas_launch.py -f {location of your configuration} -ic -or
 ```
 
 This will modify grub file on all host machines to remove isolated cpu
@@ -361,6 +382,11 @@ configuration.
 ### 5.2 Roll-back Static IP Configuration and Change Default Routes
 Back to Management Interface
 
+Execute as standard workflow:
+```
+python {git dir}/snaps-boot/iaas_launch.py -f {location of your configuration} -sc
+```
+or execute as a sudo user:
 ```
 python {git dir}/snaps-boot/iaas_launch.py -f {location of your configuration} -sc
 ```
@@ -369,8 +395,13 @@ This will modify etc/network/interfaces file to remove static entries of the int
 
 ### 5.3 Roll-back of SNAPS-Boot Installation
 
+Execute as standard workflow:
 ```
-python {git dir}/snaps-boot/iaas_launch.py -f {location of your configuration} -pc
+sudo -i python {git dir}/snaps-boot/iaas_launch.py -f {location of your configuration} -pc
+```
+or execute as a sudo user:
+```
+python {git dir}/snaps-boot/iaas_launch.py -f {location of your configuration} -pc -or
 ```
 
-This will stop DHCP, PXE and TFTP services on Build Server.
+This will uninstall Digital Rebar server.

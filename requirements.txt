@@ -1,6 +1,5 @@
 cryptography
 mock
-paramiko
 PyYAML
 requests
 netaddr

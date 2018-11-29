@@ -14,8 +14,16 @@
 - hosts: localhost
 
   tasks:
+  - name: Copy content pack resources from {{ content_dir }} to the directory /tmp/snaps-content-pack
+    synchronize:
+      src: "{{ content_dir }}"
+      dest: /tmp/snaps-content-pack
+      dirs: yes
+      rsync_opts:
+        - "--exclude=*__init__*"
+
   - name: Create content bundle
-    shell: "cd {{ content_dir }}; drpcli contents bundle snaps-content.yaml; cd -"
+    shell: "cd /tmp/snaps-content-pack/{{ content_pkg }}; drpcli contents bundle snaps-content.yaml; cd -"
 
   - name: Upload content bundle
-    shell: "cd {{ content_dir }}; drpcli contents upload snaps-content.yaml; cd -"
+    shell: "cd /tmp/snaps-content-pack/{{ content_pkg }}; drpcli contents upload snaps-content.yaml; cd -"

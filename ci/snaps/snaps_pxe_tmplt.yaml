@@ -44,9 +44,9 @@ openstack:
     - flavor:
         os_creds_name: admin-creds
         name: build-flavor-{{ build_num }}
-        ram: 8192
-        disk: 80
-        vcpus: 4
+        ram: {{ admin_ram | default(8192) }}
+        disk: {{ admin_disk | default(80) }}
+        vcpus: {{ admin_cpus | default(2) }}
 {% if flavor_metadata is defined %}
         metadata:
         {% for key, value in flavor_metadata.iteritems() %}
@@ -56,9 +56,9 @@ openstack:
     - flavor:
         os_creds_name: admin-creds
         name: pxe-flavor-{{ build_num }}
-        ram: 2048
-        disk: 40
-        vcpus: 1
+        ram: {{ pxe_ram | default(2048) }}
+        disk: {{ pxe_disk | default(40) }}
+        vcpus: {{ pxe_cpus | default(1) }}
 {% if flavor_metadata is defined %}
         metadata:
         {% for key, value in flavor_metadata.iteritems() %}
@@ -157,14 +157,6 @@ openstack:
         external_gateway: {{ ext_net }}
         internal_subnets:
           - ctrl-subnet
-    - router:
-        os_user:
-          name: pxe-user-{{ build_num }}
-          project_name: pxe-proj-{{ build_num }}
-        name: pxe-router
-        external_gateway: {{ ext_net }}
-        internal_subnets:
-          - public-subnet
   keypairs:
     - keypair:
         os_user:
@@ -331,6 +323,7 @@ openstack:
                   ip: {{ pub_ip_prfx }}.13
 ansible:
   # Install and configure snaps-boot to build host
+{% if run_build | default(True) %}
   - playbook_location: {{ local_snaps_boot_dir }}/ci/playbooks/setup_build.yaml
     hosts:
       - build-vm
@@ -475,8 +468,13 @@ ansible:
       hosts_yaml_path:
         type: string
         value: {{ hosts_yaml_target_path }}
+      run_as_root:
+        type: string
+        value: {{ run_as_root  | default(True) }}
+{% endif %}
 
   # Verify admin interface on pxe-vm-1 was configured
+{% if run_validation | default(True) %}
   - playbook_location: {{ local_snaps_boot_dir }}/ci/playbooks/verify_intfs.yaml
     hosts:
     - build-vm
@@ -495,6 +493,9 @@ ansible:
       timeout:
         type: string
         value: 1800
+      run_as_root:
+        type: string
+        value: {{ run_as_root | default(True) }}
 
   # Verify admin interface on pxe-vm-2 was configured
   - playbook_location: {{ local_snaps_boot_dir }}/ci/playbooks/verify_intfs.yaml
@@ -515,6 +516,9 @@ ansible:
       timeout:
         type: string
         value: 300
+      run_as_root:
+        type: string
+        value: {{ run_as_root | default(True) }}
 
   # Verify admin interface on pxe-vm-3 was configured
   - playbook_location: {{ local_snaps_boot_dir }}/ci/playbooks/verify_intfs.yaml
@@ -535,8 +539,13 @@ ansible:
       timeout:
         type: string
         value: 300
+      run_as_root:
+        type: string
+        value: {{ run_as_root | default(True) }}
+{% endif %}
 
   # Statically configure interfaces
+{% if run_static_intf | default(True) %}
   - playbook_location: {{ local_snaps_boot_dir }}/ci/playbooks/config_intfs.yaml
     hosts:
     - build-vm
@@ -549,8 +558,13 @@ ansible:
       hosts_yaml_path:
         type: string
         value: {{ hosts_yaml_target_path }}
+      run_as_root:
+        type: string
+        value: {{ run_as_root | default(True) }}
+{% endif %}
 
   # Verify admin interface on pxe-vm-1 was configured
+{% if run_validation | default(True) %}
   - playbook_location: {{ local_snaps_boot_dir }}/ci/playbooks/verify_intfs.yaml
     hosts:
     - build-vm
@@ -569,6 +583,9 @@ ansible:
       timeout:
         type: string
         value: 120
+      run_as_root:
+        type: string
+        value: {{ run_as_root | default(True) }}
 
   # Verify admin interface on pxe-vm-2 was configured
   - playbook_location: {{ local_snaps_boot_dir }}/ci/playbooks/verify_intfs.yaml
@@ -589,6 +606,9 @@ ansible:
       timeout:
         type: string
         value: 120
+      run_as_root:
+        type: string
+        value: {{ run_as_root | default(True) }}
 
   # Verify admin interface on pxe-vm-3 was configured
   - playbook_location: {{ local_snaps_boot_dir }}/ci/playbooks/verify_intfs.yaml
@@ -609,6 +629,9 @@ ansible:
       timeout:
         type: string
         value: 120
+      run_as_root:
+        type: string
+        value: {{ run_as_root | default(True) }}
 
   # Verify private interface on pxe-vm-1 was configured
   - playbook_location: {{ local_snaps_boot_dir }}/ci/playbooks/verify_intfs.yaml
@@ -629,6 +652,9 @@ ansible:
       timeout:
         type: string
         value: 120
+      run_as_root:
+        type: string
+        value: {{ run_as_root | default(True) }}
 
   # Verify private interface on pxe-vm-2 was configured
   - playbook_location: {{ local_snaps_boot_dir }}/ci/playbooks/verify_intfs.yaml
@@ -649,6 +675,9 @@ ansible:
       timeout:
         type: string
         value: 120
+      run_as_root:
+        type: string
+        value: {{ run_as_root | default(True) }}
 
   # Verify private interface on pxe-vm-3 was configured
   - playbook_location: {{ local_snaps_boot_dir }}/ci/playbooks/verify_intfs.yaml
@@ -669,6 +698,9 @@ ansible:
       timeout:
         type: string
         value: 120
+      run_as_root:
+        type: string
+        value: {{ run_as_root | default(True) }}
 
   # Verify public interface on pxe-vm-1 was configured
   - playbook_location: {{ local_snaps_boot_dir }}/ci/playbooks/verify_intfs.yaml
@@ -689,6 +721,9 @@ ansible:
       timeout:
         type: string
         value: 120
+      run_as_root:
+        type: string
+        value: {{ run_as_root | default(True) }}
 
   # Verify private interface on pxe-vm-2 was configured
   - playbook_location: {{ local_snaps_boot_dir }}/ci/playbooks/verify_intfs.yaml
@@ -709,6 +744,9 @@ ansible:
       timeout:
         type: string
         value: 120
+      run_as_root:
+        type: string
+        value: {{ run_as_root | default(True) }}
 
   # Verify private interface on pxe-vm-3 was configured
   - playbook_location: {{ local_snaps_boot_dir }}/ci/playbooks/verify_intfs.yaml
@@ -729,3 +767,98 @@ ansible:
       timeout:
         type: string
         value: 120
+      run_as_root:
+        type: string
+        value: {{ run_as_root | default(True) }}
+
+  - playbook_location: {{ local_snaps_boot_dir }}/ci/playbooks/verify_apt.yaml
+    hosts:
+    - build-vm
+    variables:
+      snaps_boot_dir:
+        type: string
+        value: {{ src_copy_dir }}/snaps-boot
+      ip_addr:
+        type: port
+        vm_name: pxe-vm-1
+        port_name: pxe-pub-port-1
+        port_value: ip_address
+      username:
+        type: string
+        value: {{ pxe_machine_user }}
+      timeout:
+        type: string
+        value: 120
+      run_as_root:
+        type: string
+        value: {{ run_as_root | default(True) }}
+      build_admin_ip:
+        type: port
+        vm_name: build-vm
+        port_name: build-admin-port
+        port_value: ip_address
+      http_proxy_port:
+        type: string
+        value: 3142
+
+  - playbook_location: {{ local_snaps_boot_dir }}/ci/playbooks/verify_apt.yaml
+    hosts:
+    - build-vm
+    variables:
+      snaps_boot_dir:
+        type: string
+        value: {{ src_copy_dir }}/snaps-boot
+      ip_addr:
+        type: port
+        vm_name: pxe-vm-2
+        port_name: pxe-pub-port-2
+        port_value: ip_address
+      username:
+        type: string
+        value: {{ pxe_machine_user }}
+      timeout:
+        type: string
+        value: 120
+      run_as_root:
+        type: string
+        value: {{ run_as_root | default(True) }}
+      build_admin_ip:
+        type: port
+        vm_name: build-vm
+        port_name: build-admin-port
+        port_value: ip_address
+      http_proxy_port:
+        type: string
+        value: 3142
+
+  - playbook_location: {{ local_snaps_boot_dir }}/ci/playbooks/verify_apt.yaml
+    hosts:
+    - build-vm
+    variables:
+      snaps_boot_dir:
+        type: string
+        value: {{ src_copy_dir }}/snaps-boot
+      ip_addr:
+        type: port
+        vm_name: pxe-vm-3
+        port_name: pxe-pub-port-3
+        port_value: ip_address
+      username:
+        type: string
+        value: {{ pxe_machine_user }}
+      timeout:
+        type: string
+        value: 120
+      run_as_root:
+        type: string
+        value: {{ run_as_root | default(True) }}
+      build_admin_ip:
+        type: port
+        vm_name: build-vm
+        port_name: build-admin-port
+        port_value: ip_address
+      http_proxy_port:
+        type: string
+        value: 3142
+
+{% endif %}
