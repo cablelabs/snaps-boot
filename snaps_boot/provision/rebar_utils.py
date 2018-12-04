@@ -30,8 +30,8 @@ from snaps_common.ansible_snaps import ansible_utils
 logger = logging.getLogger('rebar_utils')
 
 
-LOCAL_PRIV_KEY_FILE = os.path.expanduser('~/snaps-boot.pub_key')
-LOCAL_PUB_KEY_FILE = os.path.expanduser('~/snaps-boot.priv_key')
+LOCAL_PRIV_KEY_FILE = os.path.expanduser('~/snaps-boot.priv_key')
+LOCAL_PUB_KEY_FILE = os.path.expanduser('~/snaps-boot.pub_key')
 
 
 def install_config_drp(rebar_session, boot_conf):
