@@ -12,9 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import logging
-import os
 
+import os
 import pkg_resources
+from cryptography.hazmat.backends import default_backend
+from cryptography.hazmat.primitives import serialization
+from cryptography.hazmat.primitives.asymmetric import rsa
 from drp_python.model_layer.params_model import ParamsModel
 from drp_python.model_layer.subnet_model import SubnetModel
 from drp_python.subnet import Subnet
@@ -27,6 +30,10 @@ from snaps_common.ansible_snaps import ansible_utils
 logger = logging.getLogger('rebar_utils')
 
 
+LOCAL_PRIV_KEY_FILE = os.path.expanduser('~/snaps-boot.pub_key')
+LOCAL_PUB_KEY_FILE = os.path.expanduser('~/snaps-boot.priv_key')
+
+
 def install_config_drp(rebar_session, boot_conf):
     """
     Creates a DHCP service
@@ -35,14 +42,21 @@ def install_config_drp(rebar_session, boot_conf):
     :raises Exceptions
     """
     logger.info('Setting up Digital Rebar service and objects')
+    __setup_proxy_server()
     __setup_drp(boot_conf)
     __create_images()
     __create_subnet(rebar_session, boot_conf)
     __create_workflows()
     __create_reservations(rebar_session, boot_conf)
     __create_content_pack()
-    __generate_ssh_keys()
     __create_machines(rebar_session, boot_conf)
+
+
+def __setup_proxy_server():
+    logger.info('Setting up ng-cacher-proxy')
+    playbook_path = pkg_resources.resource_filename(
+        'snaps_boot.ansible_p.setup', 'setup_proxy_server.yaml')
+    ansible_utils.apply_playbook(playbook_path)
 
 
 def cleanup_drp(rebar_session, boot_conf):
@@ -153,8 +167,8 @@ def __create_content_pack():
 
     playbook_path = pkg_resources.resource_filename(
         'snaps_boot.ansible_p.setup', 'drp_content_pack_create.yaml')
-    ansible_utils.apply_playbook(
-        playbook_path, variables={'content_dir': pack_dir})
+    ansible_utils.apply_playbook(playbook_path, variables={
+        'content_dir': pack_dir, 'content_pkg': 'drp_content'})
 
 
 def __delete_content_pack():
@@ -265,22 +279,19 @@ def __instantiate_drp_reservations(rebar_session, boot_conf):
     # TODO/FIXME - Why are there multiple subnets configured
     prov_confs = boot_conf['PROVISION']
     subnet_conf = prov_confs['DHCP']['subnet'][0]
-    host_confs = prov_confs['STATIC']['host']
 
     bind_hosts = subnet_conf['bind_host']
     for bind_host in bind_hosts:
-        for host_conf in host_confs:
-            if host_conf['access_ip'] == bind_host['ip']:
-                res_conf = {
-                    'ip': bind_host['ip'],
-                    'mac': bind_host['mac'],
-                    'name': host_conf['name'],
-                    'type': 'admin',
-                }
-                logger.info('Creating DRP reservation %s', res_conf)
-                drp_res_conf = ReservationModel(**res_conf)
-                res = Reservation(rebar_session, drp_res_conf)
-                out.append(res)
+        res_conf = {
+            'ip': bind_host['ip'],
+            'mac': bind_host['mac'],
+            'name': bind_host['mac'],
+            'type': 'admin',
+        }
+        logger.info('Creating DRP reservation %s', res_conf)
+        drp_res_conf = ReservationModel(**res_conf)
+        res = Reservation(rebar_session, drp_res_conf)
+        out.append(res)
 
     return out
 
@@ -288,14 +299,77 @@ def __instantiate_drp_reservations(rebar_session, boot_conf):
 def __generate_ssh_keys():
     """
     Ensures that the build server has SSH keys to inject into nodes
-    :return:
+    :return: the public key value
     """
     logger.info('Generate SSH keys')
-    playbook_path = pkg_resources.resource_filename(
-        'snaps_boot.ansible_p.setup', 'generate_keys.yaml')
+    public_key, private_key, created = __create_keys()
 
-    # TODO/FIXME - can we avoid using root key file location?
-    ansible_utils.apply_playbook(playbook_path)
+    if created:
+        playbook_path = pkg_resources.resource_filename(
+            'snaps_boot.ansible_p.setup', 'copy_keys.yaml')
+
+        # TODO/FIXME - Make this key location configurable
+        ansible_utils.apply_playbook(
+            playbook_path,
+            variables={
+                'pub_key_val': public_key,
+                'priv_key_val': private_key,
+            })
+
+    return public_key
+
+
+def __create_keys(key_size=2048):
+    """
+    Generates public and private keys
+    :param key_size: the number of bytes for the key size
+    :return: tuple 3 where 0 is the public key, 1 is the private key, and
+             2 is a boolean where True means the key was created and False
+             means it already existed
+    """
+    public_key, private_key = __get_existing_keys()
+
+    if public_key and private_key:
+        return public_key, private_key, False
+    else:
+        keys = rsa.generate_private_key(
+            backend=default_backend(), public_exponent=65537,
+            key_size=key_size)
+
+        public_key = keys.public_key().public_bytes(
+            serialization.Encoding.OpenSSH,
+            serialization.PublicFormat.OpenSSH)
+        private_key = keys.private_bytes(
+            encoding=serialization.Encoding.PEM,
+            format=serialization.PrivateFormat.TraditionalOpenSSL,
+            encryption_algorithm=serialization.NoEncryption())
+
+        logger.info('Generated public key - %s', public_key)
+        logger.info('Generated private key - %s', private_key)
+
+        __store_current_key(public_key, private_key)
+
+        return public_key, private_key, True
+
+
+def __get_existing_keys():
+    if (not os.path.isfile(LOCAL_PUB_KEY_FILE)
+            or not os.path.isfile(LOCAL_PRIV_KEY_FILE)):
+        return None, None
+
+    with open(LOCAL_PUB_KEY_FILE, 'r') as ssh_pub_key_file:
+        pub_contents = ssh_pub_key_file.readlines()
+    with open(LOCAL_PRIV_KEY_FILE, 'r') as ssh_priv_key_file:
+        priv_contents = ssh_priv_key_file.readlines()
+
+    return pub_contents[0], priv_contents[0]
+
+
+def __store_current_key(pubic_key, private_key):
+    with open(LOCAL_PUB_KEY_FILE, 'wb') as pub_key_file:
+        pub_key_file.write(pubic_key)
+    with open(LOCAL_PRIV_KEY_FILE, 'wb') as priv_key_file:
+        priv_key_file.write(private_key)
 
 
 def __create_machines(rebar_session, boot_conf):
@@ -305,29 +379,31 @@ def __create_machines(rebar_session, boot_conf):
     :param boot_conf: the boot configuration
     :raises Exceptions
     """
+    public_key = __generate_ssh_keys()
+
     machines = __instantiate_drp_machines(rebar_session, boot_conf)
     logger.info('Attempting to create %s DRP machines', len(machines))
     for machine in machines:
         logger.debug('Attempting to create DRP machine %s', machine)
         machine.create()
-        __add_machine_params(boot_conf, machine)
+        __add_machine_params(boot_conf, machine, public_key)
         logger.info('Created machine %s', machine)
 
 
-def __add_machine_params(boot_conf, machine):
+def __add_machine_params(boot_conf, machine, public_key):
     """
     Adds parameters to machine object
     :param boot_conf: the boot configuration
     :raises Exception
     """
     logger.info('Adding parameters to machine %s', machine)
-    params = __create_machine_params(boot_conf)
+    params = __create_machine_params(boot_conf, public_key)
     for param in params:
         logger.info('Adding param %s', param)
         machine.add_param_values(param)
 
 
-def __create_machine_params(boot_conf):
+def __create_machine_params(boot_conf, public_key):
     """
     Instantiates all drp-python ParamsConfigModel objects
     :param boot_conf: the boot configuration
@@ -337,11 +413,19 @@ def __create_machine_params(boot_conf):
     prov_conf = boot_conf['PROVISION']
     pxe_confs = prov_conf['TFTP']['pxe_server_configuration']
     install_disk = None
+    user_password = None
+    user = None
+    fullname = None
     for value in pxe_confs.values():
         user_password = value['password']
         user = value['user']
         fullname = value['fullname']
         install_disk = value['boot_disk']
+        break
+
+    if not install_disk or not user_password or not user or not user:
+        raise Exception('Cannot set expected seed values')
+
     out.append(ParamsModel(name='seed/user-password', value=user_password))
     out.append(ParamsModel(name='seed/username', value=user))
     out.append(ParamsModel(name='seed/user-fullname', value=fullname))
@@ -358,21 +442,13 @@ def __create_machine_params(boot_conf):
     out.append(ParamsModel(name='post/https-proxy', value=https_proxy))
 
     # TODO/FIXME - all of these should probably be a global params
-    # This has been breaking port 22
-    # out.append(ParamsModel(name='access-ssh-root-mode',
-    #                        value='with-password'))
     out.append(ParamsModel(name='access-ssh-root-mode',
                            value='without-password'))
     out.append(ParamsModel(name='kernel-console', value='ttyS1,115200'))
     out.append(ParamsModel(name='select-kickseed',
                            value='snaps-net-seed.tmpl'))
 
-    # TODO/FIXME - can we avoid using root key file location?
-    with open('/root/.ssh/id_rsa.pub', 'r') as ssh_pub_key_file:
-        key_contents = ssh_pub_key_file.readlines()
-
-    out.append(ParamsModel(name='access-keys',
-                           value={'root': key_contents[0]}))
+    out.append(ParamsModel(name='access-keys', value={'root': public_key}))
     return out
 
 

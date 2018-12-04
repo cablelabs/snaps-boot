@@ -15,6 +15,7 @@
 # This script is responsible for deploying Aricent_Iaas environments and
 # Openstack Services
 import argparse
+import getpass
 import logging
 
 import os
@@ -48,8 +49,15 @@ def __run(arguments):
 
     logger.info('Launching Operation Starts ........')
 
-    config = file_utils.read_yaml(arguments.config)
-    logger.info('Read configuration file [%s]', arguments.config)
+    user = getpass.getuser()
+    if user != 'root' and arguments.override_root is ARG_NOT_SET:
+        raise Exception('Must be the root user. Please use -or to override')
+    else:
+        logger.info('Running as user %s', user)
+
+    config_filepath = os.path.expanduser(arguments.config)
+    logger.info('Reading configuration file [%s]', config_filepath)
+    config = file_utils.read_yaml(config_filepath)
 
     prv_config = config.get('PROVISION')
     if not prv_config:
@@ -151,24 +159,21 @@ if __name__ == '__main__':
         dest='provisionClean',
         nargs='?',
         default=ARG_NOT_SET,
-        # TODO/FIXME - Description is incorrect
-        help='When used, the pxe server environment will be removed')
+        help='Cleanup boot environment')
     parser.add_argument(
         '-s',
         '--staticIPConfigure',
         dest='staticIPConfigure',
         nargs='?',
         default=ARG_NOT_SET,
-        # TODO/FIXME - Description is incorrect
-        help='When used, the pxe server environment will be removed')
+        help='Configure static IPs on boot nodes')
     parser.add_argument(
         '-sc',
         '--staticIPCleanup',
         dest='staticIPCleanup',
         nargs='?',
         default=ARG_NOT_SET,
-        # TODO/FIXME - Description is incorrect
-        help='When used, the pxe server environment will be removed')
+        help='Cleans up static IPs on nodes')
     parser.add_argument(
         '-i',
         '--setIsolCpus',
@@ -185,6 +190,14 @@ if __name__ == '__main__':
         default=ARG_NOT_SET,
         # TODO/FIXME - Description is incorrect
         help='When used, the pxe server environment will be removed')
+    parser.add_argument(
+        '-or',
+        '--override-root',
+        dest='override_root',
+        nargs='?',
+        default=ARG_NOT_SET,
+        # TODO/FIXME - Description is incorrect
+        help='root user override')
     args = parser.parse_args()
 
     if (args.hardware is ARG_NOT_SET and args.boot is ARG_NOT_SET and

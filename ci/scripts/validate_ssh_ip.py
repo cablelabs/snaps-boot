@@ -19,7 +19,6 @@
 import argparse
 import logging
 
-import paramiko
 import os
 import time
 
@@ -45,13 +44,22 @@ def main(arguments):
     timeout = int(arguments.timeout)
 
     while timeout > time.time() - start:
+        from snaps_common.ssh import ssh_utils
         try:
-            ssh_client = __ssh_client(
-                arguments.ip_addr, arguments.username,
-                password=arguments.password,
-                priv_key_file=arguments.priv_key_file)
+            ssh_client = ssh_utils.ssh_client(
+                arguments.ip_addr, arguments.username)
             if ssh_client:
-                exit(0)
+                if arguments.command:
+                    stdin1, stdout1, sterr1 = ssh_client.exec_command(
+                        arguments.command)
+                    if stdout1.channel.recv_exit_status() == 0:
+                        logger.info('Command [%s] success', arguments.command)
+                        exit(0)
+                    else:
+                        raise Exception('Command {} failed', arguments.command)
+                else:
+                    logger.info('Obtained SSH client')
+                    exit(0)
         except Exception as e:
             logger.info('Retry obtaining connection - %s', e)
 
@@ -61,25 +69,8 @@ def main(arguments):
         logger.debug('VM status query timeout in ' + str(
             timeout - (time.time() - start)))
 
-    logger.error(
-        'Timeout checking for SSH connection to %s' + arguments.ip_addr)
-    exit(1)
-
-
-def __ssh_client(ip, user, password=None, priv_key_file=None):
-    """
-    Retrieves and attemts an SSH connection
-    :param ip: the IP of the host to connect
-    :param user: the user with which to connect
-    :param password: the password (optional)
-    :param priv_key_file: the private key file path (optional)
-    """
-    logger.debug('Retrieving SSH client')
-    ssh = paramiko.SSHClient()
-    ssh.set_missing_host_key_policy(paramiko.MissingHostKeyPolicy())
-    ssh.connect(ip, username=user, password=password,
-                key_filename=priv_key_file)
-    return ssh
+    raise Exception(
+        'Timeout checking for SSH connection to {}'.format(arguments.ip_addr))
 
 
 if __name__ == '__main__':
@@ -92,12 +83,6 @@ if __name__ == '__main__':
         '-u', '--username', dest='username', required=True,
         help='The username to the hosts to validate')
     parser.add_argument(
-        '-p', '--password', dest='password', required=False,
-        help='The password to the hosts to validate')
-    parser.add_argument(
-        '-k', '--priv_key_file', dest='priv_key_file', required=False,
-        help='The private key file to the hosts to validate')
-    parser.add_argument(
         '-i', '--ip-addr', dest='ip_addr', required=True,
         help='The address to connect')
     parser.add_argument(
@@ -106,6 +91,8 @@ if __name__ == '__main__':
     parser.add_argument(
         '-pi', '--poll-interval', dest='poll_interval', default=10,
         help='The number of seconds before next retry')
+    parser.add_argument(
+        '-c', '--command', dest='command', help='The command to issue via ssh')
     args = parser.parse_args()
 
     main(args)

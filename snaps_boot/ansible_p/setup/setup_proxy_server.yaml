@@ -13,21 +13,30 @@
 ---
 - hosts: localhost
   become: yes
+  become_method: sudo
   become_user: root
+
   vars:
-    public_key_file : "/root/.ssh/id_rsa.pub"
-    priv_key_file : "/root/.ssh/id_rsa"
+    ngcacher_proxy: "{{ ngcacher_proxy | default(None) }}"
 
   tasks:
-  - name: Check that the public ssh key exists
-    stat:
-      path: "{{ public_key_file }}"
-    register: pub_key_exists
+  - name: Install apt-cacher-ng
+    apt:
+      name: apt-cacher-ng
+      update_cache: yes
 
-  - name: Creates ssh keys if one does not exist
-    user:
-        name: root
-        generate_ssh_key: yes
-        ssh_key_bits: 2048
-        ssh_key_file: .ssh/id_rsa
-    when: pub_key_exists.stat.exists == False
+  - name: Configure apt-cacher-ng - PassThroughPattern
+    lineinfile:
+      path: /etc/apt-cacher-ng/acng.conf
+      line: "PassThroughPattern: .*"
+
+  - name: Configure apt-cacher-ng - PassThroughPattern
+    lineinfile:
+      path: /etc/apt-cacher-ng/acng.conf
+      line: "NoSSLChecks: 0"
+
+  - name: Restart and enable apt-cacher-ng
+    systemd:
+      state: restarted
+      enabled: yes
+      name: apt-cacher-ng

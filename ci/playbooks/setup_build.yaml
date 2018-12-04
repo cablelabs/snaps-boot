@@ -15,70 +15,92 @@
 ---
 - hosts: all
 
+  vars:
+    run_as_root: "{{ run_as_root | default('True') }}"
+
   tasks:
-    - name: Delete {{ src_copy_dir }}/snaps-boot directory
-      become: yes
-      become_method: sudo
-      become_user: root
-      file:
-        state: absent
-        dest: "{{ src_copy_dir }}/snaps-boot"
+  - name: Delete {{ src_copy_dir }}/snaps-boot directory
+    become: yes
+    become_method: sudo
+    become_user: root
+    file:
+      state: absent
+      dest: "{{ src_copy_dir }}/snaps-boot"
 
-    - name: Copy this source tree from local {{ src_snaps_boot_dir }} to {{ src_copy_dir }}/snaps-boot
-      synchronize:
-        src: "{{ src_snaps_boot_dir }}"
-        dest: "{{ src_copy_dir }}"
-        dirs: yes
-        rsync_opts:
-          - "--exclude=.idea"
+  - name: Copy this source tree from local {{ src_snaps_boot_dir }} to {{ src_copy_dir }}/snaps-boot
+    synchronize:
+      src: "{{ src_snaps_boot_dir }}"
+      dest: "{{ src_copy_dir }}"
+      dirs: yes
+      rsync_opts:
+        - "--exclude=.idea"
 
-    - name: Check if {{ src_copy_dir }}/snaps-boot exists
-      stat: path={{ src_copy_dir }}/snaps-boot
-      register: dir
+  - name: Check if {{ src_copy_dir }}/snaps-boot exists
+    stat: path={{ src_copy_dir }}/snaps-boot
+    register: dir
 
-    - name: Move from {{ src_copy_dir }}/{{ src_snaps_boot_dir.split('/')[-1] }} to {{ src_copy_dir }}/snaps-boot
-      command: mv {{ src_copy_dir }}/{{ src_snaps_boot_dir.split('/')[-1] }} {{ src_copy_dir }}/snaps-boot
-      when: not dir.stat.exists
+  - name: Move from {{ src_copy_dir }}/{{ src_snaps_boot_dir.split('/')[-1] }} to {{ src_copy_dir }}/snaps-boot
+    command: mv {{ src_copy_dir }}/{{ src_snaps_boot_dir.split('/')[-1] }} {{ src_copy_dir }}/snaps-boot
+    when: not dir.stat.exists
 
-    - name: Install python-pip
-      become: yes
-      become_method: sudo
-      become_user: root
-      apt: name=python-pip
+  - name: Install python-pip
+    become: yes
+    become_method: sudo
+    become_user: root
+    apt: name=python-pip
 
-    - name: Install snaps-boot requirements-git.txt
-      become: yes
-      become_method: sudo
-      become_user: root
-      command: pip install -r {{ src_copy_dir }}/snaps-boot/requirements-git.txt
+  - name: Install snaps-boot requirements-git.txt
+    become: yes
+    become_method: sudo
+    become_user: root
+    command: pip install -r {{ src_copy_dir }}/snaps-boot/requirements-git.txt
 
-    - name: Install snaps-boot
-      become: yes
-      become_method: sudo
-      become_user: root
-      command: pip install -e {{ src_copy_dir }}/snaps-boot
+  - name: Install snaps-boot
+    become: yes
+    become_method: sudo
+    become_user: root
+    command: pip install -e {{ src_copy_dir }}/snaps-boot
 
-    - name: Apply template and copy hosts.yaml to {{ hosts_yaml_path }}
-      action: template src=templates/hosts.yaml.j2 dest={{ hosts_yaml_path }}
+  - name: Apply template and copy hosts.yaml to {{ hosts_yaml_path }}
+    action: template src=templates/hosts.yaml.j2 dest={{ hosts_yaml_path }}
 
-    - name: Clean just in case PXE & DHCP server - iaas_launch.py -pc (see output @ /tmp/snaps-boot.log)
-      become: yes
-      become_method: sudo
-      become_user: root
-      shell: "python {{ src_copy_dir }}/snaps-boot/iaas_launch.py -f {{ hosts_yaml_path }} -pc >> /tmp/snaps-boot.log"
-      register: out
-      ignore_errors: True
-    - debug: var=out.stderr_lines
+  - name: Install as ROOT
+    block:
+      - name: pre clean as ROOT
+        shell: "python {{ src_copy_dir }}/snaps-boot/iaas_launch.py -f {{ hosts_yaml_path }} -pc >> /tmp/snaps-boot.log"
+        ignore_errors: True
 
-    - name: Config PXE & DHCP server - iaas_launch.py -p (see output @ /tmp/snaps-boot.log)
-      become: yes
-      become_method: sudo
-      become_user: root
-      shell: "python {{ src_copy_dir }}/snaps-boot/iaas_launch.py -f {{ hosts_yaml_path }} -p >> /tmp/snaps-boot.log"
-      register: out
-      ignore_errors: True
-    - debug: var=out.stderr_lines
+      - name: Install as ROOT
+        shell: "python {{ src_copy_dir }}/snaps-boot/iaas_launch.py -f {{ hosts_yaml_path }} -p -or >> /tmp/snaps-boot.log"
+        ignore_errors: True
+        register: out_root
+    when: run_as_root
+    become: yes
+    become_method: sudo
+    become_user: root
 
-    - name: Validating iaas_launch returned 0
-      fail: msg="iaas_launch.py -f {{ hosts_yaml_path }} -p command failed"
-      when: out.rc != 0
+  - name: Evaluate Install as ROOT
+    block:
+    - debug:
+        var: out_root.stderr_lines
+    - fail: msg="iaas_launch.py -f {{ hosts_yaml_path }} -p command failed"
+    when: run_as_root and out_root.rc != 0
+
+  - name: Install as {{ ansible_user_id }}
+    block:
+      - name: pre clean as {{ ansible_user_id }}
+        shell: "python {{ src_copy_dir }}/snaps-boot/iaas_launch.py -f {{ hosts_yaml_path }} -pc >> /tmp/snaps-boot.log"
+        ignore_errors: True
+
+      - name: Install as {{ ansible_user_id }}
+        shell: "python {{ src_copy_dir }}/snaps-boot/iaas_launch.py -f {{ hosts_yaml_path }} -p -or >> /tmp/snaps-boot.log"
+        register: out_user
+        ignore_errors: True
+    when: not run_as_root
+
+  - name: Evaluate Install as {{ ansible_user_id }}
+    block:
+      - debug:
+          var: out_user.stderr_lines
+      - fail: msg="iaas_launch.py -f {{ hosts_yaml_path }} -p command failed"
+    when: not run_as_root and out_user.rc != 0

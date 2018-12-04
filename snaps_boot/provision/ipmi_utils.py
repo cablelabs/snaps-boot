@@ -70,3 +70,10 @@ def __reboot(command, timeout=30):
         raise Exception('Chassis never powered down')
 
     command.set_power('on')
+
+    start_time = time.time()
+    while time.time() - start_time > timeout or power['powerstate'] != 'on':
+        power = command.get_power()
+
+    if 'off' == power['powerstate']:
+        raise Exception('Chassis never powered up')
