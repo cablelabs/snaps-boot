@@ -300,7 +300,6 @@ sudo pip install -e snaps-boot/
 ```
 
 #### Step 3 - Configure your rack
-Go to root directory of the project (e.g. `snaps-boot`)
 
 Create a configuration file based on `doc/conf/hosts.yaml` for provisioning
 of the Operating System on these nodes
@@ -325,9 +324,17 @@ or execute as a sudo user:
 python {git dir}/snaps-boot/iaas_launch.py -f {location of your configuration} -p -or
 ```
 
-#### Step 7 - Static NIC Configuration
+#### Step 5 - PXE boot
 
-Go to root directory of the project (e.g. `snaps-boot`)
+Steps to PXE boot host machines.
+
+Run `iaas_launch.py` as shown below as a passwordless sudo user:
+
+```
+python {git dir}/snaps-boot/iaas_launch.py -f {location of your configuration} -b
+```
+
+#### Step 6 - Static NIC Configuration
 
 Execute this step only if static IPs to be assigned to host machines.
 
@@ -344,8 +351,7 @@ python {git dir}/snaps-boot/iaas_launch.py -f {location of your configuration} -
 Wait a few minutes then ping and/or ssh each management server to verify  
 it is back up. 
 
-#### Step 8
-Go to root directory of the project (e.g. `snaps-boot`)
+#### Step 7 (Optional)
 
 Execute this step either for defining large memory pages or for
 isolating CPUs between host and guest OS.
