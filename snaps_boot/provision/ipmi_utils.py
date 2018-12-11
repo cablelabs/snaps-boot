@@ -63,7 +63,7 @@ def __reboot(command, timeout=30):
         command.set_power('off')
 
     start_time = time.time()
-    while time.time() - start_time > timeout or power['powerstate'] != 'off':
+    while time.time() - start_time < timeout or power['powerstate'] != 'off':
         power = command.get_power()
 
     if 'on' == power['powerstate']:
@@ -72,7 +72,7 @@ def __reboot(command, timeout=30):
     command.set_power('on')
 
     start_time = time.time()
-    while time.time() - start_time > timeout or power['powerstate'] != 'on':
+    while time.time() - start_time < timeout or power['powerstate'] != 'on':
         power = command.get_power()
 
     if 'off' == power['powerstate']:
