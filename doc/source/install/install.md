@@ -330,8 +330,13 @@ Steps to PXE boot host machines.
 
 Run `iaas_launch.py` as shown below as a passwordless sudo user:
 
+Execute as standard workflow:
 ```
-python {git dir}/snaps-boot/iaas_launch.py -f {location of your configuration} -b
+sudo -i python {git dir}/snaps-boot/iaas_launch.py -f {location of your configuration} -b
+```
+or execute as a sudo user:
+```
+python {git dir}/snaps-boot/iaas_launch.py -f {location of your configuration} -b -or
 ```
 
 #### Step 6 - Static NIC Configuration
@@ -386,15 +391,14 @@ and huge page configuration and will boot the machine to default
 configuration.
 
 ### 5.2 Roll-back Static IP Configuration and Change Default Routes
-Back to Management Interface
 
 Execute as standard workflow:
 ```
-python {git dir}/snaps-boot/iaas_launch.py -f {location of your configuration} -sc
+sudo -i python {git dir}/snaps-boot/iaas_launch.py -f {location of your configuration} -sc
 ```
 or execute as a sudo user:
 ```
-python {git dir}/snaps-boot/iaas_launch.py -f {location of your configuration} -sc
+python {git dir}/snaps-boot/iaas_launch.py -f {location of your configuration} -sc -or
 ```
 
 This will modify etc/network/interfaces file to remove static entries of the interfaces and will change back default route to management interface.
