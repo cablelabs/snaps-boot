@@ -1,0 +1,97 @@
+{
+  "Available": true,
+  "BootParams": "debian-installer/locale=en_US.utf8 console-setup/layoutcode=us keyboard-configuration/layoutcode=us netcfg/dhcp_timeout=120 netcfg/choose_interface=auto url={{.Machine.Url}}/seed netcfg/get_hostname={{.Machine.Name}} root=/dev/ram rw quiet {{if .ParamExists \"kernel-console\"}}{{.Param \"kernel-console\"}}{{end}} -- {{if .ParamExists \"kernel-console\"}}{{.Param \"kernel-console\"}}{{end}}",
+  "Description": "Ubuntu-16.04 HWE kernel install points to the latest release version",
+  "Documentation": "NOTE: Default Ubuntu ISOs will attempt to check internet repositories, \nthis can cause problems during provisioning if your environment does not have outbound access.\nWorkaround this by defining Options 3 (Gateway) and 6 (DNS) for your machines' Subnet.\n",
+  "Errors": [],
+  "Initrds": [
+    "install/hwe-netboot/ubuntu-installer/amd64/initrd.gz"
+  ],
+  "Kernel": "install/hwe-netboot/ubuntu-installer/amd64/linux",
+  "Meta": {
+    "color": "orange",
+    "feature-flags": "change-stage-v2",
+    "icon": "linux",
+    "title": "SNAPS Content"
+  },
+  "Name": "hwe-ubuntu-16.04-install",
+  "OS": {
+    "Codename": "",
+    "Family": "ubuntu",
+    "IsoFile": "ubuntu-16.04.5-server-amd64.iso",
+    "IsoSha256": "c94de1cc2e10160f325eb54638a5b5aa38f181d60ee33dae9578d96d932ee5f8",
+    "IsoUrl": "http://mirror.math.princeton.edu/pub/ubuntu-iso/16.04/ubuntu-16.04.5-server-amd64.iso",
+    "Name": "ubuntu-16.04",
+    "Version": "16.04"
+  },
+  "OnlyUnknown": false,
+  "OptionalParams": [
+    "part-scheme",
+    "operating-system-disk",
+    "provisioner-default-user",
+    "provisioner-default-fullname",
+    "provisioner-default-uid",
+    "provisioner-default-password-hash",
+    "kernel-console",
+    "proxy-servers",
+    "dns-domain",
+    "local-repo",
+    "proxy-servers",
+    "ntp-servers",
+    "select-kickseed"
+  ],
+  "ReadOnly": false,
+  "RequiredParams": [],
+  "Templates": [
+    {
+      "Contents": "",
+      "ID": "kexec.tmpl",
+      "Meta": {},
+      "Name": "kexec",
+      "Path": "{{.Machine.Path}}/kexec"
+    },
+    {
+      "Contents": "",
+      "ID": "default-pxelinux.tmpl",
+      "Meta": {},
+      "Name": "pxelinux",
+      "Path": "pxelinux.cfg/{{.Machine.HexAddress}}"
+    },
+    {
+      "Contents": "",
+      "ID": "default-ipxe.tmpl",
+      "Meta": {},
+      "Name": "ipxe",
+      "Path": "{{.Machine.Address}}.ipxe"
+    },
+    {
+      "Contents": "",
+      "ID": "default-pxelinux.tmpl",
+      "Meta": {},
+      "Name": "pxelinux-mac",
+      "Path": "pxelinux.cfg/{{.Machine.MacAddr \"pxelinux\"}}"
+    },
+    {
+      "Contents": "",
+      "ID": "default-ipxe.tmpl",
+      "Meta": {},
+      "Name": "ipxe-mac",
+      "Path": "{{.Machine.MacAddr \"ipxe\"}}.ipxe"
+    },
+    {
+      "Contents": "",
+      "ID": "select-kickseed.tmpl",
+      "Meta": {},
+      "Name": "seed",
+      "Path": "{{.Machine.Path}}/seed"
+    },
+    {
+      "Contents": "",
+      "ID": "net-post-install.sh.tmpl",
+      "Meta": {},
+      "Name": "net-post-install.sh",
+      "Path": "{{.Machine.Path}}/post-install.sh"
+    }
+  ],
+  "Validated": true
+}

@@ -1,0 +1,25 @@
+{
+  "Available": true,
+  "BootEnv": "hwe-ubuntu-16.04-install",
+  "Description": "Ubuntu 16.04 HWE stack installation stage.  References latest release",
+  "Documentation": "",
+  "Errors": [],
+  "Meta": {
+    "color": "yellow",
+    "icon": "download",
+    "title": "SNAPS Content"
+  },
+  "Name": "hwe-ubuntu-16.04-install",
+  "OptionalParams": [],
+  "Profiles": [],
+  "ReadOnly": false,
+  "Reboot": false,
+  "RequiredParams": [],
+  "RunnerWait": true,
+  "Tasks": [
+    "ubuntu-drp-only-repos",
+    "ssh-access"
+  ],
+  "Templates": [],
+  "Validated": true
+}

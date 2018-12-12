@@ -525,7 +525,7 @@ def __get_drb_machine_config(host_conf, pxe_conf, bind_host_confs):
             'name': host_conf['name'],
             'os': boot_os,
             'type': 'snaps-boot',
-            'workflow': 'snaps-ubuntu-16.04'
+            'workflow': 'snaps-ubuntu-16.04-hwe'
         }
 
         logger.info('Instantiating a MachineModel object with %s',
