@@ -57,23 +57,5 @@ def __set_boot_order(command, order):
     command.set_bootdev(order)
 
 
-def __reboot(command, timeout=30):
-    power = command.get_power()
-    if power['powerstate'] == 'on':
-        command.set_power('off')
-
-    start_time = time.time()
-    while time.time() - start_time < timeout or power['powerstate'] != 'off':
-        power = command.get_power()
-
-    if 'on' == power['powerstate']:
-        raise Exception('Chassis never powered down')
-
-    command.set_power('on')
-
-    start_time = time.time()
-    while time.time() - start_time < timeout or power['powerstate'] != 'on':
-        power = command.get_power()
-
-    if 'off' == power['powerstate']:
-        raise Exception('Chassis never powered up')
+def __reboot(command):
+    command.set_power('boot')
