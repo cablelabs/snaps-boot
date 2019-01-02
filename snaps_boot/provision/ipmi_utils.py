@@ -45,11 +45,11 @@ def __reboot_all(boot_conf, boot_order):
             command = Command(ip, user, password)
             __set_boot_order(command, boot_order)
             __reboot(command)
+            logger.info('Successfully rebooted server with BMC IP: %s', ip)
         except IpmiException as e:
             # print the error message and server bmc information
             # will continue to reboot the rest of servers
-            logger.error(e)
-            logger.warn('Failed to reboot server with BMC IP: %s, user: %s', ip, user)
+            logger.error('Failed to reboot server with BMC IP: %s, user: %s, error: %s', ip, user, e)
             logger.debug('BMC password: %s', password)
 
 
