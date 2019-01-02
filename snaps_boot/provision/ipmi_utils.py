@@ -19,7 +19,7 @@ from pyghmi.ipmi.command import Command
 from pyghmi.exceptions import IpmiException
 
 logger = logging.getLogger('snaps_boot_ipmi_utils')
-#logger.setLevel(logging.DEBUG)
+# logger.setLevel(logging.DEBUG)
 
 
 def reboot_pxe(boot_conf):
@@ -49,7 +49,9 @@ def __reboot_all(boot_conf, boot_order):
         except IpmiException as e:
             # print the error message and server bmc information
             # will continue to reboot the rest of servers
-            logger.error('Failed to reboot server with BMC IP: %s, user: %s, error: %s', ip, user, e)
+            logger.error(
+                'Failed to reboot server with BMC IP: %s, user: %s, error: %s',
+                ip, user, e)
             logger.debug('BMC password: %s', password)
 
 
