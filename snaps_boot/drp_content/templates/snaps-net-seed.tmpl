@@ -17,7 +17,11 @@ d-i netcfg/hostname string compute
 d-i netcfg/wireless_wep string
 d-i netcfg/hostname seen true
  
-d-i base-installer/kernel/overrride-image string linux-server
+{{if .ParamExists "seed/kernel-choice" -}}
+d-i base-installer/kernel/override-image string {{.Param "seed/kernel-choice"}}
+{{else -}}
+d-i base-installer/kernel/override-image string linux-server
+{{end -}}
 
 # Equivalent to url --url=http://<> in ks.cfg
 d-i mirror/country string manual

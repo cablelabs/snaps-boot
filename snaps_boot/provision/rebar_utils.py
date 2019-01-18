@@ -416,20 +416,26 @@ def __create_machine_params(boot_conf, public_key):
     user_password = None
     user = None
     fullname = None
+    kernel_choice = None
     for value in pxe_confs.values():
         user_password = value['password']
         user = value['user']
         fullname = value['fullname']
         install_disk = value['boot_disk']
+        # kernel_choice is optional, so use get() to avoid KeyError
+        kernel_choice = value.get('kernel_choice')
         break
 
-    if not install_disk or not user_password or not user or not user:
+    if not install_disk or not user_password or not user or not fullname:
         raise Exception('Cannot set expected seed values')
 
     out.append(ParamsModel(name='seed/user-password', value=user_password))
     out.append(ParamsModel(name='seed/username', value=user))
     out.append(ParamsModel(name='seed/user-fullname', value=fullname))
     out.append(ParamsModel(name='operating-system-disk', value=install_disk))
+    if kernel_choice:
+        out.append(
+            ParamsModel(name='seed/kernel-choice', value=kernel_choice))
 
     root_password = prov_conf['PXE']['password']
     server_ip = prov_conf['PXE']['server_ip']
