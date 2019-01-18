@@ -8,8 +8,8 @@
     "icon": "pencil"
   },
   "Name": "seed/kernel-choice",
-  "Description": "Kernel to install",
-  "Documentation": "Kernel to install",
+  "Description": "Kernel image package name to install",
+  "Documentation": "Kernel image package name to install",
   "Secure": false,
   "Schema": {
     "type": "string"
