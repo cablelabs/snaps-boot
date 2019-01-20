@@ -159,6 +159,7 @@ PROVISION:
           user: ubuntu
           fullname: ubuntu_user
           boot_disk: sda
+          kernel_choice: linux-server
   CPUCORE:
     host:
        -
