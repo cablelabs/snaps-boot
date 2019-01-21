@@ -244,6 +244,7 @@ This section defines parameters used in preseed configuration to automate Linux 
 | user | Y | Default user for all host machines. SNAPS-Boot creates this user. |
 | fullname | Y | Description of user created by SNAPS-Boot. |
 | boot_disk | Y | Disk name where OS is installed, e.g., sda |
+| kernel_choice | N | Name of the kernel image package that will be installed, e.g., linux-image-4.4.0-62-generic. Note: This package needs to be available from the configured repository. |
 
 ##### CentOS
 | Parameter | Required | Description |
