@@ -444,8 +444,31 @@ def __create_machine_params(boot_conf, public_key):
 
     http_proxy = prov_conf['PROXY']['http_proxy']
     https_proxy = prov_conf['PROXY']['https_proxy']
-    out.append(ParamsModel(name='post/http-proxy', value=http_proxy))
-    out.append(ParamsModel(name='post/https-proxy', value=https_proxy))
+    apt_proxy = prov_conf['PROXY']['ngcacher_proxy']
+    if http_proxy:
+       out.append(ParamsModel(name='post/http-proxy', value=http_proxy))
+    if https_proxy:
+       out.append(ParamsModel(name='post/https-proxy', value=https_proxy))
+    if apt_proxy:
+       out.append(ParamsModel(name='post/ngcacher-proxy', value=apt_proxy))
+
+    mellanox_install = False
+    # 'POST' section is optional
+    if prov_conf.get('POST'):
+        post_confs = prov_conf['POST']
+        # 'mellanox' section is optional
+        if post_confs.get('mellanox'):
+            mellanox_confs = post_confs['mellanox']
+            mellanox_install = mellanox_confs['driver_install']
+            if mellanox_install:
+                out.append(ParamsModel(
+                    name='post/mellanox-install', value=mellanox_install))
+                iso_url = mellanox_confs['iso_url']
+                kernel_support = mellanox_confs['kernel_support']
+                out.append(ParamsModel(
+                    name='post/mellanox-iso-url', value=iso_url))
+                out.append(ParamsModel(
+                    name='post/mellanox-kernel-support', value=kernel_support))
 
     # TODO/FIXME - all of these should probably be a global params
     out.append(ParamsModel(name='access-ssh-root-mode',

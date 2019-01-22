@@ -1,0 +1,18 @@
+{
+  "Validated": false,
+  "Available": false,
+  "Errors": [],
+  "ReadOnly": false,
+  "Meta": {
+    "color": "red",
+    "icon": "pencil"
+  },
+  "Name": "post/mellanox-install",
+  "Description": "Whether to install Mellanox NIC driver",
+  "Documentation": "Whether to install Mellanox NIC driver",
+  "Secure": false,
+  "Schema": {
+    "default": false,
+    "type": "boolean"
+  }
+}

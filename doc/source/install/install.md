@@ -193,6 +193,21 @@ Configuration parameter defined here are used by PXE server, usually the Build S
 | user | Y | User of PXE server (User of Build Server). |
 | password | Y | Password for user of PXE server. |
 
+#### POST:
+
+This optional section defines parameters used for post install configuration after Linux OS is installed.
+
+| Parameter | Required | Description |
+| --------- | ----------- | ----------- |
+| mellanox | N | Details of Mellanox NIC driver for its automated installation. |
+
+##### mellanox
+| Parameter | Required | Description |
+| --------- | ----------- | ----------- |
+| driver_install | Y | A boolean value to indicate if specified Mellanox NIC driver should be installed, for example, True |
+| iso_url | Y | Mellanox NIC driver ISO file location, for example, http://content.mellanox.com/ofed/MLNX_EN-4.4-2.0.7.0/mlnx-en-4.4-2.0.7.0-ubuntu16.04-x86_64.iso |
+| kernel_support | Y | Linux kernel to be supported by the Mellanox NIC driver, for example, 4.4.0-62-generic |
+
 #### STATIC:
 
 SNAPS-Boot can be configured to allocate static IPs to host machines. This section has sub-section for each host machine. User is required to specify all the interfaces and IPs to be assigned to those interfaces.

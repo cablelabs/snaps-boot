@@ -1,0 +1,17 @@
+{
+  "Validated": false,
+  "Available": false,
+  "Errors": [],
+  "ReadOnly": false,
+  "Meta": {
+    "color": "red",
+    "icon": "pencil"
+  },
+  "Name": "post/mellanox-iso-url",
+  "Description": "Defines URL to download Mellanox driver iso from",
+  "Documentation": "Defines URL to download Mellanox driver iso from",
+  "Secure": false,
+  "Schema": {
+    "type": "string"
+  }
+}

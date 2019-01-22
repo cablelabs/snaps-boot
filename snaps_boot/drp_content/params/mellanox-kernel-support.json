@@ -1,0 +1,17 @@
+{
+  "Validated": false,
+  "Available": false,
+  "Errors": [],
+  "ReadOnly": false,
+  "Meta": {
+    "color": "red",
+    "icon": "pencil"
+  },
+  "Name": "post/mellanox-kernel-support",
+  "Description": "Defines linux kernel support by Mellanox driver",
+  "Documentation": "Defines linux kernel support by Mellanox driver",
+  "Secure": false,
+  "Schema": {
+    "type": "string"
+  }
+}
