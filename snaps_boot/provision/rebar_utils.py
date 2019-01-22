@@ -446,11 +446,11 @@ def __create_machine_params(boot_conf, public_key):
     https_proxy = prov_conf['PROXY']['https_proxy']
     apt_proxy = prov_conf['PROXY']['ngcacher_proxy']
     if http_proxy:
-       out.append(ParamsModel(name='post/http-proxy', value=http_proxy))
+        out.append(ParamsModel(name='post/http-proxy', value=http_proxy))
     if https_proxy:
-       out.append(ParamsModel(name='post/https-proxy', value=https_proxy))
+        out.append(ParamsModel(name='post/https-proxy', value=https_proxy))
     if apt_proxy:
-       out.append(ParamsModel(name='post/ngcacher-proxy', value=apt_proxy))
+        out.append(ParamsModel(name='post/ngcacher-proxy', value=apt_proxy))
 
     mellanox_install = False
     # 'POST' section is optional
