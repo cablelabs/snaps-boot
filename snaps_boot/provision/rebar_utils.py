@@ -397,13 +397,13 @@ def __add_machine_params(boot_conf, machine, public_key):
     :raises Exception
     """
     logger.info('Adding parameters to machine %s', machine)
-    params = __create_machine_params(boot_conf, public_key)
+    params = __create_machine_params(boot_conf, machine, public_key)
     for param in params:
         logger.info('Adding param %s', param)
         machine.add_param_values(param)
 
 
-def __create_machine_params(boot_conf, public_key):
+def __create_machine_params(boot_conf, machine, public_key):
     """
     Instantiates all drp-python ParamsConfigModel objects
     :param boot_conf: the boot configuration
@@ -452,23 +452,14 @@ def __create_machine_params(boot_conf, public_key):
     if apt_proxy:
         out.append(ParamsModel(name='post/ngcacher-proxy', value=apt_proxy))
 
-    mellanox_install = False
-    # 'POST' section is optional
-    if prov_conf.get('POST'):
-        post_confs = prov_conf['POST']
-        # 'mellanox' section is optional
-        if post_confs.get('mellanox'):
-            mellanox_confs = post_confs['mellanox']
-            mellanox_install = mellanox_confs['driver_install']
-            if mellanox_install:
-                out.append(ParamsModel(
-                    name='post/mellanox-install', value=mellanox_install))
-                iso_url = mellanox_confs['iso_url']
-                kernel_support = mellanox_confs['kernel_support']
-                out.append(ParamsModel(
-                    name='post/mellanox-iso-url', value=iso_url))
-                out.append(ParamsModel(
-                    name='post/mellanox-kernel-support', value=kernel_support))
+    host_confs = boot_conf['PROVISION']['STATIC']['host']
+    for host_conf in host_confs:
+        if host_conf['access_ip'] == machine.get().ip:
+            post_script_url = host_conf.get('post_script_url')
+            if post_script_url:
+                out.append(ParamsModel(name='post/script-url',
+                                       value=post_script_url))
+            break
 
     # TODO/FIXME - all of these should probably be a global params
     out.append(ParamsModel(name='access-ssh-root-mode',
