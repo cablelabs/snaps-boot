@@ -193,20 +193,6 @@ Configuration parameter defined here are used by PXE server, usually the Build S
 | user | Y | User of PXE server (User of Build Server). |
 | password | Y | Password for user of PXE server. |
 
-#### POST:
-
-This optional section defines parameters used for post install configuration after Linux OS is installed.
-
-| Parameter | Required | Description |
-| --------- | ----------- | ----------- |
-| mellanox | N | Details of Mellanox NIC driver for its automated installation. |
-
-##### mellanox
-| Parameter | Required | Description |
-| --------- | ----------- | ----------- |
-| driver_install | Y | A boolean value to indicate if specified Mellanox NIC driver should be installed, for example, True |
-| iso_url | Y | Mellanox NIC driver ISO file location, for example, http://content.mellanox.com/ofed/MLNX_EN-4.4-2.0.7.0/mlnx-en-4.4-2.0.7.0-ubuntu16.04-x86_64.iso |
-| kernel_support | Y | Linux kernel to be supported by the Mellanox NIC driver, for example, 4.4.0-62-generic |
 
 #### STATIC:
 
@@ -216,6 +202,7 @@ SNAPS-Boot can be configured to allocate static IPs to host machines. This secti
 | --------- | ----------- | ----------- |
 | access_ip | Y | IP of the interface on management subnet (this is the IP allocated by SNAPS-Boot DHCP configuration to this machine). |
 | name | Y | OpenStack node type for this machine. Human readable values just for identification. For example: Controller, Compute1, Compute2 etc. |
+| post_script_url | N | URL for automated post install script that can be downloaded via HTTP. |
 | interfaces | Y | This section should be defined for each interface to be provisioned for static IP allocation. Each interface is defined by the attributes that follow. |
 | address | Y | IP address to be allocated to the interface. |
 | dn | N | Domain name. |
