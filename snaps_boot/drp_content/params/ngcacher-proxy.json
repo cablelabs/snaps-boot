@@ -1,0 +1,17 @@
+{
+  "Validated": false,
+  "Available": false,
+  "Errors": [],
+  "ReadOnly": false,
+  "Meta": {
+    "color": "red",
+    "icon": "pencil"
+  },
+  "Name": "post/ngcacher-proxy",
+  "Description": "Apt caching proxy URL",
+  "Documentation": "Apt caching proxy URL",
+  "Secure": false,
+  "Schema": {
+    "type": "string"
+  }
+}

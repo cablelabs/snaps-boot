@@ -193,6 +193,7 @@ Configuration parameter defined here are used by PXE server, usually the Build S
 | user | Y | User of PXE server (User of Build Server). |
 | password | Y | Password for user of PXE server. |
 
+
 #### STATIC:
 
 SNAPS-Boot can be configured to allocate static IPs to host machines. This section has sub-section for each host machine. User is required to specify all the interfaces and IPs to be assigned to those interfaces.
@@ -201,6 +202,7 @@ SNAPS-Boot can be configured to allocate static IPs to host machines. This secti
 | --------- | ----------- | ----------- |
 | access_ip | Y | IP of the interface on management subnet (this is the IP allocated by SNAPS-Boot DHCP configuration to this machine). |
 | name | Y | OpenStack node type for this machine. Human readable values just for identification. For example: Controller, Compute1, Compute2 etc. |
+| post_script_url | N | URL for automated post install script that can be downloaded via HTTP. |
 | interfaces | Y | This section should be defined for each interface to be provisioned for static IP allocation. Each interface is defined by the attributes that follow. |
 | address | Y | IP address to be allocated to the interface. |
 | dn | N | Domain name. |

@@ -1,0 +1,17 @@
+{
+  "Validated": false,
+  "Available": false,
+  "Errors": [],
+  "ReadOnly": false,
+  "Meta": {
+    "color": "red",
+    "icon": "pencil"
+  },
+  "Name": "post/script-url",
+  "Description": "Defines URL to download custom post install script from",
+  "Documentation": "Defines URL to download custom post install script from",
+  "Secure": false,
+  "Schema": {
+    "type": "string"
+  }
+}

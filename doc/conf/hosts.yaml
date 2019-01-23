@@ -55,7 +55,6 @@ PROVISION:
     #user to provide ngcacher_proxy only in case when servers are behind company
     #firewall, else left blank.
     ngcacher_proxy: ""
-
   PXE:
     password: cable123
     server_ip: "10.197.121.21"

@@ -1,8 +1,13 @@
 #!/usr/bin/env bash
 
 cat > /etc/apt/apt.conf <<EOF
-Acquire::http::Proxy "{{.Param "post/http-proxy"}}";
-Acquire::https::Proxy "{{.Param "post/https-proxy"}}";
+{{ if .ParamExists "post/ngcacher-proxy" }}
+Acquire::http::Proxy "{{.Param "post/ngcacher-proxy"}}";
+Acquire::https::Proxy "{{.Param "post/ngcacher-proxy"}}";
+{{ else }}
+Acquire::http::Proxy "";
+Acquire::https::Proxy "";
+{{ end }}
 Acquire::ftp::Proxy "";
 EOF
 
@@ -20,8 +25,18 @@ deb http://security.ubuntu.com/ubuntu xenial-security multiverse
 EOF
 
 sed -i 's/prohibit-password/yes/' /etc/ssh/sshd_config
-service sshd restart
 
-cat >> /etc/modprobe.d/nest.conf <<EOF
+cat > /etc/modprobe.d/nest.conf <<EOF
 options kvm_intel nested=1
 EOF
+
+{{ if .ParamExists "post/script-url" }}
+SCRIPT=/var/log/downloaded_script
+{{ if and (.ParamExists "post/http-proxy") (gt (len (.Param "post/http-proxy")) 0) }}
+wget -e http_proxy={{.Param "post/http-proxy"}} {{.Param "post/script-url"}} -O $SCRIPT
+{{ else }}
+wget {{.Param "post/script-url"}} -O $SCRIPT
+{{ end }}
+chmod +x $SCRIPT
+$SCRIPT
+{{ end }}

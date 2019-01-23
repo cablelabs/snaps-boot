@@ -37,6 +37,7 @@ PROVISION:
     ftp_proxy: ""
     http_proxy: "http://10.0.1.11:3128"
     https_proxy: ""
+    ngcacher_proxy: "http://10.0.1.11:3142"
   PXE: 
     password: cable123
     server_ip: "10.0.1.11"
