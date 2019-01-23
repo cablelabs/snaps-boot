@@ -40,7 +40,7 @@ PROVISION:
     ftp_proxy: ""
     http_proxy: "http://{{ build_admin_ip }}:{{ http_proxy_port }}"
     https_proxy: "https://{{ build_admin_ip }}:{{ http_proxy_port }}"
-    ngcacher_proxy: "{{ build_admin_ip }}:{{ http_proxy_port }}"
+    ngcacher_proxy: "http://{{ build_admin_ip }}:{{ http_proxy_port }}"
   PXE:
     # TODO - Determine exactly what this value does!
     password: "password"
