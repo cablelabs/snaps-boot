@@ -38,8 +38,8 @@ PROVISION:
       type: management
   PROXY:
     ftp_proxy: ""
-    http_proxy: "http://{{ build_admin_ip }}:{{ http_proxy_port }}"
-    https_proxy: "https://{{ build_admin_ip }}:{{ http_proxy_port }}"
+    http_proxy: ""
+    https_proxy: ""
     ngcacher_proxy: "http://{{ build_admin_ip }}:{{ http_proxy_port }}"
   PXE:
     # TODO - Determine exactly what this value does!
@@ -156,3 +156,4 @@ PROVISION:
         fullname: ubuntu_user
         boot_disk: vda
         kernel_choice: linux-server
+        post_script_location: {{ post_script_file }}

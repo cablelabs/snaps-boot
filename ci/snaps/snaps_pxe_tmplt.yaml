@@ -343,6 +343,9 @@ ansible:
       src_copy_dir:
         type: string
         value: {{ src_copy_dir }}
+      post_script_file:
+        type: string
+        value: {{ src_copy_dir }}/snaps-boot/ci/scripts/post_script
       priv_addr:
         type: network
         network_name: admin-net
@@ -482,6 +485,9 @@ ansible:
       snaps_boot_dir:
         type: string
         value: {{ src_copy_dir }}/snaps-boot
+      check_file:
+        type: string
+        value: /var/log/hello_world
       ip_addr:
         type: port
         vm_name: pxe-vm-1
@@ -505,6 +511,9 @@ ansible:
       snaps_boot_dir:
         type: string
         value: {{ src_copy_dir }}/snaps-boot
+      check_file:
+        type: string
+        value: /var/log/hello_world
       ip_addr:
         type: port
         vm_name: pxe-vm-2
@@ -528,6 +537,9 @@ ansible:
       snaps_boot_dir:
         type: string
         value: {{ src_copy_dir }}/snaps-boot
+      check_file:
+        type: string
+        value: /var/log/hello_world
       ip_addr:
         type: port
         vm_name: pxe-vm-3

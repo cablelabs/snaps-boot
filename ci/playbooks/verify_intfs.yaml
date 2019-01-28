@@ -23,8 +23,8 @@
     become: yes
     become_method: sudo
     become_user: root
-    command: "python {{ snaps_boot_dir }}/ci/scripts/validate_ssh_ip.py -u {{ username }} -i {{ ip_addr }} -t {{ timeout }}"
+    command: "python {{ snaps_boot_dir }}/ci/scripts/validate_ssh_ip.py -u {{ username }} -i {{ ip_addr }} -t {{ timeout }} -c 'ls -l {{ check_file }}'"
 
   - name: Attempting to obtain an SSH connection to {{ ip_addr }}
-    command: "python {{ snaps_boot_dir }}/ci/scripts/validate_ssh_ip.py -u {{ username }} -i {{ ip_addr }} -t {{ timeout }}"
+    command: "python {{ snaps_boot_dir }}/ci/scripts/validate_ssh_ip.py -u {{ username }} -i {{ ip_addr }} -t {{ timeout }} -c 'ls -l {{ check_file }}'"
     when: not run_as_root
