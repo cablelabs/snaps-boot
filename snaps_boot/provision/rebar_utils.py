@@ -29,7 +29,6 @@ from snaps_common.ansible_snaps import ansible_utils
 
 logger = logging.getLogger('rebar_utils')
 
-
 LOCAL_PRIV_KEY_FILE = os.path.expanduser('~/snaps-boot.priv_key')
 LOCAL_PUB_KEY_FILE = os.path.expanduser('~/snaps-boot.pub_key')
 
@@ -466,8 +465,24 @@ def __create_machine_params(boot_conf, machine, public_key):
     if post_script_location:
         out.append(
             ParamsModel(name='post/script-url',
-                        value='http://'+server_ip+':8091/files/post_script'))
+                        value='http://' + server_ip + ':8091/files/post_script'))
 
+    host_confs = boot_conf['PROVISION']['STATIC']['host']
+    for host_conf in host_confs:
+        if host_conf['access_ip'] == machine.get().ip:
+            post_script_url = host_conf.get('post_script_url')
+            if post_script_url:
+                # set the param with user provided post_script_url
+                out.append(ParamsModel(name='post/script-url',
+                                       value=post_script_url))
+            elif post_script_location:
+                out.append(
+                    ParamsModel(name='post/script-url',
+                                value='http://' + server_ip +
+                                      ':8091/files/post_script'))
+            break
+
+    # TODO/FIXME - all of these should probably be a global params
     http_proxy = prov_conf['PROXY']['http_proxy']
     https_proxy = prov_conf['PROXY']['https_proxy']
     apt_proxy = prov_conf['PROXY']['ngcacher_proxy']
@@ -478,16 +493,6 @@ def __create_machine_params(boot_conf, machine, public_key):
     if apt_proxy:
         out.append(ParamsModel(name='post/ngcacher-proxy', value=apt_proxy))
 
-    host_confs = boot_conf['PROVISION']['STATIC']['host']
-    for host_conf in host_confs:
-        if host_conf['access_ip'] == machine.get().ip:
-            post_script_url = host_conf.get('post_script_url')
-            if post_script_url:
-                out.append(ParamsModel(name='post/script-url',
-                                       value=post_script_url))
-            break
-
-    # TODO/FIXME - all of these should probably be a global params
     out.append(ParamsModel(name='access-ssh-root-mode',
                            value='without-password'))
     out.append(ParamsModel(name='kernel-console', value='ttyS1,115200'))
@@ -552,7 +557,6 @@ def __instantiate_drp_machines(rebar_session, boot_conf):
 
 
 def __get_drb_machine_config(host_conf, pxe_conf, bind_host_confs):
-
     mac = None
     for bind_host_conf in bind_host_confs:
         if bind_host_conf['ip'] == host_conf['access_ip']:
