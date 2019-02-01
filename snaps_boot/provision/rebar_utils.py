@@ -462,11 +462,6 @@ def __create_machine_params(boot_conf, machine, public_key):
     out.append(ParamsModel(name='seed/root-password', value=root_password))
     out.append(ParamsModel(name='seed/server-ip', value=server_ip))
 
-    if post_script_location:
-        out.append(
-            ParamsModel(name='post/script-url',
-                        value='http://' + server_ip + ':8091/files/post_script'))
-
     host_confs = boot_conf['PROVISION']['STATIC']['host']
     for host_conf in host_confs:
         if host_conf['access_ip'] == machine.get().ip:
@@ -476,6 +471,7 @@ def __create_machine_params(boot_conf, machine, public_key):
                 out.append(ParamsModel(name='post/script-url',
                                        value=post_script_url))
             elif post_script_location:
+                # set the param with the global post script url
                 out.append(
                     ParamsModel(name='post/script-url',
                                 value='http://' + server_ip +
