@@ -247,7 +247,7 @@ This section defines parameters used in preseed configuration to automate Linux 
 | fullname | Y | Description of user created by SNAPS-Boot. |
 | boot_disk | Y | Disk name where OS is installed, e.g., sda |
 | post_script_location | N | Local file location of a global post install script, e.g., /home/ubuntu/scripts/post_script. Note: This global attribute will be overridden by node specific post_script_url attribute if specified. |
-| kernel_choice | N | Name of the kernel image package that will be installed, e.g., linux-image-4.4.0-62-generic. Note: This package needs to be available from the configured repository. |
+| kernel_choice | N | Name of the kernel image package that will be installed, e.g., linux-image-4.15.0-43-generic. Note: This package needs to be available from the configured repository. |
 
 ##### CentOS
 | Parameter | Required | Description |
