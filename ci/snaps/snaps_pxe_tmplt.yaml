@@ -343,6 +343,9 @@ ansible:
       src_copy_dir:
         type: string
         value: {{ src_copy_dir }}
+      post_script_file:
+        type: string
+        value: {{ src_copy_dir }}/snaps-boot/ci/scripts/post_script
       priv_addr:
         type: network
         network_name: admin-net
@@ -482,6 +485,9 @@ ansible:
       snaps_boot_dir:
         type: string
         value: {{ src_copy_dir }}/snaps-boot
+      check_file:
+        type: string
+        value: /var/log/hello_world
       ip_addr:
         type: port
         vm_name: pxe-vm-1
@@ -505,6 +511,9 @@ ansible:
       snaps_boot_dir:
         type: string
         value: {{ src_copy_dir }}/snaps-boot
+      check_file:
+        type: string
+        value: /var/log/hello_world
       ip_addr:
         type: port
         vm_name: pxe-vm-2
@@ -528,6 +537,9 @@ ansible:
       snaps_boot_dir:
         type: string
         value: {{ src_copy_dir }}/snaps-boot
+      check_file:
+        type: string
+        value: /var/log/hello_world
       ip_addr:
         type: port
         vm_name: pxe-vm-3
@@ -572,6 +584,9 @@ ansible:
       snaps_boot_dir:
         type: string
         value: {{ src_copy_dir }}/snaps-boot
+      check_file:
+        type: string
+        value: /var/log/hello_world
       ip_addr:
         type: port
         vm_name: pxe-vm-1
@@ -595,6 +610,9 @@ ansible:
       snaps_boot_dir:
         type: string
         value: {{ src_copy_dir }}/snaps-boot
+      check_file:
+        type: string
+        value: /var/log/hello_world
       ip_addr:
         type: port
         vm_name: pxe-vm-2
@@ -618,6 +636,9 @@ ansible:
       snaps_boot_dir:
         type: string
         value: {{ src_copy_dir }}/snaps-boot
+      check_file:
+        type: string
+        value: /var/log/hello_world
       ip_addr:
         type: port
         vm_name: pxe-vm-3
@@ -725,7 +746,7 @@ ansible:
         type: string
         value: {{ run_as_root | default(True) }}
 
-  # Verify private interface on pxe-vm-2 was configured
+  # Verify public interface on pxe-vm-2 was configured
   - playbook_location: {{ local_snaps_boot_dir }}/ci/playbooks/verify_intfs.yaml
     hosts:
     - build-vm
@@ -748,7 +769,7 @@ ansible:
         type: string
         value: {{ run_as_root | default(True) }}
 
-  # Verify private interface on pxe-vm-3 was configured
+  # Verify public interface on pxe-vm-3 was configured
   - playbook_location: {{ local_snaps_boot_dir }}/ci/playbooks/verify_intfs.yaml
     hosts:
       - build-vm

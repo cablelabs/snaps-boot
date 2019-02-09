@@ -29,7 +29,6 @@ from snaps_common.ansible_snaps import ansible_utils
 
 logger = logging.getLogger('rebar_utils')
 
-
 LOCAL_PRIV_KEY_FILE = os.path.expanduser('~/snaps-boot.priv_key')
 LOCAL_PUB_KEY_FILE = os.path.expanduser('~/snaps-boot.pub_key')
 
@@ -47,6 +46,7 @@ def install_config_drp(rebar_session, boot_conf):
     __create_images()
     __create_subnet(rebar_session, boot_conf)
     __create_workflows()
+    __upload_postscript(boot_conf)
     __create_reservations(rebar_session, boot_conf)
     __create_content_pack()
     __create_machines(rebar_session, boot_conf)
@@ -154,6 +154,23 @@ def __delete_workflows():
         ansible_utils.apply_playbook(playbook_path)
     except Exception as e:
         logger.warn('Unable to delete workflows - [%s]', e)
+
+
+def __upload_postscript(boot_conf):
+    logger.info('Uploading post script')
+    prov_conf = boot_conf['PROVISION']
+    pxe_confs = prov_conf['TFTP']['pxe_server_configuration']
+    post_script_location = None
+    for value in pxe_confs.values():
+        # post_script_location is optional, so use get() to avoid KeyError
+        post_script_location = value.get('post_script_location')
+        break
+
+    if post_script_location:
+        playbook_path = pkg_resources.resource_filename(
+            'snaps_boot.ansible_p.setup', 'upload_postscript.yaml')
+        ansible_utils.apply_playbook(playbook_path, variables={
+            'post_script_file': post_script_location})
 
 
 def __create_content_pack():
@@ -417,6 +434,7 @@ def __create_machine_params(boot_conf, machine, public_key):
     user = None
     fullname = None
     kernel_choice = None
+    post_script_location = None
     for value in pxe_confs.values():
         user_password = value['password']
         user = value['user']
@@ -424,6 +442,8 @@ def __create_machine_params(boot_conf, machine, public_key):
         install_disk = value['boot_disk']
         # kernel_choice is optional, so use get() to avoid KeyError
         kernel_choice = value.get('kernel_choice')
+        # post_script_location is optional, so use get() to avoid KeyError
+        post_script_location = value.get('post_script_location')
         break
 
     if not install_disk or not user_password or not user or not fullname:
@@ -442,6 +462,23 @@ def __create_machine_params(boot_conf, machine, public_key):
     out.append(ParamsModel(name='seed/root-password', value=root_password))
     out.append(ParamsModel(name='seed/server-ip', value=server_ip))
 
+    host_confs = boot_conf['PROVISION']['STATIC']['host']
+    for host_conf in host_confs:
+        if host_conf['access_ip'] == machine.get().ip:
+            post_script_url = host_conf.get('post_script_url')
+            if post_script_url:
+                # set the param with user provided post_script_url
+                out.append(ParamsModel(name='post/script-url',
+                                       value=post_script_url))
+            elif post_script_location:
+                # set the param with the global post script url
+                out.append(
+                    ParamsModel(name='post/script-url',
+                                value='http://' + server_ip +
+                                      ':8091/files/post_script'))
+            break
+
+    # TODO/FIXME - all of these should probably be a global params
     http_proxy = prov_conf['PROXY']['http_proxy']
     https_proxy = prov_conf['PROXY']['https_proxy']
     apt_proxy = prov_conf['PROXY']['ngcacher_proxy']
@@ -452,16 +489,6 @@ def __create_machine_params(boot_conf, machine, public_key):
     if apt_proxy:
         out.append(ParamsModel(name='post/ngcacher-proxy', value=apt_proxy))
 
-    host_confs = boot_conf['PROVISION']['STATIC']['host']
-    for host_conf in host_confs:
-        if host_conf['access_ip'] == machine.get().ip:
-            post_script_url = host_conf.get('post_script_url')
-            if post_script_url:
-                out.append(ParamsModel(name='post/script-url',
-                                       value=post_script_url))
-            break
-
-    # TODO/FIXME - all of these should probably be a global params
     out.append(ParamsModel(name='access-ssh-root-mode',
                            value='without-password'))
     out.append(ParamsModel(name='kernel-console', value='ttyS1,115200'))
@@ -526,7 +553,6 @@ def __instantiate_drp_machines(rebar_session, boot_conf):
 
 
 def __get_drb_machine_config(host_conf, pxe_conf, bind_host_confs):
-
     mac = None
     for bind_host_conf in bind_host_confs:
         if bind_host_conf['ip'] == host_conf['access_ip']:

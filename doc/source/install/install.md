@@ -202,7 +202,7 @@ SNAPS-Boot can be configured to allocate static IPs to host machines. This secti
 | --------- | ----------- | ----------- |
 | access_ip | Y | IP of the interface on management subnet (this is the IP allocated by SNAPS-Boot DHCP configuration to this machine). |
 | name | Y | OpenStack node type for this machine. Human readable values just for identification. For example: Controller, Compute1, Compute2 etc. |
-| post_script_url | N | URL for automated post install script that can be downloaded via HTTP. |
+| post_script_url | N | URL for automated post install script that can be downloaded via HTTP. This node specific attribute will override the global post install script attribute.|
 | interfaces | Y | This section should be defined for each interface to be provisioned for static IP allocation. Each interface is defined by the attributes that follow. |
 | address | Y | IP address to be allocated to the interface. |
 | dn | N | Domain name. |
@@ -246,7 +246,8 @@ This section defines parameters used in preseed configuration to automate Linux 
 | user | Y | Default user for all host machines. SNAPS-Boot creates this user. |
 | fullname | Y | Description of user created by SNAPS-Boot. |
 | boot_disk | Y | Disk name where OS is installed, e.g., sda |
-| kernel_choice | N | Name of the kernel image package that will be installed, e.g., linux-image-4.4.0-62-generic. Note: This package needs to be available from the configured repository. |
+| post_script_location | N | Local file location of a global post install script, e.g., /home/ubuntu/scripts/post_script. Note: This global attribute will be overridden by node specific post_script_url attribute if specified. |
+| kernel_choice | N | Name of the kernel image package that will be installed, e.g., linux-image-4.15.0-43-generic. Note: This package needs to be available from the configured repository. |
 
 ##### CentOS
 | Parameter | Required | Description |
