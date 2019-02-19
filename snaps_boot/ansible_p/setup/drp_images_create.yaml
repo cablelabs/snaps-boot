@@ -14,5 +14,5 @@
 - hosts: localhost
 
   tasks:
-  - name: Upload Ubuntu 16.04 ISO to DRP
-    command: drpcli bootenvs uploadiso ubuntu-16.04-install
+  - name: Upload Ubuntu 18.04 ISO to DRP
+    command: drpcli bootenvs uploadiso ubuntu-18.04-install

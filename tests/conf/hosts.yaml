@@ -230,9 +230,7 @@ PROVISION:
   TFTP:
     pxe_server_configuration:
       ubuntu:
-        os: ubuntu-16.04.4-server-amd64.iso
         password: cable123
-        seed: hwe-ubuntu-server.seed
         timezone: America/Denver
         user: ubuntu
         fullname: ubuntu_user

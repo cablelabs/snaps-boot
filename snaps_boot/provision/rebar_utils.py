@@ -559,7 +559,7 @@ def __get_drb_machine_config(host_conf, pxe_conf, bind_host_confs):
             mac = bind_host_conf['mac']
 
     if 'ubuntu' in pxe_conf:
-        boot_os = 'ubuntu-16.04.5-server-amd64.iso'
+        boot_os = 'ubuntu-18.04.1-server-amd64.iso'
     else:
         raise Exception('Ubuntu is currently only supported')
 
@@ -571,7 +571,7 @@ def __get_drb_machine_config(host_conf, pxe_conf, bind_host_confs):
             'name': host_conf['name'],
             'os': boot_os,
             'type': 'snaps-boot',
-            'workflow': 'snaps-ubuntu-16.04-hwe'
+            'workflow': 'snaps-ubuntu-18.04'
         }
 
         logger.info('Instantiating a MachineModel object with %s',
