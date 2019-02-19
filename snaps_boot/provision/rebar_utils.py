@@ -568,7 +568,7 @@ def __get_drb_machine_config(host_conf, pxe_conf, bind_host_confs):
             mac = bind_host_conf['mac']
 
     if 'ubuntu' in pxe_conf:
-        boot_os = 'ubuntu-18.04.1-server-amd64.iso'
+        boot_os = 'ubuntu-18.04.2-server-amd64.iso'
     else:
         raise Exception('Ubuntu is currently only supported')
 
