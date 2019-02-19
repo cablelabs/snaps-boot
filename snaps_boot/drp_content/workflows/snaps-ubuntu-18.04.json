@@ -12,7 +12,7 @@
   "Description": "Install ubuntu 18.04 kernel",
   "Documentation": "",
   "Stages": [
-    "ubuntu-18.04-install",
+    "snaps-ubuntu-18.04-install",
     "snaps-post-install",
     "complete"
   ]

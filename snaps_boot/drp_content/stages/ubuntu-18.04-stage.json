@@ -1,0 +1,25 @@
+{
+  "Available": true,
+  "BootEnv": "snaps-ubuntu-18.04-install",
+  "Description": "Ubuntu 18.04 installation stage.  References latest release",
+  "Documentation": "",
+  "Errors": [],
+  "Meta": {
+    "color": "yellow",
+    "icon": "download",
+    "title": "SNAPS Content"
+  },
+  "Name": "snaps-ubuntu-18.04-install",
+  "OptionalParams": [],
+  "Profiles": [],
+  "ReadOnly": false,
+  "Reboot": false,
+  "RequiredParams": [],
+  "RunnerWait": true,
+  "Tasks": [
+    "ubuntu-drp-only-repos",
+    "ssh-access"
+  ],
+  "Templates": [],
+  "Validated": true
+}
