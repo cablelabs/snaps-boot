@@ -109,9 +109,11 @@ def __create_images():
     """
     # TODO/FIXME - find appropriate API to perform these tasks
     logger.info('Setting up Digital Rebar images')
+    pack_dir = pkg_resources.resource_filename('snaps_boot', 'drp_content')
     playbook_path = pkg_resources.resource_filename(
         'snaps_boot.ansible_p.setup', 'drp_images_create.yaml')
-    ansible_utils.apply_playbook(playbook_path)
+    ansible_utils.apply_playbook(playbook_path, variables={
+        'content_dir': pack_dir})
 
 
 def __delete_images():
