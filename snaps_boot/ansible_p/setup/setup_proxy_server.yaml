@@ -25,6 +25,12 @@
       name: apt-cacher-ng
       update_cache: yes
 
+  - name: Configure apt-cacher-ng - Proxy Settings
+    lineinfile:
+      path: /etc/apt-cacher-ng/acng.conf
+      line: "Proxy: {{ http_proxy }}"
+    when: http_proxy is defined and "{{ http_proxy }}"!=""
+
   - name: Configure apt-cacher-ng - PassThroughPattern
     lineinfile:
       path: /etc/apt-cacher-ng/acng.conf
