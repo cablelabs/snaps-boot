@@ -15,4 +15,4 @@
 
   tasks:
   - name: Destroy DRP Workflows for SNAPS
-    command: drpcli workflows destroy snaps-ubuntu-18.04
+    command: drpcli workflows destroy snaps-ubuntu-18.04-hwe

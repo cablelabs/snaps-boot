@@ -15,7 +15,7 @@
 
   tasks:
   - name: Create 18.04 bootenv
-    command: drpcli bootenvs create {{ content_dir }}/bootenvs/ubuntu-18.04-bootenv.json
+    command: drpcli bootenvs create {{ content_dir }}/bootenvs/hwe-ubuntu-18.04-bootenv.json
 
   - name: Upload Ubuntu 18.04 ISO to DRP
-    command: drpcli bootenvs uploadiso snaps-ubuntu-18.04-install
+    command: drpcli bootenvs uploadiso hwe-ubuntu-18.04-install
