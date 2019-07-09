@@ -27,25 +27,39 @@
     https_proxy: "{{ https_proxy }}"
 
   tasks:
-  - name: Configuring nodes with static ip for mangment network
-    lineinfile:
-      dest: /etc/network/interfaces
-      state: present
-      backrefs: yes
-      regexp: "iface {{ iface }} inet dhcp"
-      line: "iface {{ iface}} inet static\naddress {{ address }} \nnetmask {{netmask}}"
+  - name: Configuring nodes with static ip for management network
+    blockinfile:
+      dest: /etc/netplan/50-cloud-init.yaml
+      insertafter: "ethernets:"
+      marker: "# {mark} ANSIBLE MANAGED BLOCK {{ iface }}"
+      block: |
+                {{ iface }}:
+                  addresses: [{{ address }}]
     when: is_mng|bool and true
 
   - name: Configuring nodes with static ip for external network
-    lineinfile:
-      dest: /etc/network/interfaces
-      line: "auto {{ iface }}\niface {{ iface}} inet static\naddress {{ address }} \nnetmask {{ netmask }} \ngateway {{ gateway }}\ndns-nameservers {{ dns }}\ndns-search {{ dn }}\nup route add netmask {{ netmask }} gw {{ gateway }}"
+    blockinfile:
+      dest: /etc/netplan/50-cloud-init.yaml
+      insertafter: "ethernets:"
+      marker: "# {mark} ANSIBLE MANAGED BLOCK {{ iface }}"
+      block: |
+                {{ iface }}:
+                  addresses: [{{ address }}]
+                  dhcp4: false
+                  gateway4: {{ gateway }}
+                  nameservers:
+                    addresses: [{{ dns }}]
+                    search: [{{ dn }}]
     when: is_ext|bool and true
 
   - name: Configuring nodes with static ip for tenant network
-    lineinfile:
-      dest: /etc/network/interfaces
-      line: "auto {{ iface }}\niface {{ iface }} inet static\naddress {{ address }} \nnetmask {{ netmask }}"
+    blockinfile:
+      dest: /etc/netplan/50-cloud-init.yaml
+      insertafter: "ethernets:"
+      marker: "# {mark} ANSIBLE MANAGED BLOCK {{ iface }}"
+      block: |
+                {{ iface }}:
+                  addresses: [{{ address }}]
     when: is_tnt|bool and true
 
   - name: Backing up resolv.conf
