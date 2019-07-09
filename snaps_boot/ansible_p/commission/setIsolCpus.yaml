@@ -29,15 +29,12 @@
         line: 'GRUB_CMDLINE_LINUX="$GRUB_CMDLINE_LINUX isolcpus={{isolcpus}}"'
      when: not(isolcpus== "")
 
-
    - name: set isolcpus in /etc/default/grub
      lineinfile:
         dest: "/etc/default/grub"
         state: present
-        line: 'GRUB_CMDLINE_LINUX="$GRUB_CMDLINE_LINUX hugepagesz={{hugepagesz}}  hugepages={{hugepages}} transparent_hugepage=never"'
+        line: 'GRUB_CMDLINE_LINUX="$GRUB_CMDLINE_LINUX hugepagesz={{hugepagesz}} hugepages={{hugepages}} transparent_hugepage=never"'
      when: (not(hugepagesz == "") and not(hugepages == ""))
-
-
 
    - name: update grub command
      command: update-grub
