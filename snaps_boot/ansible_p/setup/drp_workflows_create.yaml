@@ -14,8 +14,8 @@
 - hosts: localhost
 
   tasks:
-  - name: Check to ensure stage ubuntu-18.04-install is available
-    shell: "drpcli stages show ubuntu-18.04-install | jq -r '.Available'"
+  - name: Check to ensure stage hwe-ubuntu-18.04-install is available
+    shell: "drpcli stages show hwe-ubuntu-18.04-install | jq -r '.Available'"
     retries: 30
     delay: 3
     register: result
