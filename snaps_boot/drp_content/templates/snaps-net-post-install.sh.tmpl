@@ -11,6 +11,15 @@ Acquire::https::Proxy "";
 Acquire::ftp::Proxy "";
 EOF
 
+cat >> /etc/environment <<EOF
+{{ if .ParamExists "post/http-proxy" }}
+http_proxy="{{.Param "post/http-proxy"}}"
+{{ end }}
+{{ if .ParamExists "post/https-proxy" }}
+https_proxy="{{.Param "post/https-proxy"}}"
+{{ end }}
+EOF
+
 cat > /etc/apt/sources.list <<EOF
 deb http://archive.ubuntu.com/ubuntu/ xenial main restricted
 deb http://archive.ubuntu.com/ubuntu/ xenial-updates main restricted
