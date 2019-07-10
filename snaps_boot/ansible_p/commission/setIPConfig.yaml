@@ -66,12 +66,6 @@
       remote_src: True
     when: is_ext|bool and true
 
-  - name: Remove /etc/apt/apt.conf.bak
-    file:
-      path: /etc/apt/apt.conf
-      state: absent
-    when: is_ext|bool and true
-
   - name: restarting system
     shell: /sbin/shutdown -r 1 "Ansible restart"
     ignore_errors: True
