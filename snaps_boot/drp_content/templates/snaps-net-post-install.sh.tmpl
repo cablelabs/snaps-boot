@@ -32,11 +32,7 @@ EOF
 
 {{ if .ParamExists "post/script-url" }}
 SCRIPT=/var/log/downloaded_script
-{{ if .ParamExists "post/http-proxy" }}
-wget -e http_proxy={{.Param "post/http-proxy"}} {{.Param "post/script-url"}} -O $SCRIPT
-{{ else }}
 wget {{.Param "post/script-url"}} -O $SCRIPT
-{{ end }}
 chmod +x $SCRIPT
 $SCRIPT
 {{ end }}
