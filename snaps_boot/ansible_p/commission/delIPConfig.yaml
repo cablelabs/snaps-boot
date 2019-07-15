@@ -20,10 +20,6 @@
     - is_mng: "{{ type == 'management' }}"
     - is_tnt: "{{ type == 'tenant' }}"
   tasks:
-   - name: Backing up resolv.conf
-     command: mv /etc/resolvconf/resolv.conf.d/base.bak /etc/resolvconf/resolv.conf.d/base
-     ignore_errors: True
-     when: is_ext|bool and true
    - name: Deleting connection address
      command: ifconfig "{{ iface }}" 0.0.0.0
      ignore_errors: True

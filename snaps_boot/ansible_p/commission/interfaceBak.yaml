@@ -21,11 +21,11 @@
     bak: "{{ bak }}"
   tasks:
    - name: Backing up interface file
-     command: cp /etc/netplan/50-cloud-init.yaml /etc/netplan/50-cloud-init.yaml.bak
+     command: mv /etc/netplan/01-netcfg.yaml /etc/netplan/01-netcfg.yaml.bak
      ignore_errors: True
      when: bak == "Y"
    - name: Copy backup file
-     command: cp /etc/netplan/50-cloud-init.yaml.bak /etc/netplan/50-cloud-init.yaml
+     command: cp /etc/netplan/01-netcfg.yaml.bak /etc/netplan/01-netcfg.yaml
      ignore_errors: True
      when: bak == "N"
    - name: Backing up apt.conf
