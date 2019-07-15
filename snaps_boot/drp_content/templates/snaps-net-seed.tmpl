@@ -129,7 +129,7 @@ d-i apt-setup/universe boolean true
 d-i debian-installer/allow_unauthenticated string true
 tasksel	tasksel/force-tasks	string server
 tasksel tasksel/first multiselect standard, server
-d-i pkgsel/include string openssh-server curl efibootmgr {{if .ParamExists "extra-packages"}}{{ range $index, $element := (.Param "extra-packages") }}{{if $index}} {{end}}{{$element}}{{end}}{{end}}
+d-i pkgsel/include string openssh-server curl python efibootmgr {{if .ParamExists "extra-packages"}}{{ range $index, $element := (.Param "extra-packages") }}{{if $index}} {{end}}{{$element}}{{end}}{{end}}
 d-i pkgsel/update-policy select none
 d-i pkgsel/language-pack-patterns	string
 d-i pkgsel/install-language-support	boolean false
