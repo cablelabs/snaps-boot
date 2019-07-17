@@ -41,7 +41,7 @@ def install_config_drp(rebar_session, boot_conf):
     :raises Exceptions
     """
     logger.info('Setting up Digital Rebar service and objects')
-    __setup_proxy_server()
+    __setup_proxy_server(boot_conf)
     __setup_drp(boot_conf)
     __create_images()
     __create_subnet(rebar_session, boot_conf)
@@ -52,11 +52,12 @@ def install_config_drp(rebar_session, boot_conf):
     __create_machines(rebar_session, boot_conf)
 
 
-def __setup_proxy_server():
+def __setup_proxy_server(boot_conf):
     logger.info('Setting up ng-cacher-proxy')
     playbook_path = pkg_resources.resource_filename(
         'snaps_boot.ansible_p.setup', 'setup_proxy_server.yaml')
-    ansible_utils.apply_playbook(playbook_path)
+    ansible_utils.apply_playbook(playbook_path, variables={
+        'http_proxy': boot_conf['PROVISION']['PROXY']['http_proxy']})
 
 
 def cleanup_drp(rebar_session, boot_conf):
