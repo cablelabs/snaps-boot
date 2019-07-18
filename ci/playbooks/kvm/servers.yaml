@@ -1,0 +1,70 @@
+# Copyright (c) 2019 Cable Television Laboratories, Inc. ("CableLabs")
+#                    and others.  All rights reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at:
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# Setting up PXE servers on KVM.
+---
+- hosts: all
+
+  gather_facts: no
+
+  vars:
+    pxe_img: /home/ubuntu/qemu-2.10+dfsg/pc-bios/s390-netboot.img
+
+  tasks:
+    - name: Install dependencies
+      become: yes
+      become_method: sudo
+      become_user: root
+      apt:
+        name:
+          - ubuntu-dev-tools
+
+    - name: Retrieve PXE image
+      command: pull-lp-source qemu artful
+      args:
+        chdir: $HOME
+
+    - name: destroy node 1
+      virt:
+        name: node-1
+        command: destroy
+      ignore_errors: yes
+
+    - name: Define node-1
+      virt:
+        name: node-1
+        command: define
+        xml: '{{ lookup("template", "servers/node.xml") }}'
+
+    - name: start node-1
+      virt:
+        name: node-1
+        state: running
+
+    - name: destroy node 2
+      virt:
+        name: node-2
+        command: destroy
+      ignore_errors: yes
+
+    - name: Define node-2
+      virt:
+        name: node-2
+        command: define
+        xml: '{{ lookup("template", "servers/node.xml") }}'
+
+    - name: start node-2
+      virt:
+        name: node-2
+        state: running

@@ -1,0 +1,29 @@
+<domain type='qemu' id='1'>
+  <memory unit='KiB'>4194304</memory>
+  <currentMemory unit='KiB'>4194304</currentMemory>
+  <vcpu placement='static'>2</vcpu>
+  <devices>
+    <emulator>/usr/bin/qemu-system-x86_64</emulator>
+    <disk type='file' device='disk'>
+      <driver name='qemu' type='qcow2'/>
+      <source file='/var/lib/libvirt/images/generic.qcow2'/>
+      <backingStore/>
+      <target dev='hda' bus='ide'/>
+      <alias name='ide0-0-0'/>
+      <address type='drive' controller='0' bus='0' target='0' unit='0'/>
+    </disk>
+    <interface type='network'>
+      <source network='private-br' bridge='private-br'/>
+      <model type='rtl8139'/>
+    </interface>
+    <interface type='network'>
+      <source network='admin-br' bridge='admin-br'/>
+      <model type='rtl8139'/>
+    </interface>
+    <interface type='network'>
+      <source network='public-br' bridge='public-br'/>
+      <model type='rtl8139'/>
+    </interface>
+  </devices>
+</domain>
+

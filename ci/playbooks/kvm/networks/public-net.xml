@@ -1,0 +1,5 @@
+<network>
+    <bridge name="public-br" />
+    <forward mode="nat"/>
+    <ip address="10.0.3.0" netmask="255.255.255.0"/>
+</network>
