@@ -67,44 +67,61 @@
         -i '{{ tf_out.outputs.pub_ip.value }},'
         -u {{ tf_out.outputs.sudo_user.value }}
         --key-file {{ tf_out.outputs.priv_key_file.value }}
+        --extra-vars
+        'priv_ip_prfx={{ priv_ip_prfx | default('10.0.1') }}
+        admin_ip_prfx={{ admin_ip_prfx | default('10.0.2') }}
+        pub_ip_prfx={{ pub_ip_prfx | default('10.0.3') }}'
       environment:
         ANSIBLE_HOST_KEY_CHECKING: "False"
       when: run_build_var|bool
 
-#    - name: Install snaps-boot
-#      shell: >-
-#        ansible-playbook ../playbooks/setup_build.yaml
-#        -i '{{ tf_out.outputs.pub_ip.value }},'
-#        -u {{ tf_out.outputs.sudo_user.value }}
-#        --key-file {{ tf_out.outputs.priv_key_file.value }}
-#        --extra-vars
-#        'build_id={{ build_id }}'
-#      environment:
-#        ANSIBLE_HOST_KEY_CHECKING: "False"
-#      register: deploy_out
-#      ignore_errors: yes
-#      when: run_build_var|bool
-#
-#    - name: k8s deploy out on failure
-#      debug:
-#        var: deploy_out.stdout_lines
-#      when: deploy_out is defined
-#    - fail:
-#      when: deploy_out is defined and deploy_out.rc is defined and deploy_out.rc != 0
-#
-#    - name: Validate snaps-boot installation
-#      shell: >-
-#        ansible-playbook ../playbooks/validation.yaml
-#        -i '{{ tf_out.outputs.pub_ip.value }},'
-#        -u {{ tf_out.outputs.sudo_user.value }}
-#        --key-file {{ tf_out.outputs.priv_key_file.value }}
-#        --extra-vars
-#        'src_copy_dir={{ src_copy_dir | default('/tmp') }}
-#        deployment_yaml_path={{ deployment_yaml_target_path | default('/tmp/deployment.yaml') }}'
-#      environment:
-#        ANSIBLE_HOST_KEY_CHECKING: "False"
-#      when: run_validation_var|bool
-#
+    - name: Install snaps-boot
+      shell: >-
+        ansible-playbook ../playbooks/setup_build.yaml
+        -i '{{ tf_out.outputs.pub_ip.value }},'
+        -u {{ tf_out.outputs.sudo_user.value }}
+        --key-file {{ tf_out.outputs.priv_key_file.value }}
+        --extra-vars
+        'build_id={{ build_id }}
+        src_copy_dir={{ src_copy_dir }}
+        post_script_file={{ src_copy_dir }}/snaps-boot/ci/scripts/post_script
+        priv_ip_prfx={{ priv_ip_prfx | default('10.0.1') }}
+        admin_ip_prfx={{ admin_ip_prfx | default('10.0.2') }}
+        ip_suffix_1=11
+        ip_suffix_2=12
+        ip_suffix_3=13
+        admin_mac_1={{ admin_mac_1 }}
+        admin_mac_2={{ admin_mac_2 }}
+        admin_mac_3={{ admin_mac_3 }}
+        pub_ip_prfx={{ pub_ip_prfx | default('10.0.3') }}
+        pub_gateway={{ pub_gateway }}
+        broadcast_addr={{ broadcast_addr }}
+        domain_name={{ domain_name | default('cablelabs.com') }}
+        dns_addr={{ dns_addr | default('8.8.8.8') }}
+        listen_iface={{ listen_iface | default('ens4') }}
+        max_lease={{ max_lease | default('7200') }}
+        netmask={{ netmask }}
+        router_ip={{ router_ip }}
+        build_admin_ip={{ build_admin_ip }}
+        http_proxy_port={{ http_proxy_port | default('3142') }}
+        priv_iface={{ priv_iface | default('eth0') }}
+        admin_iface={{ admin_iface | default('eth1') }}
+        pub_iface={{ admin_iface | default('eth2') }}
+        pxe_pass={{ pxe_pass }}
+        hosts_yaml_path={{ hosts_yaml_path }}'
+      environment:
+        ANSIBLE_HOST_KEY_CHECKING: "False"
+      register: deploy_out
+      ignore_errors: yes
+      when: run_build_var|bool
+
+    - name: k8s deploy out on failure
+      debug:
+        var: deploy_out.stdout_lines
+      when: deploy_out is defined
+    - fail:
+      when: deploy_out is defined and deploy_out.rc is defined and deploy_out.rc != 0
+
 #    - name: Destroy VM
 #      terraform:
 #        binary_path: "/tmp/{{ build_id}}/terraform-12.4/terraform"

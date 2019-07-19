@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # Setting up PXE servers on KVM.
+# see https://ubuntu.com/blog/early-experiences-with-pxe-net-boot-of-kvm-vms-on-ubuntu-for-s390x
 ---
 - hosts: all
 
@@ -22,19 +23,6 @@
     pxe_img: /home/ubuntu/qemu-2.10+dfsg/pc-bios/s390-netboot.img
 
   tasks:
-    - name: Install dependencies
-      become: yes
-      become_method: sudo
-      become_user: root
-      apt:
-        name:
-          - ubuntu-dev-tools
-
-    - name: Retrieve PXE image
-      command: pull-lp-source qemu artful
-      args:
-        chdir: $HOME
-
     - name: destroy node 1
       virt:
         name: node-1
@@ -46,6 +34,8 @@
         name: node-1
         command: define
         xml: '{{ lookup("template", "servers/node.xml") }}'
+      vars:
+        vm_name: node-1
 
     - name: start node-1
       virt:
@@ -63,6 +53,8 @@
         name: node-2
         command: define
         xml: '{{ lookup("template", "servers/node.xml") }}'
+      vars:
+        vm_name: node-2
 
     - name: start node-2
       virt:

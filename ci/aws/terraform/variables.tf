@@ -24,6 +24,13 @@ variable "region" {default = "us-west-2"}
 variable "availability_zone" {default = "us-west-2b"}
 
 # Ubuntu 16.04 SSD Volume Type
-variable "ami" {default = "ami-0b37e9efc396e4c38"}
+//variable "ami" {default = "ami-0b37e9efc396e4c38"}
+
+# snaps-boot image with KVM and generic.qcow2
+variable "ami" {default = "ami-044440dc7a3d75d2b"}
 variable "instance_type" {default = "t2.2xlarge"}
 
+# Playbook Constants
+variable "ANSIBLE_CMD" {default = "export ANSIBLE_HOST_KEY_CHECKING=False; ansible-playbook"}
+variable "SETUP_KVM_PB" {default = "../../playbooks/setup_kvm.yaml"}
+variable "EXE_SNAPS_BOOT_PB" {default = "../../playbooks/setup_build.yaml"}

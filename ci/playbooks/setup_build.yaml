@@ -16,38 +16,36 @@
 - hosts: all
 
   vars:
-    run_as_root: "{{ run_as_root | default('True') }}"
+    run_as_root: "{{ run_as_root | default(false) }}"
 
   tasks:
-  - name: Delete {{ src_copy_dir }}/snaps-boot directory
+    - name: Install apt dependencies
+      become: yes
+      become_method: sudo
+      become_user: root
+      apt:
+        name:
+          - python-pip
+
+    - name: Delete {{ src_copy_dir }}/snaps-boot directory
     become: yes
     become_method: sudo
     become_user: root
     file:
       state: absent
       dest: "{{ src_copy_dir }}/snaps-boot"
+    ignore_errors: yes
 
   - name: Copy this source tree from local {{ src_snaps_boot_dir }} to {{ src_copy_dir }}/snaps-boot
     synchronize:
-      src: "{{ src_snaps_boot_dir }}"
-      dest: "{{ src_copy_dir }}"
+      src: ../../../
+      dest: "{{ src_copy_dir }}/snaps-boot"
       dirs: yes
       rsync_opts:
         - "--exclude=.idea"
-
-  - name: Check if {{ src_copy_dir }}/snaps-boot exists
-    stat: path={{ src_copy_dir }}/snaps-boot
-    register: dir
-
-  - name: Move from {{ src_copy_dir }}/{{ src_snaps_boot_dir.split('/')[-1] }} to {{ src_copy_dir }}/snaps-boot
-    command: mv {{ src_copy_dir }}/{{ src_snaps_boot_dir.split('/')[-1] }} {{ src_copy_dir }}/snaps-boot
-    when: not dir.stat.exists
-
-  - name: Install python-pip
-    become: yes
-    become_method: sudo
-    become_user: root
-    apt: name=python-pip
+        - "--exclude=venv"
+        - "--exclude=.git/objects/pack"
+        - "--exclude=ci/aws/terraform/.terraform"
 
   - name: Install snaps-boot requirements-git.txt
     become: yes
@@ -59,10 +57,13 @@
     become: yes
     become_method: sudo
     become_user: root
-    command: pip install -e {{ src_copy_dir }}/snaps-boot
+    pip:
+      name: file://{{ src_copy_dir }}/snaps-boot
 
   - name: Apply template and copy hosts.yaml to {{ hosts_yaml_path }}
-    action: template src=templates/hosts.yaml.j2 dest={{ hosts_yaml_path }}
+    template:
+      src: templates/hosts.yaml.j2
+      dest: "{{ hosts_yaml_path }}"
 
   - name: Install as ROOT
     block:
@@ -74,7 +75,7 @@
         shell: "python {{ src_copy_dir }}/snaps-boot/iaas_launch.py -f {{ hosts_yaml_path }} -p -or >> /tmp/snaps-boot.log"
         ignore_errors: True
         register: out_root
-    when: run_as_root
+    when: run_as_root|bool
     become: yes
     become_method: sudo
     become_user: root
@@ -84,7 +85,7 @@
     - debug:
         var: out_root.stderr_lines
     - fail: msg="iaas_launch.py -f {{ hosts_yaml_path }} -p command failed"
-    when: run_as_root and out_root.rc != 0
+    when: run_as_root|bool and out_root.rc != 0
 
   - name: Install as {{ ansible_user_id }}
     block:
@@ -96,11 +97,11 @@
         shell: "python {{ src_copy_dir }}/snaps-boot/iaas_launch.py -f {{ hosts_yaml_path }} -p -or >> /tmp/snaps-boot.log"
         register: out_user
         ignore_errors: True
-    when: not run_as_root
+    when: not run_as_root|bool
 
   - name: Evaluate Install as {{ ansible_user_id }}
     block:
       - debug:
           var: out_user.stderr_lines
       - fail: msg="iaas_launch.py -f {{ hosts_yaml_path }} -p command failed"
-    when: not run_as_root and out_user.rc != 0
+    when: not run_as_root|bool and out_user.rc != 0

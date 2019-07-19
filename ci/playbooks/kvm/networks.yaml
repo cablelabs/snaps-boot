@@ -25,67 +25,79 @@
     - name: destroy private network
       virt_net:
         command: destroy
-        name: private-br
+        name: private-net
       ignore_errors: yes
 
     - name: Define private network
       virt_net:
         command: define
-        name: private-br
-        xml: '{{ lookup("template", "networks/private-net.xml") }}'
+        name: private-net
+        xml: '{{ lookup("template", "networks/network.xml.j2") }}'
+      vars:
+        bridge_name: private-net
+        forward_mode: nat
+        ip_prfx: "{{ priv_ip_prfx }}"
 
     - name: create private network
       virt_net:
         command: create
-        name: private-br
+        name: private-net
 
     # TODO - make configurable
     - name: assign IP to private-br
-      command: ip addr add 10.0.1.3 dev private-br
+      command: ip addr add 10.0.1.3 dev private-net
 
-    - name: destroy admin network
+    - name: Destroy admin network
       virt_net:
         command: destroy
-        name: admin-br
+        name: admin-net
       ignore_errors: yes
 
     - name: Define admin network
       virt_net:
         command: define
-        name: admin-br
-        xml: '{{ lookup("template", "networks/admin-net.xml") }}'
+        name: admin-net
+        xml: '{{ lookup("template", "networks/network.xml.j2") }}'
+      vars:
+        bridge_name: admin-net
+        forward_mode: nat
+        ip_prfx: "{{ admin_ip_prfx }}"
 
-    - name: create admin network
+    - name: Create admin network
       virt_net:
         command: create
-        name: admin-br
+        name: admin-net
 
     # TODO - make configurable
-    - name: assign IP to admin-br
-      command: ip addr add 10.0.2.3 dev admin-br
+    - name: Assign IP to admin-net
+      command: ip addr add 10.0.2.3 dev admin-net
 
-    - name: destroy public network
+    - name: Destroy public network
       virt_net:
         command: destroy
-        name: public-br
+        name: public-net
       ignore_errors: yes
 
     - name: Define public network
       virt_net:
         command: define
-        name: public-br
-        xml: '{{ lookup("template", "networks/public-net.xml") }}'
+        name: public-net
+        xml: '{{ lookup("template", "networks/network.xml.j2") }}'
+      vars:
+        bridge_name: public-net
+        forward_mode: nat
+        ip_prfx: "{{ pub_ip_prfx }}"
 
-    - name: create public network
+    - name: Create public network
       virt_net:
         command: create
-        name: public-br
+        name: public-net
 
     # TODO - make configurable
-    - name: assign IP to public-br
-      command: ip addr add 10.0.3.3 dev public-br
+    - name: Assign IP to public-net
+      command: ip addr add 10.0.3.3 dev public-net
 
-    - name: list networks
+    - name: List networks
       virt_net:
         command: list_nets
       register: networks

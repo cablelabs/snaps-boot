@@ -17,7 +17,8 @@
  libvirt network configuration
 -->
 <network>
-    <bridge name="admin-br" />
-    <forward mode="private"/>
-    <ip address="10.0.2.0" netmask="255.255.255.0"/>
+  <name>{{ bridge_name }}</name>
+  <bridge name="{{ bridge_name }}" />
+  <forward mode="{{ forward_mode }}"/>
+  <ip address="{{ ip_prfx }}.0" netmask="255.255.255.0"/>
 </network>
