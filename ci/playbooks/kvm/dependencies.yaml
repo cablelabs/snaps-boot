@@ -15,14 +15,16 @@
 ---
 - hosts: all
 
+  become: yes
+  become_method: sudo
+  become_user: root
+
   gather_facts: no
 
   tasks:
     - name: Install apt dependencies
-      become: yes
-      become_method: sudo
-      become_user: root
       apt:
+        update_cache: yes
         name:
           - qemu-kvm
           - libvirt-bin

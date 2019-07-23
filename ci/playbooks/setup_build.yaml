@@ -19,15 +19,16 @@
     run_as_root: "{{ run_as_root | default(false) }}"
 
   tasks:
-    - name: Install apt dependencies
-      become: yes
-      become_method: sudo
-      become_user: root
-      apt:
-        name:
-          - python-pip
+  - name: Install apt dependencies
+    become: yes
+    become_method: sudo
+    become_user: root
+    apt:
+      update_cache: yes
+      name:
+        - python-pip
 
-    - name: Delete {{ src_copy_dir }}/snaps-boot directory
+  - name: Delete {{ src_copy_dir }}/snaps-boot directory
     become: yes
     become_method: sudo
     become_user: root
@@ -36,7 +37,7 @@
       dest: "{{ src_copy_dir }}/snaps-boot"
     ignore_errors: yes
 
-  - name: Copy this source tree from local {{ src_snaps_boot_dir }} to {{ src_copy_dir }}/snaps-boot
+  - name: Copy this source tree to {{ src_copy_dir }}/snaps-boot
     synchronize:
       src: ../../../
       dest: "{{ src_copy_dir }}/snaps-boot"
@@ -57,8 +58,11 @@
     become: yes
     become_method: sudo
     become_user: root
-    pip:
-      name: file://{{ src_copy_dir }}/snaps-boot
+    command: python setup.py install
+    args:
+      chdir: "{{ src_copy_dir }}/snaps-boot"
+#    pip:
+#      name: file://{{ src_copy_dir }}/snaps-boot
 
   - name: Apply template and copy hosts.yaml to {{ hosts_yaml_path }}
     template:

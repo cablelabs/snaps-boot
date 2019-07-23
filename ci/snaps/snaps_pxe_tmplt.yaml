@@ -334,12 +334,6 @@ ansible:
       - pxe-vm-2
       - pxe-vm-3
     variables:
-      pxe_config:
-        type: string
-        value: {{ install_type }}
-      src_snaps_boot_dir:
-        type: string
-        value: {{ local_snaps_boot_dir }}
       src_copy_dir:
         type: string
         value: {{ src_copy_dir }}

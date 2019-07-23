@@ -17,12 +17,44 @@
 ---
 - hosts: all
 
+  become: yes
+
   gather_facts: no
 
-  vars:
-    pxe_img: /home/ubuntu/qemu-2.10+dfsg/pc-bios/s390-netboot.img
-
   tasks:
+#    - name: Install apt dependencies
+#      become: yes
+#      apt:
+#        name:
+#          - python-pip
+#
+#    - name: Install s3 pip dependencies
+#      become: yes
+#      pip:
+#        name:
+#          - botocore
+#          - boto3
+#
+#    - name: download PXE image {{ pxe_img }} from S3
+#      aws_s3:
+#        aws_access_key: "{{ aws_access_key }}"
+#        aws_secret_key: "{{ aws_secret_key }}"
+#        bucket: snaps-ci
+#        object: "libvirt-pxe.qcow2"
+#        dest: "{{ pxe_img }}"
+#        mode: get
+
+    - name: Delete old qcow2
+      file:
+        path: "{{ pxe_img }}"
+        state: absent
+
+    - name: create PXE image {{ pxe_img }}_1
+      command: "qemu-img create -f qcow2 {{ pxe_img }}_1 {{ img_size | default(5) }}"
+
+    - name: create PXE image {{ pxe_img }}_2
+      command: "qemu-img create -f qcow2 {{ pxe_img }}_2 {{ img_size | default(5) }}"
+
     - name: destroy node 1
       virt:
         name: node-1
@@ -33,9 +65,10 @@
       virt:
         name: node-1
         command: define
-        xml: '{{ lookup("template", "servers/node.xml") }}'
+        xml: '{{ lookup("template", "servers/node.xml.j2") }}'
       vars:
         vm_name: node-1
+        img_loc: "{{ pxe_img }}_1"
 
     - name: start node-1
       virt:
@@ -52,9 +85,10 @@
       virt:
         name: node-2
         command: define
-        xml: '{{ lookup("template", "servers/node.xml") }}'
+        xml: '{{ lookup("template", "servers/node.xml.j2") }}'
       vars:
         vm_name: node-2
+        img_loc: "{{ pxe_img }}_2"
 
     - name: start node-2
       virt:

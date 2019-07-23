@@ -23,7 +23,7 @@
     <emulator>/usr/bin/qemu-system-x86_64</emulator>
     <disk type='file' device='disk'>
       <driver name='qemu' type='qcow2'/>
-      <source file='/var/lib/libvirt/images/generic.qcow2'/>
+      <source file='{{ img_loc }}'/>
       <target dev='vda' bus='virtio'/>
     </disk>
 
