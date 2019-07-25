@@ -13,91 +13,46 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 ---
+- import_playbook: network.yaml
+  vars:
+    network_name: "{{ build_net_name }}"
+    net_type: route
+    ip_prefix: "{{ build_ip_prfx }}"
+    ip_suffix: 3
+    br_name: virbr1
+    netmask_val: "{{ netmask }}"
+
+- import_playbook: network.yaml
+  vars:
+    network_name: "{{ priv_net_name }}"
+    net_type: isolate
+    ip_prefix: "{{ priv_ip_prfx }}"
+    ip_suffix: 3
+    br_name: virbr2
+    netmask_val: "{{ netmask }}"
+
+- import_playbook: network.yaml
+  vars:
+    network_name: "{{ admin_net_name }}"
+    net_type: isolate
+    ip_prefix: "{{ admin_ip_prfx }}"
+    ip_suffix: 3
+    br_name: virbr3
+    netmask_val: "{{ netmask }}"
+
+- import_playbook: network.yaml
+  vars:
+    network_name: "{{ pub_net_name }}"
+    net_type: isolate
+    ip_prefix: "{{ pub_ip_prfx }}"
+    ip_suffix: 3
+    br_name: virbr4
+    netmask_val: "{{ netmask }}"
+
 - hosts: all
-
-  become: yes
-  become_method: sudo
-  become_user: root
-
-  gather_facts: no
-
   tasks:
-    - name: destroy private network
-      virt_net:
-        command: destroy
-        name: private-net
-      ignore_errors: yes
-
-    - name: Define private network
-      virt_net:
-        command: define
-        name: private-net
-        xml: '{{ lookup("template", "networks/network.xml.j2") }}'
-      vars:
-        bridge_name: private-net
-        forward_mode: nat
-        ip_prfx: "{{ priv_ip_prfx }}"
-
-    - name: create private network
-      virt_net:
-        command: create
-        name: private-net
-
-    # TODO - make configurable
-    - name: assign IP to private-br
-      command: ip addr add 10.0.1.3 dev private-net
-
-    - name: Destroy admin network
-      virt_net:
-        command: destroy
-        name: admin-net
-      ignore_errors: yes
-
-    - name: Define admin network
-      virt_net:
-        command: define
-        name: admin-net
-        xml: '{{ lookup("template", "networks/network.xml.j2") }}'
-      vars:
-        bridge_name: admin-net
-        forward_mode: nat
-        ip_prfx: "{{ admin_ip_prfx }}"
-
-    - name: Create admin network
-      virt_net:
-        command: create
-        name: admin-net
-
-    # TODO - make configurable
-    - name: Assign IP to admin-net
-      command: ip addr add 10.0.2.3 dev admin-net
-
-    - name: Destroy public network
-      virt_net:
-        command: destroy
-        name: public-net
-      ignore_errors: yes
-
-    - name: Define public network
-      virt_net:
-        command: define
-        name: public-net
-        xml: '{{ lookup("template", "networks/network.xml.j2") }}'
-      vars:
-        bridge_name: public-net
-        forward_mode: nat
-        ip_prfx: "{{ pub_ip_prfx }}"
-
-    - name: Create public network
-      virt_net:
-        command: create
-        name: public-net
-
-    # TODO - make configurable
-    - name: Assign IP to public-net
-      command: ip addr add 10.0.3.3 dev public-net
-
     - name: List networks
+      become: yes
       virt_net:
         command: list_nets
       register: networks

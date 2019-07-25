@@ -29,22 +29,33 @@ variable "availability_zone" {default = "us-west-2b"}
 variable "src_copy_dir" {default = "/tmp"}
 # TODO - add in some logic into this default post_script file as it does nothing
 variable "post_script_file" {default = "/tmp/snaps-boot/ci/scripts/post_script"}
+variable "netmask" {default = "255.255.255.0"}
+variable "build_ip_prfx" {default = "10.0.0"}
+variable "build_net_name" {default = "build-net"}
 variable "priv_ip_prfx" {default = "10.0.1"}
+variable "priv_net_name" {default = "priv-net"}
 variable "admin_ip_prfx" {default = "10.0.2"}
+variable "admin_net_name" {default = "admin-net"}
 variable "pub_ip_prfx" {default = "10.0.3"}
+variable "pub_net_name" {default = "pub-net"}
+variable "bridge_nic" {default = "ens5"}
 
+# snaps-boot image with KVM and generic.qcow2 TODO DELETE AMI
+//variable "ami" {default = "ami-044440dc7a3d75d2b"}
 # Ubuntu 16.04 SSD Volume Type
 //variable "ami" {default = "ami-0b37e9efc396e4c38"}
 # Ubuntu 18.04 SSD Volume Type
 variable "ami" {default = "ami-07b4f3c02c7f83d59"}
 
-# snaps-boot image with KVM and generic.qcow2
-//variable "ami" {default = "ami-044440dc7a3d75d2b"}
-variable "instance_type" {default = "t2.2xlarge"}
+//variable "instance_type" {default = "t2.2xlarge"}
+variable "instance_type" {default = "m5a.8xlarge"}
 
 # Playbook Constants
 variable "ANSIBLE_CMD" {default = "export ANSIBLE_HOST_KEY_CHECKING=False; ansible-playbook"}
 variable "SETUP_KVM_DEPENDENCIES" {default = "../../playbooks/kvm/dependencies.yaml"}
 variable "SETUP_KVM_NETWORKS" {default = "../../playbooks/kvm/networks.yaml"}
 variable "SETUP_KVM_SERVERS" {default = "../../playbooks/kvm/servers.yaml"}
-variable "EXE_SNAPS_BOOT_PB" {default = "../../playbooks/setup_build.yaml"}
+variable "SETUP_SRC" {default = "../../playbooks/setup_src.yaml"}
+variable "SETUP_DRP" {default = "../../playbooks/setup_drp.yaml"}
+variable "VERIFY_INTFS" {default = "../../playbooks/verify_intfs.yaml"}
+variable "VERIFY_INTFS_CHECK_FILE" {default = "/var/log/hello_world"}

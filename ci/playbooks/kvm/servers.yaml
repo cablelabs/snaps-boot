@@ -16,81 +16,46 @@
 # see https://ubuntu.com/blog/early-experiences-with-pxe-net-boot-of-kvm-vms-on-ubuntu-for-s390x
 ---
 - hosts: all
-
-  become: yes
-
   gather_facts: no
-
   tasks:
-#    - name: Install apt dependencies
-#      become: yes
-#      apt:
-#        name:
-#          - python-pip
-#
-#    - name: Install s3 pip dependencies
-#      become: yes
-#      pip:
-#        name:
-#          - botocore
-#          - boto3
-#
-#    - name: download PXE image {{ pxe_img }} from S3
-#      aws_s3:
-#        aws_access_key: "{{ aws_access_key }}"
-#        aws_secret_key: "{{ aws_secret_key }}"
-#        bucket: snaps-ci
-#        object: "libvirt-pxe.qcow2"
-#        dest: "{{ pxe_img }}"
-#        mode: get
+    - name: Install dependencies
+      become: yes
+      apt:
+        name:
+          - libguestfs-tools
 
-    - name: Delete old qcow2
-      file:
-        path: "{{ pxe_img }}"
-        state: absent
+- import_playbook: server.yaml
+  vars:
+    vm_name: build
+    vm_type: ubuntu
+    node_num: 0
+    net_1_name: "{{ build_net_name }}"
+    net_2_name: "{{ priv_net_name }}"
+    net_3_name: "{{ admin_net_name }}"
 
-    - name: create PXE image {{ pxe_img }}_1
-      command: "qemu-img create -f qcow2 {{ pxe_img }}_1 {{ img_size | default(5) }}"
+- import_playbook: server.yaml
+  vars:
+    vm_name: pxe-node-1
+    vm_type: pxe
+    node_num: 1
+    net_1_name: "{{ priv_net_name }}"
+    net_2_name: "{{ admin_net_name }}"
+    net_3_name: "{{ pub_net_name }}"
 
-    - name: create PXE image {{ pxe_img }}_2
-      command: "qemu-img create -f qcow2 {{ pxe_img }}_2 {{ img_size | default(5) }}"
+- import_playbook: server.yaml
+  vars:
+    vm_name: pxe-node-2
+    vm_type: pxe
+    node_num: 2
+    net_1_name: "{{ priv_net_name }}"
+    net_2_name: "{{ admin_net_name }}"
+    net_3_name: "{{ pub_net_name }}"
 
-    - name: destroy node 1
-      virt:
-        name: node-1
-        command: destroy
-      ignore_errors: yes
-
-    - name: Define node-1
-      virt:
-        name: node-1
-        command: define
-        xml: '{{ lookup("template", "servers/node.xml.j2") }}'
-      vars:
-        vm_name: node-1
-        img_loc: "{{ pxe_img }}_1"
-
-    - name: start node-1
-      virt:
-        name: node-1
-        state: running
-
-    - name: destroy node 2
-      virt:
-        name: node-2
-        command: destroy
-      ignore_errors: yes
-
-    - name: Define node-2
-      virt:
-        name: node-2
-        command: define
-        xml: '{{ lookup("template", "servers/node.xml.j2") }}'
-      vars:
-        vm_name: node-2
-        img_loc: "{{ pxe_img }}_2"
-
-    - name: start node-2
-      virt:
-        name: node-2
-        state: running
+- import_playbook: server.yaml
+  vars:
+    vm_name: pxe-node-3
+    vm_type: pxe
+    node_num: 3
+    net_1_name: "{{ priv_net_name }}"
+    net_2_name: "{{ admin_net_name }}"
+    net_3_name: "{{ pub_net_name }}"

@@ -18,9 +18,24 @@ resource "null_resource" "snaps-boot-pk-setup" {
   }
 }
 
+# Call ensure SSH key has correct permissions
+resource "null_resource" "snaps-boot-remote-key-gen" {
+  provisioner "remote-exec" {
+    inline = [
+      "sudo ssh-keygen -t rsa -N '' -f /root/.ssh/id_rsa",
+    ]
+  }
+  connection {
+    host = aws_instance.snaps-boot-build.public_ip
+    type     = "ssh"
+    user     = var.sudo_user
+    private_key = file(var.private_key_file)
+  }
+}
+
 # Call ansible scripts to setup KVM
 resource "null_resource" "snaps-boot-kvm-setup" {
-  depends_on = [null_resource.snaps-boot-pk-setup]
+  depends_on = [null_resource.snaps-boot-pk-setup, null_resource.snaps-boot-remote-key-gen]
 
   # Install KVM dependencies
   provisioner "local-exec" {
@@ -44,9 +59,16 @@ ${var.ANSIBLE_CMD} -u ${var.sudo_user} \
 ${var.SETUP_KVM_NETWORKS} \
 --key-file ${var.private_key_file} \
 --extra-vars "\
+build_ip_prfx=${var.build_ip_prfx} \
+build_net_name=${var.build_net_name} \
 priv_ip_prfx=${var.priv_ip_prfx} \
+priv_net_name=${var.priv_net_name} \
 admin_ip_prfx=${var.admin_ip_prfx} \
-pub_ip_prfx=${var.pub_ip_prfx}
+admin_net_name=${var.admin_net_name} \
+pub_ip_prfx=${var.pub_ip_prfx} \
+pub_net_name=${var.pub_net_name}
+netmask=${var.netmask}
+bridge_nic=${var.bridge_nic}
 "\
 EOT
   }
@@ -64,54 +86,228 @@ ${var.ANSIBLE_CMD} -u ${var.sudo_user} \
 ${var.SETUP_KVM_SERVERS} \
 --key-file ${var.private_key_file} \
 --extra-vars "\
-aws_access_key=${var.access_key} \
-aws_secret_key=${var.secret_key} \
-pxe_img=/var/lib/libvirt/images/libvirt-pxe.qcow2
+pxe_img=/var/lib/libvirt/images/libvirt-pxe.qcow2 \
+target_user=${var.sudo_user} \
+build_net_name=${var.build_net_name} \
+priv_net_name=${var.priv_net_name} \
+admin_net_name=${var.admin_net_name} \
+pub_net_name=${var.pub_net_name}
 "\
 EOT
   }
 }
 
-# Call ansible scripts to run snaps-boot
-resource "null_resource" "snaps-boot-deploy" {
-  depends_on = [null_resource.snaps-boot-server-setup]
-//  depends_on = [null_resource.snaps-boot-kvm-setup]
-
-  # Setup KVM on the VM to create VMs on it for testing snaps-boot
-  provisioner "local-exec" {
-    command = <<EOT
-${var.ANSIBLE_CMD} -u ${var.sudo_user} \
--i ${aws_instance.snaps-boot-build.public_ip}, \
-${var.EXE_SNAPS_BOOT_PB} \
---key-file ${var.private_key_file} \
---extra-vars "\
-src_copy_dir=${var.src_copy_dir} \
-post_script_file=${var.post_script_file} \
-priv_ip_prfx=10.0.1 \
-admin_ip_prfx=10.0.2 \
-pub_ip_prfx=10.0.3
-ip_suffix_1=11
-ip_suffix_2=12
-ip_suffix_3=13
-admin_mac_1=foo-mac-1
-admin_mac_2=foo-mac-2
-admin_mac_3=foo-mac-3
-pub_gateway=foo-gateway
-broadcast_addr=foo-broadcast_addr
-domain_name=foo-domain_name
-dns_addr=8.8.8.8
-listen_iface=foo-listen_iface
-max_lease=7200
-netmask=foo-netmask
-router_ip=foo-router_ip
-build_admin_ip=foo-build_admin_ip
-http_proxy_port=3142
-priv_iface=eth0
-admin_iface=eth1
-admin_iface=eth2
-pxe_pass=foo-pxe_pass
-hosts_yaml_path=foo-hosts_yaml_path
-"\
-EOT
-  }
-}
+//# Call ansible scripts to run snaps-boot
+//resource "null_resource" "snaps-boot-src-setup" {
+//  depends_on = [null_resource.snaps-boot-server-setup]
+////  depends_on = [null_resource.snaps-boot-kvm-setup]
+//
+//  # Setup KVM on the VM to create VMs on it for testing snaps-boot
+//  provisioner "local-exec" {
+//    command = <<EOT
+//${var.ANSIBLE_CMD} -u ${var.sudo_user} \
+//-i ${aws_instance.snaps-boot-build.public_ip}, \
+//${var.SETUP_SRC} \
+//--key-file ${var.private_key_file} \
+//--extra-vars "\
+//src_copy_dir=${var.src_copy_dir} \
+//"\
+//EOT
+//  }
+//}
+//
+//# Call ansible scripts to run snaps-boot
+//resource "null_resource" "snaps-boot-drp-setup" {
+//  depends_on = [null_resource.snaps-boot-src-setup]
+////  depends_on = [null_resource.snaps-boot-kvm-setup]
+//
+//  # Setup KVM on the VM to create VMs on it for testing snaps-boot
+//  provisioner "local-exec" {
+//    command = <<EOT
+//${var.ANSIBLE_CMD} -u ${var.sudo_user} \
+//-i ${aws_instance.snaps-boot-build.public_ip}, \
+//${var.SETUP_DRP} \
+//--key-file ${var.private_key_file} \
+//--extra-vars "\
+//src_copy_dir=${var.src_copy_dir} \
+//post_script_file=${var.post_script_file} \
+//priv_ip_prfx=${var.priv_ip_prfx} \
+//admin_ip_prfx=${var.admin_ip_prfx} \
+//pub_ip_prfx=${var.pub_ip_prfx} \
+//ip_suffix_1=11 \
+//ip_suffix_2=12 \
+//ip_suffix_3=13 \
+//admin_mac_1=foo-mac-1 \
+//admin_mac_2=foo-mac-2 \
+//admin_mac_3=foo-mac-3 \
+//pub_gateway=foo-gateway \
+//broadcast_addr=foo-broadcast_addr \
+//domain_name=foo-domain_name \
+//dns_addr=8.8.8.8 \
+//listen_iface=foo-listen_iface \
+//max_lease=7200 \
+//netmask=foo-netmask \
+//router_ip=foo-router_ip \
+//build_admin_ip=foo-build_admin_ip \
+//http_proxy_port=3142 \
+//priv_addr=foo \
+//priv_iface=eth0 \
+//admin_iface=eth1 \
+//admin_iface=eth2 \
+//pxe_pass=foo-pxe_pass \
+//hosts_yaml_path=foo-hosts_yaml_path
+//"\
+//EOT
+//  }
+//}
+//
+//resource "null_resource" "snaps-boot-nodes-power-cycle" {
+//  depends_on = [null_resource.snaps-boot-drp-setup]
+//  provisioner "local-exec" {
+//    command = "virsh reset node-1; virsh reset node-2; virsh reset node-3"
+//  }
+//}
+//
+//# Call ansible scripts to run snaps-boot
+//resource "null_resource" "snaps-boot-verify-intfs-node-1-priv" {
+//  depends_on = [null_resource.snaps-boot-nodes-power-cycle]
+//
+//  # Setup KVM on the VM to create VMs on it for testing snaps-boot
+//  provisioner "local-exec" {
+//    command = <<EOT
+//${var.ANSIBLE_CMD} -u ${var.sudo_user} \
+//-i ${aws_instance.snaps-boot-build.public_ip}, \
+//${var.VERIFY_INTFS} \
+//--key-file ${var.private_key_file} \
+//--extra-vars "\
+//run_as_root=False \
+//snaps_boot_dir=${var.src_copy_dir}/snaps-boot \
+//check_file=${var.VERIFY_INTFS_CHECK_FILE} \
+//username=${var.sudo_user} \
+//ip_addr=${var.priv_ip_prfx}.11 \
+//src_copy_dir=${var.src_copy_dir} \
+//timeout=1800 \
+//"\
+//EOT
+//  }
+//}
+//
+//# Call ansible scripts to run snaps-boot
+//resource "null_resource" "snaps-boot-verify-intfs-node-1-admin" {
+//  depends_on = [null_resource.snaps-boot-nodes-power-cycle]
+//
+//  # Setup KVM on the VM to create VMs on it for testing snaps-boot
+//  provisioner "local-exec" {
+//    command = <<EOT
+//${var.ANSIBLE_CMD} -u ${var.sudo_user} \
+//-i ${aws_instance.snaps-boot-build.public_ip}, \
+//${var.VERIFY_INTFS} \
+//--key-file ${var.private_key_file} \
+//--extra-vars "\
+//run_as_root=False \
+//snaps_boot_dir=${var.src_copy_dir}/snaps-boot \
+//check_file=${var.VERIFY_INTFS_CHECK_FILE} \
+//username=${var.sudo_user} \
+//ip_addr=${var.admin_ip_prfx}.11 \
+//src_copy_dir=${var.src_copy_dir} \
+//timeout=1800 \
+//"\
+//EOT
+//  }
+//}
+//
+//# Call ansible scripts to run snaps-boot
+//resource "null_resource" "snaps-boot-verify-intfs-node-1-pub" {
+//  depends_on = [null_resource.snaps-boot-nodes-power-cycle]
+//
+//  # Setup KVM on the VM to create VMs on it for testing snaps-boot
+//  provisioner "local-exec" {
+//    command = <<EOT
+//${var.ANSIBLE_CMD} -u ${var.sudo_user} \
+//-i ${aws_instance.snaps-boot-build.public_ip}, \
+//${var.VERIFY_INTFS} \
+//--key-file ${var.private_key_file} \
+//--extra-vars "\
+//run_as_root=False \
+//snaps_boot_dir=${var.src_copy_dir}/snaps-boot \
+//check_file=${var.VERIFY_INTFS_CHECK_FILE} \
+//username=${var.sudo_user} \
+//ip_addr=${var.pub_ip_prfx}.11 \
+//src_copy_dir=${var.src_copy_dir} \
+//timeout=1800 \
+//"\
+//EOT
+//  }
+//}
+//
+//# Call ansible scripts to run snaps-boot
+//resource "null_resource" "snaps-boot-verify-intfs-node-2-priv" {
+//  depends_on = [null_resource.snaps-boot-nodes-power-cycle]
+//
+//  # Setup KVM on the VM to create VMs on it for testing snaps-boot
+//  provisioner "local-exec" {
+//    command = <<EOT
+//${var.ANSIBLE_CMD} -u ${var.sudo_user} \
+//-i ${aws_instance.snaps-boot-build.public_ip}, \
+//${var.VERIFY_INTFS} \
+//--key-file ${var.private_key_file} \
+//--extra-vars "\
+//run_as_root=False \
+//snaps_boot_dir=${var.src_copy_dir}/snaps-boot \
+//check_file=${var.VERIFY_INTFS_CHECK_FILE} \
+//username=${var.sudo_user} \
+//ip_addr=${var.priv_ip_prfx}.12 \
+//src_copy_dir=${var.src_copy_dir} \
+//timeout=1800 \
+//"\
+//EOT
+//  }
+//}
+//
+//# Call ansible scripts to run snaps-boot
+//resource "null_resource" "snaps-boot-verify-intfs-node-2-admin" {
+//  depends_on = [null_resource.snaps-boot-nodes-power-cycle]
+//
+//  # Setup KVM on the VM to create VMs on it for testing snaps-boot
+//  provisioner "local-exec" {
+//    command = <<EOT
+//${var.ANSIBLE_CMD} -u ${var.sudo_user} \
+//-i ${aws_instance.snaps-boot-build.public_ip}, \
+//${var.VERIFY_INTFS} \
+//--key-file ${var.private_key_file} \
+//--extra-vars "\
+//run_as_root=False \
+//snaps_boot_dir=${var.src_copy_dir}/snaps-boot \
+//check_file=${var.VERIFY_INTFS_CHECK_FILE} \
+//username=${var.sudo_user} \
+//ip_addr=${var.admin_ip_prfx}.12 \
+//src_copy_dir=${var.src_copy_dir} \
+//timeout=1800 \
+//"\
+//EOT
+//  }
+//}
+//
+//# Call ansible scripts to run snaps-boot
+//resource "null_resource" "snaps-boot-verify-intfs-node-2-pub" {
+//  depends_on = [null_resource.snaps-boot-nodes-power-cycle]
+//
+//  # Setup KVM on the VM to create VMs on it for testing snaps-boot
+//  provisioner "local-exec" {
+//    command = <<EOT
+//${var.ANSIBLE_CMD} -u ${var.sudo_user} \
+//-i ${aws_instance.snaps-boot-build.public_ip}, \
+//${var.VERIFY_INTFS} \
+//--key-file ${var.private_key_file} \
+//--extra-vars "\
+//run_as_root=False \
+//snaps_boot_dir=${var.src_copy_dir}/snaps-boot \
+//check_file=${var.VERIFY_INTFS_CHECK_FILE} \
+//username=${var.sudo_user} \
+//ip_addr=${var.pub_ip_prfx}.12 \
+//src_copy_dir=${var.src_copy_dir} \
+//timeout=1800 \
+//"\
+//EOT
+//  }
+//}
