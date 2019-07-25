@@ -39,10 +39,19 @@
             dest: "{{ vm_file }}"
             mode: 0664
             force: yes
+
         - name: Insert setup {{ vm_file }} image with public key and root password
           command: "virt-sysprep -a {{ vm_file }} --ssh-inject root:file:/root/.ssh/id_rsa.pub --root-password password:password"
-          #      command: "virt-sysprep -a /var/lib/libvirt/images/ubuntu16.img --ssh-inject root:file:/root/.ssh/id_rsa.pub"
-          #      command: "virt-sysprep -a /var/lib/libvirt/images/ubuntu16.img --ssh-inject {{ target_user }}:file:/root/.ssh/id_rsa.pub"
+
+        - name: Create netplan file
+          template:
+            src: servers/50-cloud-init.yaml.j2
+            dest: /tmp/50-clout-init.yaml
+          vars:
+            nic_name: "{{ build_nic_name }}"
+
+        - name: Copy netplan into {{ vm_file }}
+          command: "virt-copy-in -a {{ vm_file }} /tmp/50-clout-init.yaml /etc/netplan"
       when: vm_type == 'ubuntu'
 
     - name: create PXE image {{ vm_file }}

@@ -68,7 +68,6 @@ admin_net_name=${var.admin_net_name} \
 pub_ip_prfx=${var.pub_ip_prfx} \
 pub_net_name=${var.pub_net_name}
 netmask=${var.netmask}
-bridge_nic=${var.bridge_nic}
 "\
 EOT
   }
@@ -92,6 +91,7 @@ build_net_name=${var.build_net_name} \
 priv_net_name=${var.priv_net_name} \
 admin_net_name=${var.admin_net_name} \
 pub_net_name=${var.pub_net_name}
+build_nic_name=${var.build_nic}
 "\
 EOT
   }

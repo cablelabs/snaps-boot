@@ -38,7 +38,7 @@ variable "admin_ip_prfx" {default = "10.0.2"}
 variable "admin_net_name" {default = "admin-net"}
 variable "pub_ip_prfx" {default = "10.0.3"}
 variable "pub_net_name" {default = "pub-net"}
-variable "bridge_nic" {default = "ens5"}
+variable "build_nic" {default = "ens3"}
 
 # snaps-boot image with KVM and generic.qcow2 TODO DELETE AMI
 //variable "ami" {default = "ami-044440dc7a3d75d2b"}
