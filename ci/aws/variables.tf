@@ -25,6 +25,26 @@ variable "sudo_user" {default = "ubuntu"}
 variable "region" {default = "us-west-2"}
 variable "availability_zone" {default = "us-west-2b"}
 
+# snaps-boot image with KVM and generic.qcow2 TODO DELETE AMI
+//variable "ami" {default = "ami-044440dc7a3d75d2b"}
+# Ubuntu 16.04 SSD Volume Type
+//variable "ami" {default = "ami-0b37e9efc396e4c38"}
+# Ubuntu 18.04 SSD Volume Type
+variable "ami" {default = "ami-07b4f3c02c7f83d59"}
+
+//variable "instance_type" {default = "t2.2xlarge"}
+variable "instance_type" {default = "m5a.8xlarge"}
+
+# Playbook Constants
+variable "ANSIBLE_CMD" {default = "export ANSIBLE_HOST_KEY_CHECKING=False; ansible-playbook"}
+variable "SETUP_KVM_DEPENDENCIES" {default = "../playbooks/kvm/dependencies.yaml"}
+variable "SETUP_KVM_NETWORKS" {default = "../playbooks/kvm/networks.yaml"}
+variable "SETUP_KVM_SERVERS" {default = "../playbooks/kvm/servers.yaml"}
+variable "SETUP_SRC" {default = "../playbooks/setup_src.yaml"}
+variable "SETUP_DRP" {default = "../playbooks/setup_drp.yaml"}
+variable "VERIFY_INTFS" {default = "../playbooks/verify_intfs.yaml"}
+variable "VERIFY_INTFS_CHECK_FILE" {default = "/var/log/hello_world"}
+
 # Optional Variables for test
 variable "src_copy_dir" {default = "/tmp"}
 # TODO - add in some logic into this default post_script file as it does nothing
@@ -54,23 +74,3 @@ variable "node_2_mac_3" {default = "00:00:00:00:02:03"}
 variable "node_3_mac_1" {default = "00:00:00:00:03:01"}
 variable "node_3_mac_2" {default = "00:00:00:00:03:02"}
 variable "node_3_mac_3" {default = "00:00:00:00:03:03"}
-
-# snaps-boot image with KVM and generic.qcow2 TODO DELETE AMI
-//variable "ami" {default = "ami-044440dc7a3d75d2b"}
-# Ubuntu 16.04 SSD Volume Type
-//variable "ami" {default = "ami-0b37e9efc396e4c38"}
-# Ubuntu 18.04 SSD Volume Type
-variable "ami" {default = "ami-07b4f3c02c7f83d59"}
-
-//variable "instance_type" {default = "t2.2xlarge"}
-variable "instance_type" {default = "m5a.8xlarge"}
-
-# Playbook Constants
-variable "ANSIBLE_CMD" {default = "export ANSIBLE_HOST_KEY_CHECKING=False; ansible-playbook"}
-variable "SETUP_KVM_DEPENDENCIES" {default = "../../playbooks/kvm/dependencies.yaml"}
-variable "SETUP_KVM_NETWORKS" {default = "../../playbooks/kvm/networks.yaml"}
-variable "SETUP_KVM_SERVERS" {default = "../../playbooks/kvm/servers.yaml"}
-variable "SETUP_SRC" {default = "../../playbooks/setup_src.yaml"}
-variable "SETUP_DRP" {default = "../../playbooks/setup_drp.yaml"}
-variable "VERIFY_INTFS" {default = "../../playbooks/verify_intfs.yaml"}
-variable "VERIFY_INTFS_CHECK_FILE" {default = "/var/log/hello_world"}
