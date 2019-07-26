@@ -23,6 +23,9 @@
     <ip address="{{ ip_prfx }}.1" netmask="{{ netmask }}">
         <dhcp>
             <range start="{{ ip_prfx }}.101" end="{{ ip_prfx }}.254"/>
+        {% if mac_address %}
+            <host mac="{{ mac_address | default('') }}" name="{{ vm_name | default('') }}" ip="{{ ip_addr  | default('')}}"/>
+        {% endif %}
         </dhcp>
     </ip>
 </network>

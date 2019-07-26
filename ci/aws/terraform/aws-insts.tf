@@ -12,7 +12,7 @@
 # limitations under the License.
 
 # AWS EC2 Instances
-resource "aws_instance" "snaps-boot-build" {
+resource "aws_instance" "snaps-boot-host" {
   ami = var.ami
   instance_type = var.instance_type
   key_name = aws_key_pair.snaps-boot-pk.key_name

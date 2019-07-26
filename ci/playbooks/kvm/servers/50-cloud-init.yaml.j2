@@ -1,5 +1,9 @@
 network:
+  version: 2
   ethernets:
     {{ nic_name }}:
-      dhcp4: true
-  version: 2
+      dhcp4: no
+      addresses: [{{ ip_addr }}]
+      gateway4: {{ gateway }}
+      nameservers:
+        addresses: [8.8.8.8,8.8.4.4]

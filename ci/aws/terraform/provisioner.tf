@@ -26,7 +26,7 @@ resource "null_resource" "snaps-boot-remote-key-gen" {
     ]
   }
   connection {
-    host = aws_instance.snaps-boot-build.public_ip
+    host = aws_instance.snaps-boot-host.public_ip
     type     = "ssh"
     user     = var.sudo_user
     private_key = file(var.private_key_file)
@@ -41,7 +41,7 @@ resource "null_resource" "snaps-boot-kvm-setup" {
   provisioner "local-exec" {
     command = <<EOT
 ${var.ANSIBLE_CMD} -u ${var.sudo_user} \
--i ${aws_instance.snaps-boot-build.public_ip}, \
+-i ${aws_instance.snaps-boot-host.public_ip}, \
 ${var.SETUP_KVM_DEPENDENCIES} \
 --key-file ${var.private_key_file} \
 EOT
@@ -55,17 +55,20 @@ resource "null_resource" "snaps-boot-network-setup" {
   provisioner "local-exec" {
     command = <<EOT
 ${var.ANSIBLE_CMD} -u ${var.sudo_user} \
--i ${aws_instance.snaps-boot-build.public_ip}, \
+-i ${aws_instance.snaps-boot-host.public_ip}, \
 ${var.SETUP_KVM_NETWORKS} \
 --key-file ${var.private_key_file} \
 --extra-vars "\
-build_ip_prfx=${var.build_ip_prfx} \
-build_net_name=${var.build_net_name} \
-priv_ip_prfx=${var.priv_ip_prfx} \
-priv_net_name=${var.priv_net_name} \
-admin_ip_prfx=${var.admin_ip_prfx} \
-admin_net_name=${var.admin_net_name} \
-pub_ip_prfx=${var.pub_ip_prfx} \
+build_ip_prfx=${var.build_ip_prfx}
+build_vm_name=${var.build_vm_name}
+build_mac_1=${var.build_mac_1}
+build_vm_ip=${var.build_ip_prfx}.${var.build_ip_suffix}
+build_net_name=${var.build_net_name}
+priv_ip_prfx=${var.priv_ip_prfx}
+priv_net_name=${var.priv_net_name}
+admin_ip_prfx=${var.admin_ip_prfx}
+admin_net_name=${var.admin_net_name}
+pub_ip_prfx=${var.pub_ip_prfx}
 pub_net_name=${var.pub_net_name}
 netmask=${var.netmask}
 "\
@@ -81,17 +84,33 @@ resource "null_resource" "snaps-boot-server-setup" {
   provisioner "local-exec" {
     command = <<EOT
 ${var.ANSIBLE_CMD} -u ${var.sudo_user} \
--i ${aws_instance.snaps-boot-build.public_ip}, \
+-i ${aws_instance.snaps-boot-host.public_ip}, \
 ${var.SETUP_KVM_SERVERS} \
 --key-file ${var.private_key_file} \
 --extra-vars "\
-pxe_img=/var/lib/libvirt/images/libvirt-pxe.qcow2 \
-target_user=${var.sudo_user} \
-build_net_name=${var.build_net_name} \
-priv_net_name=${var.priv_net_name} \
-admin_net_name=${var.admin_net_name} \
+pxe_img=/var/lib/libvirt/images/libvirt-pxe.qcow2
+target_user=${var.sudo_user}
+build_net_name=${var.build_net_name}
+priv_net_name=${var.priv_net_name}
+admin_net_name=${var.admin_net_name}
 pub_net_name=${var.pub_net_name}
+build_vm_name=${var.build_vm_name}
+build_vm_ip=${var.build_ip_prfx}.${var.build_ip_suffix}
+build_ip_bits=${var.build_ip_bits}
+build_gateway=${var.build_ip_prfx}.1
 build_nic_name=${var.build_nic}
+build_mac_1=${var.build_mac_1}
+build_mac_2=${var.build_mac_2}
+build_mac_3=${var.build_mac_3}
+node_1_mac_1=${var.node_1_mac_1}
+node_1_mac_2=${var.node_1_mac_2}
+node_1_mac_3=${var.node_1_mac_3}
+node_2_mac_1=${var.node_2_mac_1}
+node_2_mac_2=${var.node_2_mac_2}
+node_2_mac_3=${var.node_2_mac_3}
+node_3_mac_1=${var.node_3_mac_1}
+node_3_mac_2=${var.node_3_mac_2}
+node_3_mac_3=${var.node_3_mac_3}
 "\
 EOT
   }

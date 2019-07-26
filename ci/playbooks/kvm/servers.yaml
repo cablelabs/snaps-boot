@@ -14,6 +14,9 @@
 # limitations under the License.
 # Setting up PXE servers on KVM.
 # see https://ubuntu.com/blog/early-experiences-with-pxe-net-boot-of-kvm-vms-on-ubuntu-for-s390x
+#
+# This playbook is responsible for creating all of the snaps-boot libvirt CI
+# servers
 ---
 - hosts: all
   gather_facts: no
@@ -26,12 +29,19 @@
 
 - import_playbook: server.yaml
   vars:
-    vm_name: build
+    vm_name: "{{ build_vm_name }}"
     vm_type: ubuntu
     node_num: 0
     net_1_name: "{{ build_net_name }}"
     net_2_name: "{{ priv_net_name }}"
     net_3_name: "{{ admin_net_name }}"
+    mac_1_address: "{{ build_mac_1 }}"
+    mac_2_address: "{{ build_mac_2 }}"
+    mac_3_address: "{{ build_mac_3 }}"
+    ip_1_addr: "{{ build_vm_ip }}"
+    addr_bits: "{{ build_ip_bits }}"
+    net_gateway: "{{ build_gateway }}"
+    server_nic_name: "{{ build_nic_name }}"
 
 - import_playbook: server.yaml
   vars:
@@ -41,6 +51,9 @@
     net_1_name: "{{ priv_net_name }}"
     net_2_name: "{{ admin_net_name }}"
     net_3_name: "{{ pub_net_name }}"
+    mac_1_address: "{{ node_1_mac_1 }}"
+    mac_2_address: "{{ node_1_mac_2 }}"
+    mac_3_address: "{{ node_1_mac_3 }}"
 
 - import_playbook: server.yaml
   vars:
@@ -50,6 +63,9 @@
     net_1_name: "{{ priv_net_name }}"
     net_2_name: "{{ admin_net_name }}"
     net_3_name: "{{ pub_net_name }}"
+    mac_1_address: "{{ node_2_mac_1 }}"
+    mac_2_address: "{{ node_2_mac_2 }}"
+    mac_3_address: "{{ node_2_mac_3 }}"
 
 - import_playbook: server.yaml
   vars:
@@ -59,3 +75,6 @@
     net_1_name: "{{ priv_net_name }}"
     net_2_name: "{{ admin_net_name }}"
     net_3_name: "{{ pub_net_name }}"
+    mac_1_address: "{{ node_3_mac_1 }}"
+    mac_2_address: "{{ node_3_mac_2 }}"
+    mac_3_address: "{{ node_3_mac_3 }}"

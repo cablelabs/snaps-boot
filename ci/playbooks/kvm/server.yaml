@@ -27,7 +27,7 @@
   tasks:
     - name: destroy {{ vm_name }}
       virt:
-        name: build
+        name: "{{ vm_name }}"
         command: destroy
       ignore_errors: yes
 
@@ -40,7 +40,7 @@
             mode: 0664
             force: yes
 
-        - name: Insert setup {{ vm_file }} image with public key and root password
+        - name: Insert {{ vm_file }} image with public key and root password
           command: "virt-sysprep -a {{ vm_file }} --ssh-inject root:file:/root/.ssh/id_rsa.pub --root-password password:password"
 
         - name: Create netplan file
@@ -48,7 +48,9 @@
             src: servers/50-cloud-init.yaml.j2
             dest: /tmp/50-clout-init.yaml
           vars:
-            nic_name: "{{ build_nic_name }}"
+            nic_name: "{{ server_nic_name }}"
+            ip_addr: "{{ ip_1_addr }}/{{ addr_bits }}"
+            gateway: "{{ net_gateway }}"
 
         - name: Copy netplan into {{ vm_file }}
           command: "virt-copy-in -a {{ vm_file }} /tmp/50-clout-init.yaml /etc/netplan"
@@ -69,5 +71,5 @@
 
     - name: start {{ vm_name }}
       virt:
-        name: build
+        name: "{{ vm_name }}"
         state: running

@@ -12,6 +12,9 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+#
+# This playbook is responsible for creating all of the snaps-boot libvirt CI
+# networks
 ---
 - import_playbook: network.yaml
   vars:
@@ -21,6 +24,9 @@
     ip_suffix: 3
     br_name: virbr1
     netmask_val: "{{ netmask }}"
+    mac_address: "{{ build_mac_1 }}"
+    vm_name: "{{ build_vm_name }}"
+    ip_addr: "{{ build_vm_ip }}"
 
 - import_playbook: network.yaml
   vars:

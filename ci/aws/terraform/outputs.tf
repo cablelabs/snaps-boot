@@ -14,7 +14,7 @@
 # Outputs
 
 output "pub_ip" {
-  value = aws_instance.snaps-boot-build.public_ip
+  value = aws_instance.snaps-boot-host.public_ip
 }
 
 output "priv_key_file" {
