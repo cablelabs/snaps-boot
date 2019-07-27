@@ -1,0 +1,9 @@
+version: 1
+config:
+  - type: physical
+    name: {{ intf_name }}
+    subnets:
+      - control: auto
+        type: static
+        address: {{ ip_addr }}/{{ ip_bits }}
+        gateway: {{ gateway }}

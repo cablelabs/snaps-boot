@@ -14,6 +14,8 @@
 # Required Variables
 variable "access_key" {}
 variable "secret_key" {}
+variable "git_user" {}
+variable "git_pass" {}
 variable "build_id" {}
 
 # Variables that are recommended to change as they won't work in all envs
@@ -62,6 +64,7 @@ variable "pub_ip_prfx" {default = "10.0.3"}
 variable "pub_net_name" {default = "pub-net"}
 variable "build_nic" {default = "ens3"}
 variable "build_vm_name" {default = "build_server"}
+variable "build_password" {default = "password"}
 variable "build_mac_1" {default = "00:00:00:00:00:01"}
 variable "build_mac_2" {default = "00:00:00:00:00:02"}
 variable "build_mac_3" {default = "00:00:00:00:00:03"}

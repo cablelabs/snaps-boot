@@ -17,33 +17,32 @@
     libvirt server configuration
 -->
 <domain type='qemu'>
-  <name>{{ name }}</name>
-  <memory unit='KiB'>{{ memory | default('4194304') }}</memory>
-  <vcpu placement='static'>{{ cpus | default('2') }}</vcpu>
-
-  <resource>
-    <partition>/machine</partition>
-  </resource>
+  <name>{{ name }}</name>d
+  <memory>{{ memory | default('4194304') }}</memory>
+  <vcpu>{{ cpus | default('2') }}</vcpu>
 
   <os>
-    <type arch='x86_64' machine='pc-i440fx-xenial'>hvm</type>
+    <type>hvm</type>
     <boot dev='network'/>
     <boot dev='hd'/>
   </os>
 
   <features>
     <acpi/>
-    <apic/>
-    <vmport state='off'/>
   </features>
 
   <devices>
-    <emulator>/usr/bin/qemu-system-x86_64</emulator>
     <disk type='file' device='disk'>
-      <driver name='qemu' type='qcow2'/>
+      <driver type='qcow2' cache='none'/>
       <source file='{{ img_loc }}'/>
       <target dev='vda' bus='virtio'/>
     </disk>
+{% if vm_type == 'ubuntu' %}
+    <disk type='file' device='disk'>
+      <source file='{{ userdata_img_loc }}'/>
+      <target dev='vdb' bus='virtio'/>
+    </disk>
+{% endif %}
 
     <controller type='usb' index='0' model='ich9-ehci1'>
       <alias name='usb'/>

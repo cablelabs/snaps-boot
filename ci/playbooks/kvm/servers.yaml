@@ -26,6 +26,7 @@
       apt:
         name:
           - libguestfs-tools
+          - cloud-image-utils
 
 - import_playbook: server.yaml
   vars:
@@ -42,6 +43,9 @@
     addr_bits: "{{ build_ip_bits }}"
     net_gateway: "{{ build_gateway }}"
     server_nic_name: "{{ build_nic_name }}"
+    srvr_password: "{{ build_password }}"
+    nic_name: "{{ build_nic_name }}"
+    public_key: "{{ build_public_key }}"
 
 - import_playbook: server.yaml
   vars:

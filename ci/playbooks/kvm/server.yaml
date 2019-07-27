@@ -22,7 +22,9 @@
 
   vars:
     vm_type: "{{ vm_type }}"
+    images_dir: "/var/lib/libvirt/images"
     vm_file: "/var/lib/libvirt/images/image-{{ vm_name }}.img"
+    img_file: "/var/lib/libvirt/images/{{ vm_name }}-userdata.img"
 
   tasks:
     - name: destroy {{ vm_name }}
@@ -31,29 +33,53 @@
         command: destroy
       ignore_errors: yes
 
-    - name: Prepare Ubuntu image
+    - name: Prepare Ubuntu cloud image for libvirt
       block:
-        - name: Download Ubuntu image to {{ vm_file }}
+        - name: Download Ubuntu cloud image
           get_url:
-            url: https://cloud-images.ubuntu.com/bionic/current/bionic-server-cloudimg-amd64.img
-            dest: "{{ vm_file }}"
+            url: https://cloud-images.ubuntu.com/releases/16.04/release/ubuntu-16.04-server-cloudimg-amd64-disk1.img
+            dest: /tmp/ubuntu.img
             mode: 0664
-            force: yes
 
-        - name: Insert {{ vm_file }} image with public key and root password
-          command: "virt-sysprep -a {{ vm_file }} --ssh-inject root:file:/root/.ssh/id_rsa.pub --root-password password:password"
+        - name: Convert cloud image to /tmp/{{ vm_name }}-ubuntu.qcow2 as qcow2
+          command: "qemu-img convert -O qcow2 /tmp/ubuntu.img {{ images_dir }}/{{ vm_name }}-ubuntu.qcow2"
 
-        - name: Create netplan file
+        - name: Resize {{ vm_file }} to {{ img_size | default(5) }}G
+          command: "qemu-img resize {{ images_dir }}/{{ vm_name }}-ubuntu.qcow2 +{{ img_size | default(5) }}G"
+
+        - name: Create image for {{ vm_name }}
+          command: "qemu-img create -f qcow2 -b {{ images_dir }}/{{ vm_name }}-ubuntu.qcow2 {{ vm_file }}"
+
+        - name: Create network configuration for cloud-init
           template:
-            src: servers/50-cloud-init.yaml.j2
-            dest: /tmp/50-clout-init.yaml
+            src: servers/net-config.yaml.j2
+            dest: "/tmp/{{ vm_name }}-net-config.yaml"
           vars:
-            nic_name: "{{ server_nic_name }}"
-            ip_addr: "{{ ip_1_addr }}/{{ addr_bits }}"
+            intf_name: "{{ nic_name }}"
+            ip_addr: "{{ ip_1_addr }}"
+            ip_bits: "{{ addr_bits }}"
             gateway: "{{ net_gateway }}"
 
-        - name: Copy netplan into {{ vm_file }}
-          command: "virt-copy-in -a {{ vm_file }} /tmp/50-clout-init.yaml /etc/netplan"
+        - name: Create userdata file for cloud-init
+          template:
+            src: servers/userdata.yaml.j2
+            dest: "/tmp/{{ vm_name }}-userdata.yaml"
+          vars:
+            password: "{{ srvr_password }}"
+            public_key: "{{ public_key }}"
+
+        - name: Add net-config.yml & userdata.yml to userdata.img
+          command: "cloud-localds -N /tmp/{{ vm_name }}-net-config.yaml /tmp/{{ vm_name }}-userdata.img /tmp/{{ vm_name }}-userdata.yaml"
+
+        - name: Copy /tmp/{{ vm_name }}-userdata.img
+          copy:
+            src: "/tmp/{{ vm_name }}-userdata.img"
+            dest: "{{ img_file }}"
+            mode: 0664
+            remote_src: yes
+
+          #ssh-keygen -f /etc/ssh/ssh_host_rsa_key -N '' -t rsa
+          #ssh-keygen -f /etc/ssh/ssh_host_dsa_key -N '' -t dsa
       when: vm_type == 'ubuntu'
 
     - name: create PXE image {{ vm_file }}
@@ -68,8 +94,11 @@
       vars:
         name: "{{ vm_name }}"
         img_loc: "{{ vm_file }}"
+        userdata_img_loc: "{{ img_file }}"
+        type: "{{ vm_type }}"
 
-    - name: start {{ vm_name }}
+    - name: Set autostart and start {{ vm_name }}
       virt:
         name: "{{ vm_name }}"
+        autostart: yes
         state: running

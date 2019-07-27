@@ -56,8 +56,8 @@
 
     - name: Define DHCP network {{ network_name }} with IP {{ ip_prefix }}.0
       virt_net:
-        command: define
         name: "{{ network_name }}"
+        command: define
         xml: '{{ lookup("template", "networks/bridged-network.xml.j2") }}'
       vars:
         net_name: "{{ network_name }}"
@@ -65,11 +65,12 @@
         forward_mode: bridge
       when: net_type == 'bridge'
 
+    - name: Set autostart on {{ network_name }} network
+      virt_net:
+        name: "{{ network_name }}"
+        autostart: yes
+
     - name: Create {{ network_name }} network
       virt_net:
         command: create
         name: "{{ network_name }}"
-
-    - name: Assign IP to {{ br_name }}
-      command: "ip addr add {{ ip_prefix }}.{{ ip_suffix }} dev {{ br_name }}"
-      when: net_type != 'bridge'
