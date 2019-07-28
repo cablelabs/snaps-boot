@@ -54,11 +54,6 @@
           template:
             src: servers/net-config.yaml.j2
             dest: "/tmp/{{ vm_name }}-net-config.yaml"
-          vars:
-            intf_name: "{{ nic_name }}"
-            ip_addr: "{{ ip_1_addr }}"
-            ip_bits: "{{ addr_bits }}"
-            gateway: "{{ net_gateway }}"
 
         - name: Create userdata file for cloud-init with public key {{ public_key }}
           template:
@@ -96,6 +91,7 @@
         img_loc: "{{ vm_file }}"
         userdata_img_loc: "{{ img_file }}"
         type: "{{ vm_type }}"
+        nets: "{{ networks }}"
 
     - name: Set autostart and start {{ vm_name }}
       virt:

@@ -1,9 +1,11 @@
 version: 1
 config:
-  - type: physical
-    name: {{ intf_name }}
-    subnets:
-      - control: auto
-        type: static
-        address: {{ ip_addr }}/{{ ip_bits }}
-        gateway: {{ gateway }}
+{% for net in networks -%}
+- type: physical
+  name: {{ net['nic_name'] }}
+  subnets:
+    - control: auto
+      type: static
+      address: {{ net['ip'] }}/{{ net['bits'] }}
+      gateway: {{ net['gateway'] }}{{ '\n' }}
+{%- endfor %}

@@ -49,7 +49,7 @@ resource "null_resource" "snaps-boot-get-host-pub-key" {
 
 # Call ansible scripts to setup KVM
 resource "null_resource" "snaps-boot-kvm-setup" {
-  depends_on = [null_resource.snaps-boot-pk-setup, null_resource.snaps-boot-remote-key-gen]
+  depends_on = [null_resource.snaps-boot-pk-setup]
 
   # Install KVM dependencies
   provisioner "local-exec" {
@@ -92,7 +92,8 @@ EOT
 
 # Call ansible scripts to setup KVM servers
 resource "null_resource" "snaps-boot-server-setup" {
-  depends_on = [null_resource.snaps-boot-network-setup]
+  depends_on = [null_resource.snaps-boot-network-setup,
+                null_resource.snaps-boot-get-host-pub-key]
 
   # Setup KVM on the VM to create VMs on it for testing snaps-boot
   provisioner "local-exec" {
@@ -108,9 +109,9 @@ build_net_name=${var.build_net_name}
 priv_net_name=${var.priv_net_name}
 priv_ip_prfx=${var.priv_ip_prfx}
 admin_net_name=${var.admin_net_name}
-admin_ip_prfx=${var.priv_ip_prfx}
+admin_ip_prfx=${var.admin_ip_prfx}
 pub_net_name=${var.pub_net_name}
-pub_ip_prfx=${var.priv_ip_prfx}
+pub_ip_prfx=${var.pub_ip_prfx}
 build_vm_name=${var.build_vm_name}
 build_password=${var.build_password}
 build_public_key_file=${local.remote_pub_key_file}
