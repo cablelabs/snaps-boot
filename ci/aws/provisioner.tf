@@ -24,6 +24,7 @@ locals {
 
 # Call ensure SSH key has correct permissions
 resource "null_resource" "snaps-boot-remote-key-gen" {
+  depends_on = [null_resource.snaps-boot-pk-setup]
   provisioner "remote-exec" {
     inline = [
       "ssh-keygen -t rsa -N '' -f ${var.vm_host_priv_key}",
@@ -38,6 +39,22 @@ resource "null_resource" "snaps-boot-remote-key-gen" {
     private_key = file(var.private_key_file)
   }
 }
+
+//# Call ensure SSH key has correct permissions
+//resource "null_resource" "snaps-boot-proxy-setup" {
+//  depends_on = [null_resource.snaps-boot-pk-setup]
+//  provisioner "remote-exec" {
+//    inline = [
+//      "sudo apt install squid",
+//    ]
+//  }
+//  connection {
+//    host = aws_instance.snaps-boot-host.public_ip
+//    type     = "ssh"
+//    user     = var.sudo_user
+//    private_key = file(var.private_key_file)
+//  }
+//}
 
 # Call ensure SSH key has correct permissions
 resource "null_resource" "snaps-boot-get-host-pub-key" {
@@ -120,6 +137,7 @@ build_ip_sfx=${var.build_ip_suffix}
 build_ip_bits=${var.build_ip_bits}
 build_gateway=${var.build_ip_prfx}.1
 build_nic_name=${var.build_nic}
+build_mac_0=${var.build_mac_0}
 build_mac_1=${var.build_mac_1}
 build_mac_2=${var.build_mac_2}
 build_mac_3=${var.build_mac_3}
@@ -139,7 +157,7 @@ EOT
 
 //# Call ansible scripts to run snaps-boot
 //resource "null_resource" "snaps-boot-src-setup" {
-//  depends_on = [null_resource.snaps-boot-server-setup]
+//  depends_on = [null_resource.snaps-boot-server-setup, null_resource.snaps-boot-proxy-setup]
 ////  depends_on = [null_resource.snaps-boot-kvm-setup]
 //
 //  # Setup KVM on the VM to create VMs on it for testing snaps-boot

@@ -36,7 +36,7 @@
     public_key: "{{lookup('file', '{{ build_public_key_file }}') }}"
     networks:
     - name: "{{ build_net_name }}"
-      mac: "{{ build_mac_1 }}"
+      mac: "{{ build_mac_0 }}"
       ip: "{{ build_ip_prfx }}.{{ build_ip_sfx }}"
       bits: "{{ build_ip_bits }}"
       gateway: "{{ build_gateway }}"

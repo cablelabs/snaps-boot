@@ -65,6 +65,7 @@ variable "pub_net_name" {default = "pub-net"}
 variable "build_nic" {default = "ens3"}
 variable "build_vm_name" {default = "build_server"}
 variable "build_password" {default = "password"}
+variable "build_mac_0" {default = "00:00:00:00:00:00"}
 variable "build_mac_1" {default = "00:00:00:00:00:01"}
 variable "build_mac_2" {default = "00:00:00:00:00:02"}
 variable "build_mac_3" {default = "00:00:00:00:00:03"}
