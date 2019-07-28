@@ -39,6 +39,7 @@ variable "instance_type" {default = "m5a.8xlarge"}
 
 # Playbook Constants
 variable "ANSIBLE_CMD" {default = "export ANSIBLE_HOST_KEY_CHECKING=False; ansible-playbook"}
+variable "SETUP_HOST_PROXY" {default = "../playbooks/setup_proxy.yaml"}
 variable "SETUP_KVM_DEPENDENCIES" {default = "../playbooks/kvm/dependencies.yaml"}
 variable "SETUP_KVM_NETWORKS" {default = "../playbooks/kvm/networks.yaml"}
 variable "SETUP_KVM_SERVERS" {default = "../playbooks/kvm/servers.yaml"}

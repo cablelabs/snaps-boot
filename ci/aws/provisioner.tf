@@ -40,27 +40,26 @@ resource "null_resource" "snaps-boot-remote-key-gen" {
   }
 }
 
-//# Call ensure SSH key has correct permissions
-//resource "null_resource" "snaps-boot-proxy-setup" {
-//  depends_on = [null_resource.snaps-boot-pk-setup]
-//  provisioner "remote-exec" {
-//    inline = [
-//      "sudo apt install squid",
-//    ]
-//  }
-//  connection {
-//    host = aws_instance.snaps-boot-host.public_ip
-//    type     = "ssh"
-//    user     = var.sudo_user
-//    private_key = file(var.private_key_file)
-//  }
-//}
-
 # Call ensure SSH key has correct permissions
 resource "null_resource" "snaps-boot-get-host-pub-key" {
   depends_on = [null_resource.snaps-boot-remote-key-gen]
   provisioner "local-exec" {
     command = "scp ${var.sudo_user}@${aws_instance.snaps-boot-host.public_ip}:~/.ssh/id_rsa.pub ${local.remote_pub_key_file}"
+  }
+}
+
+# Call ansible scripts to setup KVM
+resource "null_resource" "snaps-boot-proxy-setup" {
+  depends_on = [null_resource.snaps-boot-pk-setup]
+
+  # Install KVM dependencies
+  provisioner "local-exec" {
+    command = <<EOT
+${var.ANSIBLE_CMD} -u ${var.sudo_user} \
+-i ${aws_instance.snaps-boot-host.public_ip}, \
+${var.SETUP_HOST_PROXY} \
+--key-file ${var.private_key_file} \
+EOT
   }
 }
 
