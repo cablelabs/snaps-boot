@@ -60,13 +60,13 @@
             ip_bits: "{{ addr_bits }}"
             gateway: "{{ net_gateway }}"
 
-        - name: Create userdata file for cloud-init
+        - name: Create userdata file for cloud-init with public key {{ public_key }}
           template:
             src: servers/userdata.yaml.j2
             dest: "/tmp/{{ vm_name }}-userdata.yaml"
           vars:
             password: "{{ srvr_password }}"
-            public_key: "{{ public_key }}"
+            pub_key: "{{ public_key }}"
 
         - name: Add net-config.yml & userdata.yml to userdata.img
           command: "cloud-localds -N /tmp/{{ vm_name }}-net-config.yaml /tmp/{{ vm_name }}-userdata.img /tmp/{{ vm_name }}-userdata.yaml"

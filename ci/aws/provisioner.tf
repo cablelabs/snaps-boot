@@ -18,11 +18,17 @@ resource "null_resource" "snaps-boot-pk-setup" {
   }
 }
 
+locals {
+  remote_pub_key_file = "/tmp/${var.build_id}-remote-pk"
+}
+
 # Call ensure SSH key has correct permissions
 resource "null_resource" "snaps-boot-remote-key-gen" {
   provisioner "remote-exec" {
     inline = [
-      "sudo ssh-keygen -t rsa -N '' -f /root/.ssh/id_rsa",
+      "ssh-keygen -t rsa -N '' -f ${var.vm_host_priv_key}",
+      "sudo cp ${var.vm_host_priv_key} /root/.ssh/",
+      "sudo cp ${var.vm_host_priv_key}.pub /root/.ssh/",
     ]
   }
   connection {
@@ -30,6 +36,14 @@ resource "null_resource" "snaps-boot-remote-key-gen" {
     type     = "ssh"
     user     = var.sudo_user
     private_key = file(var.private_key_file)
+  }
+}
+
+# Call ensure SSH key has correct permissions
+resource "null_resource" "snaps-boot-get-host-pub-key" {
+  depends_on = [null_resource.snaps-boot-remote-key-gen]
+  provisioner "local-exec" {
+    command = "scp ${var.sudo_user}@${aws_instance.snaps-boot-host.public_ip}:~/.ssh/id_rsa.pub ${local.remote_pub_key_file}"
   }
 }
 
@@ -92,12 +106,16 @@ pxe_img=/var/lib/libvirt/images/libvirt-pxe.qcow2
 target_user=${var.sudo_user}
 build_net_name=${var.build_net_name}
 priv_net_name=${var.priv_net_name}
+priv_ip_prfx=${var.priv_ip_prfx}
 admin_net_name=${var.admin_net_name}
+admin_ip_prfx=${var.priv_ip_prfx}
 pub_net_name=${var.pub_net_name}
+pub_ip_prfx=${var.priv_ip_prfx}
 build_vm_name=${var.build_vm_name}
 build_password=${var.build_password}
-build_public_key=${aws_key_pair.snaps-boot-pk.public_key}
-build_vm_ip=${var.build_ip_prfx}.${var.build_ip_suffix}
+build_public_key_file=${local.remote_pub_key_file}
+build_ip_prfx=${var.build_ip_prfx}
+build_ip_sfx=${var.build_ip_suffix}
 build_ip_bits=${var.build_ip_bits}
 build_gateway=${var.build_ip_prfx}.1
 build_nic_name=${var.build_nic}
