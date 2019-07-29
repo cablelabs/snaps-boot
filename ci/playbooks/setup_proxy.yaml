@@ -17,13 +17,13 @@
 
   become: yes
 
+  gather_facts: no
+
   tasks:
     - name: Install proxy dependencies
       apt:
         name:
           - squid
-      retries: 60
-      poll: 10
 
     - name: Configure squid
       template:

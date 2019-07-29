@@ -7,3 +7,8 @@ packages:
   - python
 ssh_authorized_keys:
   - {{ pub_key }}
+apt:
+  proxy: http://{{ proxy_host }}:{{ proxy_port }}/
+  http_proxy: http://{{ proxy_host }}:{{ proxy_port }}/
+  ftp_proxy: ftp://{{ proxy_host }}:{{ proxy_port }}/
+  https_proxy: https://{{ proxy_host }}:{{ proxy_port }}/

@@ -44,13 +44,13 @@ resource "null_resource" "snaps-boot-remote-key-gen" {
 resource "null_resource" "snaps-boot-get-host-pub-key" {
   depends_on = [null_resource.snaps-boot-remote-key-gen]
   provisioner "local-exec" {
-    command = "scp ${var.sudo_user}@${aws_instance.snaps-boot-host.public_ip}:~/.ssh/id_rsa.pub ${local.remote_pub_key_file}"
+    command = "scp -o StrictHostKeyChecking=no ${var.sudo_user}@${aws_instance.snaps-boot-host.public_ip}:~/.ssh/id_rsa.pub ${local.remote_pub_key_file}"
   }
 }
 
 # Call ansible scripts to setup KVM
 resource "null_resource" "snaps-boot-proxy-setup" {
-  depends_on = [null_resource.snaps-boot-pk-setup]
+  depends_on = [null_resource.snaps-boot-get-host-pub-key]
 
   # Install KVM dependencies
   provisioner "local-exec" {
@@ -59,13 +59,16 @@ ${var.ANSIBLE_CMD} -u ${var.sudo_user} \
 -i ${aws_instance.snaps-boot-host.public_ip}, \
 ${var.SETUP_HOST_PROXY} \
 --key-file ${var.private_key_file} \
+--extra-vars "\
+proxy_port=${var.proxy_port}
+"\
 EOT
   }
 }
 
 # Call ansible scripts to setup KVM
 resource "null_resource" "snaps-boot-kvm-setup" {
-  depends_on = [null_resource.snaps-boot-pk-setup]
+  depends_on = [null_resource.snaps-boot-proxy-setup]
 
   # Install KVM dependencies
   provisioner "local-exec" {
@@ -149,6 +152,8 @@ node_2_mac_3=${var.node_2_mac_3}
 node_3_mac_1=${var.node_3_mac_1}
 node_3_mac_2=${var.node_3_mac_2}
 node_3_mac_3=${var.node_3_mac_3}
+proxy_host=${var.build_ip_prfx}.1
+proxy_port=${var.proxy_port}
 "\
 EOT
   }
@@ -156,7 +161,7 @@ EOT
 
 //# Call ansible scripts to run snaps-boot
 //resource "null_resource" "snaps-boot-src-setup" {
-//  depends_on = [null_resource.snaps-boot-server-setup, null_resource.snaps-boot-proxy-setup]
+//  depends_on = [null_resource.snaps-boot-server-setup]
 ////  depends_on = [null_resource.snaps-boot-kvm-setup]
 //
 //  # Setup KVM on the VM to create VMs on it for testing snaps-boot

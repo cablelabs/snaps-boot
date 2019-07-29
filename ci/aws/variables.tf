@@ -79,6 +79,7 @@ variable "node_2_mac_3" {default = "00:00:00:00:02:03"}
 variable "node_3_mac_1" {default = "00:00:00:00:03:01"}
 variable "node_3_mac_2" {default = "00:00:00:00:03:02"}
 variable "node_3_mac_3" {default = "00:00:00:00:03:03"}
+variable "proxy_port" {default = "3128"}
 
 variable "vm_host_pub_key" {default = "~/.ssh/id_rsa.pub"}
 variable "vm_host_priv_key" {default = "~/.ssh/id_rsa"}
