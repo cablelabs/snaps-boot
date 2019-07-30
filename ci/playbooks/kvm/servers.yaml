@@ -104,3 +104,13 @@
 
     - name: "{{ pub_net_name }}"
       mac: "{{ node_3_mac_3 }}"
+
+- hosts: all
+  gather_facts: no
+  tasks:
+  - name: Wait for {{ build_ip_prfx }}.{{ build_ip_sfx }} port 22 to be opened
+    wait_for:
+      host: "{{ build_ip_prfx }}.{{ build_ip_sfx }}"
+      port: 22
+      timeout: 300
+      state: started

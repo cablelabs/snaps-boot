@@ -15,6 +15,16 @@
 ---
 - hosts: all
 
+  gather_facts: no
+
+  pre_tasks:
+    - name: Install python
+      raw: sudo apt install python -y
+      register: out
+      until: out.rc == 0
+      retries: 30
+      delay: 5
+
   tasks:
     - name: Install apt dependencies
       become: yes
@@ -24,6 +34,9 @@
         update_cache: yes
         name:
           - python-pip
+      retries: 3
+      delay: 5
+      register: out
 
     - name: Delete {{ src_copy_dir }}/snaps-boot directory
       become: yes
@@ -39,6 +52,10 @@
         src: ../../../
         dest: "{{ src_copy_dir }}/snaps-boot"
         dirs: yes
+        partial: yes
+        private_key: ~/.ssh/id_rsa
+        rsync_timeout: 60
+        use_ssh_args: yes
         rsync_opts:
           - "--exclude=.idea"
           - "--exclude=venv"
@@ -50,11 +67,16 @@
       become_method: sudo
       become_user: root
       command: pip install -r {{ src_copy_dir }}/snaps-boot/requirements-git.txt
+      environment:
+        http_proxy: "http://{{ proxy_host }}:{{ proxy_port }}"
+        https_proxy: "https://{{ proxy_host }}:{{ proxy_port }}"
 
     - name: Install snaps-boot
       become: yes
       become_method: sudo
       become_user: root
-      command: python setup.py install
-      args:
-        chdir: "{{ src_copy_dir }}/snaps-boot"
+      pip:
+        name: file:///tmp/snaps-boot
+      environment:
+        http_proxy: "http://{{ proxy_host }}:{{ proxy_port }}"
+        https_proxy: "http://{{ proxy_host }}:{{ proxy_port }}"

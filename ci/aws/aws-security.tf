@@ -26,9 +26,15 @@ resource "aws_key_pair" "snaps-boot-pk" {
 resource "aws_security_group" "snaps-boot" {
   name = "snaps-boot-pub-${var.build_id}"
   ingress {
-    from_port = 0
-    to_port = 0
-    protocol = "-1"
+    from_port = 22
+    to_port = 22
+    protocol = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+  ingress {
+    from_port = var.proxy_port
+    to_port = var.proxy_port
+    protocol = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
   egress {

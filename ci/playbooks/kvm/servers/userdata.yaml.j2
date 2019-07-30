@@ -3,8 +3,6 @@ password: {{ password }}
 chpasswd:
   expire: false
 ssh_pwauth: yes
-packages:
-  - python
 ssh_authorized_keys:
   - {{ pub_key }}
 apt:
