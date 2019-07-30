@@ -15,8 +15,10 @@
 ---
 - hosts: all
 
+  gather_facts: no
+
   tasks:
-    - name: Apply template and copy hosts.yaml to {{ hosts_yaml_path }}
+    - name: Apply template and copy hosts.yaml.j2 to {{ hosts_yaml_path }}
       template:
         src: templates/hosts.yaml.j2
         dest: "{{ hosts_yaml_path }}"
@@ -24,9 +26,21 @@
         admin_ip_1: "{{ admin_ip_prfx }}.{{ ip_suffix_1 }}"
         admin_ip_2: "{{ admin_ip_prfx }}.{{ ip_suffix_2 }}"
         admin_ip_3: "{{ admin_ip_prfx }}.{{ ip_suffix_3 }}"
+        priv_addr: "{{ priv_ip_prfx }}.0"
+        ip_range: "{{ admin_ip_prfx }}.101 {{ admin_ip_prfx }}.254"
+        priv_ip_1: "{{ priv_ip_prfx }}.{{ ip_suffix_1 }}"
+        priv_ip_2: "{{ priv_ip_prfx }}.{{ ip_suffix_2 }}"
+        priv_ip_3: "{{ priv_ip_prfx }}.{{ ip_suffix_3 }}"
+        public_ip_1: "{{ pub_ip_prfx }}.{{ ip_suffix_1 }}"
+        public_ip_2: "{{ pub_ip_prfx }}.{{ ip_suffix_2 }}"
+        public_ip_3: "{{ pub_ip_prfx }}.{{ ip_suffix_3 }}"
+        public_gateway: "{{ pub_ip_prfx }}.1"
+        build_admin_ip: "{{ admin_ip_prfx }}.{{ build_ip_suffix }}"
+        http_proxy: "http://{{ org_proxy }}"
+        https_proxy: "https://{{ org_proxy }}"
 
     - name: Cleanup any old deployments
-      shell: "python {{ src_copy_dir }}/snaps-boot/iaas_launch.py -f {{ hosts_yaml_path }} -pc >> /tmp/snaps-boot.log"
+      shell: "python {{ src_copy_dir }}/snaps-boot/iaas_launch.py -f {{ hosts_yaml_path }} -pc -or >> /tmp/snaps-boot.log"
       ignore_errors: True
 
     - name: Setup DRP

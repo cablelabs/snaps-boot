@@ -16,6 +16,12 @@
   become_method: sudo
   become_user: root
 
+  gather_facts: no
+
+  environment:
+    http_proxy: "{{ http_proxy }}"
+    https_proxy: "{{ https_proxy }}"
+
   tasks:
   - name: Install jq used for parsing drpcli stdout in downstream playbooks
     apt:

@@ -205,33 +205,32 @@ ${var.SETUP_DRP} \
 --key-file ${local.remote_priv_key_file} \
 --ssh-common-args="-o ProxyCommand='ssh ${var.sudo_user}@${aws_instance.snaps-boot-host.public_ip} nc ${var.build_ip_prfx}.${var.build_ip_suffix} 22'" \
 --extra-vars "\
-src_copy_dir=${var.src_copy_dir} \
-post_script_file=${var.post_script_file} \
-priv_ip_prfx=${var.priv_ip_prfx} \
-admin_ip_prfx=${var.admin_ip_prfx} \
-pub_ip_prfx=${var.pub_ip_prfx} \
-ip_suffix_1=11 \
-ip_suffix_2=12 \
-ip_suffix_3=13 \
-admin_mac_1=foo-mac-1 \
-admin_mac_2=foo-mac-2 \
-admin_mac_3=foo-mac-3 \
-pub_gateway=foo-gateway \
-broadcast_addr=foo-broadcast_addr \
-domain_name=foo-domain_name \
-dns_addr=8.8.8.8 \
-listen_iface=foo-listen_iface \
-max_lease=7200 \
-netmask=foo-netmask \
-router_ip=foo-router_ip \
-build_admin_ip=foo-build_admin_ip \
-http_proxy_port=??? \
-priv_addr=foo \
-priv_iface=eth0 \
-admin_iface=eth1 \
-admin_iface=eth2 \
-pxe_pass=foo-pxe_pass \
-hosts_yaml_path=foo-hosts_yaml_path
+src_copy_dir=${var.src_copy_dir}
+post_script_file=${var.post_script_file}
+priv_ip_prfx=${var.priv_ip_prfx}
+admin_ip_prfx=${var.admin_ip_prfx}
+pub_ip_prfx=${var.pub_ip_prfx}
+ip_suffix_1=${var.node_1_suffix}
+ip_suffix_2=${var.node_2_suffix}
+ip_suffix_3=${var.node_3_suffix}
+priv_mac_1=${var.node_1_mac_1}
+priv_mac_2=${var.node_2_mac_1}
+priv_mac_3=${var.node_3_mac_1}
+broadcast_addr=${var.priv_ip_prfx}.255
+domain_name=cablelabs.com
+dns_addr=8.8.8.8
+listen_iface=ens3
+max_lease=7200
+netmask=255.255.255.0
+router_ip=${var.priv_ip_prfx}.100 ${var.priv_ip_prfx}.254
+build_ip_suffix=${var.build_ip_suffix}
+http_proxy_port=3142
+priv_iface=ens3
+admin_iface=ens8
+pub_iface=ens9
+pxe_pass=password
+hosts_yaml_path=/tmp/hosts.yaml
+org_proxy=${var.build_ip_prfx}.1:${var.proxy_port}
 "\
 EOT
   }
