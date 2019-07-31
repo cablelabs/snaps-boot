@@ -331,7 +331,7 @@ EOT
 
 # Configure NICs
 resource "null_resource" "snaps-boot-config-intf" {
-  depends_on = [null_resource.snaps-boot-nodes-power-cycle]
+  depends_on = [null_resource.snaps-boot-verify-intfs-node-3-priv]
 
   # Setup KVM on the VM to create VMs on it for testing snaps-boot
   provisioner "local-exec" {
@@ -428,7 +428,7 @@ EOT
 
 # Validate public interface is active
 resource "null_resource" "snaps-boot-verify-intfs-node-2-pub" {
-  depends_on = [null_resource.snaps-boot-nodes-power-cycle]
+  depends_on = [null_resource.snaps-boot-config-intf]
 
   # Setup KVM on the VM to create VMs on it for testing snaps-boot
   provisioner "local-exec" {
@@ -478,7 +478,7 @@ EOT
 
 # Validate public interface is active
 resource "null_resource" "snaps-boot-verify-intfs-node-3-pub" {
-  depends_on = [null_resource.snaps-boot-nodes-power-cycle]
+  depends_on = [null_resource.snaps-boot-config-intf]
 
   # Setup KVM on the VM to create VMs on it for testing snaps-boot
   provisioner "local-exec" {
