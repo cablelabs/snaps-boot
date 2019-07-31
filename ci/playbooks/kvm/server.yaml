@@ -61,7 +61,7 @@
             dest: "/tmp/{{ vm_name }}-userdata.yaml"
           vars:
             password: "{{ srvr_password }}"
-            pub_key: "{{ public_key }}"
+            pub_keys: "{{ public_keys }}"
 
         - name: Add net-config.yml & userdata.yml to userdata.img
           command: "cloud-localds -N /tmp/{{ vm_name }}-net-config.yaml /tmp/{{ vm_name }}-userdata.img /tmp/{{ vm_name }}-userdata.yaml"
@@ -72,13 +72,14 @@
             dest: "{{ img_file }}"
             mode: 0664
             remote_src: yes
-
-          #ssh-keygen -f /etc/ssh/ssh_host_rsa_key -N '' -t rsa
-          #ssh-keygen -f /etc/ssh/ssh_host_dsa_key -N '' -t dsa
       when: vm_type == 'ubuntu'
 
-    - name: create PXE image {{ vm_file }}
-      command: "qemu-img create -f qcow2 {{ vm_file }} {{ img_size | default(5) }}"
+    - name: Create PXE image {{ vm_file }}
+      command: "qemu-img create -f qcow2 {{ vm_file }} {{ img_size | default(10) }}G"
+      when: vm_type == 'pxe'
+
+    - name: Resize PXE image {{ vm_file }}
+      command: "qemu-img resize {{ vm_file }} +{{ img_size | default(10) }}G"
       when: vm_type == 'pxe'
 
     - name: Define {{ vm_name }}

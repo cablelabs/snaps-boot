@@ -36,6 +36,7 @@ variable "ami" {default = "ami-07b4f3c02c7f83d59"}
 
 //variable "instance_type" {default = "t2.2xlarge"}
 variable "instance_type" {default = "m5a.8xlarge"}
+variable "volume_size" {default = 50}
 
 # Playbook Constants
 variable "ANSIBLE_CMD" {default = "export ANSIBLE_HOST_KEY_CHECKING=False; ansible-playbook"}
@@ -46,6 +47,7 @@ variable "SETUP_KVM_SERVERS" {default = "../playbooks/kvm/servers.yaml"}
 variable "SETUP_SRC" {default = "../playbooks/setup_src.yaml"}
 variable "SETUP_DRP" {default = "../playbooks/setup_drp.yaml"}
 variable "VERIFY_INTFS" {default = "../playbooks/verify_intfs.yaml"}
+variable "CONFIG_INTFS" {default = "../playbooks/config_intfs.yaml"}
 variable "VERIFY_INTFS_CHECK_FILE" {default = "/var/log/hello_world"}
 
 # Optional Variables for test
@@ -83,6 +85,12 @@ variable "node_1_suffix" {default = "11"}
 variable "node_2_suffix" {default = "12"}
 variable "node_3_suffix" {default = "13"}
 variable "proxy_port" {default = "3128"}
+variable "ngcacher_proxy_port" {default = "3142"}
+variable "pxe_pass" {default = "password"}
+variable "hosts_yaml_path" {default = "/tmp/hosts.yaml"}
 
 variable "vm_host_pub_key" {default = "~/.ssh/id_rsa.pub"}
 variable "vm_host_priv_key" {default = "~/.ssh/id_rsa"}
+
+variable "initial_boot_timeout" {default = "7200"}
+variable "std_boot_timeout" {default = "300"}

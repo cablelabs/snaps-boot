@@ -33,7 +33,9 @@
     vm_name: "{{ build_vm_name }}"
     vm_type: ubuntu
     srvr_password: "{{ build_password }}"
-    public_key: "{{lookup('file', '{{ build_public_key_file }}') }}"
+    public_keys:
+    - "{{ lookup('file', '{{ build_public_key_file }}') }}"
+    - "{{ local_public_key }}"
     networks:
     - name: "{{ build_net_name }}"
       mac: "{{ build_mac_0 }}"

@@ -4,7 +4,9 @@ chpasswd:
   expire: false
 ssh_pwauth: yes
 ssh_authorized_keys:
-  - {{ pub_key }}
+{% for pub_key in pub_keys -%}
+  - {{ pub_key }}{{ '\n' }}
+{%- endfor %}
 apt:
   proxy: http://{{ proxy_host }}:{{ proxy_port }}/
   http_proxy: http://{{ proxy_host }}:{{ proxy_port }}/

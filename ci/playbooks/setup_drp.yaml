@@ -27,7 +27,7 @@
         admin_ip_2: "{{ admin_ip_prfx }}.{{ ip_suffix_2 }}"
         admin_ip_3: "{{ admin_ip_prfx }}.{{ ip_suffix_3 }}"
         priv_addr: "{{ priv_ip_prfx }}.0"
-        ip_range: "{{ admin_ip_prfx }}.101 {{ admin_ip_prfx }}.254"
+        ip_range: "{{ priv_ip_prfx }}.101 {{ priv_ip_prfx }}.254"
         priv_ip_1: "{{ priv_ip_prfx }}.{{ ip_suffix_1 }}"
         priv_ip_2: "{{ priv_ip_prfx }}.{{ ip_suffix_2 }}"
         priv_ip_3: "{{ priv_ip_prfx }}.{{ ip_suffix_3 }}"
@@ -35,7 +35,7 @@
         public_ip_2: "{{ pub_ip_prfx }}.{{ ip_suffix_2 }}"
         public_ip_3: "{{ pub_ip_prfx }}.{{ ip_suffix_3 }}"
         public_gateway: "{{ pub_ip_prfx }}.1"
-        build_admin_ip: "{{ admin_ip_prfx }}.{{ build_ip_suffix }}"
+        build_priv_ip: "{{ priv_ip_prfx }}.{{ build_ip_suffix }}"
         http_proxy: "http://{{ org_proxy }}"
         https_proxy: "https://{{ org_proxy }}"
 

@@ -18,6 +18,10 @@ resource "aws_instance" "snaps-boot-host" {
   key_name = aws_key_pair.snaps-boot-pk.key_name
   availability_zone = var.availability_zone
 
+  root_block_device {
+    volume_size = var.volume_size
+  }
+
   tags = {
     Name = "snaps-boot-ci-build-${var.build_id}"
   }
