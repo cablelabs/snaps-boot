@@ -26,6 +26,7 @@ variable "private_key_file" {default = "~/.ssh/id_rsa"}
 variable "sudo_user" {default = "ubuntu"}
 variable "region" {default = "us-west-2"}
 variable "availability_zone" {default = "us-west-2b"}
+//variable "availability_zone" {default = "us-west-2a"}
 
 # snaps-boot image with KVM and generic.qcow2 TODO DELETE AMI
 //variable "ami" {default = "ami-044440dc7a3d75d2b"}
@@ -34,8 +35,9 @@ variable "availability_zone" {default = "us-west-2b"}
 # Ubuntu 18.04 SSD Volume Type
 variable "ami" {default = "ami-07b4f3c02c7f83d59"}
 
-//variable "instance_type" {default = "m5a.8xlarge"}
-variable "instance_type" {default = "c5n.4xlarge"}
+variable "instance_type" {default = "m5a.8xlarge"}
+//variable "instance_type" {default = "c5n.4xlarge"}
+//variable "instance_type" {default = "h1.4xlarge"}
 variable "volume_size" {default = 50}
 
 # Playbook Constants

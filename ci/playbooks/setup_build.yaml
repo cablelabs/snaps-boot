@@ -18,7 +18,7 @@
   gather_facts: no
 
   vars:
-    as_root|bool: "{{ run_as_root | default('False') }}"
+    as_root: "{{ run_as_root | default('False') }}"
 
   tasks:
   - name: Delete {{ src_copy_dir }}/snaps-boot directory
