@@ -33,11 +33,13 @@ variable "availability_zone" {default = "us-west-2b"}
 # Ubuntu 16.04 SSD Volume Type
 //variable "ami" {default = "ami-0b37e9efc396e4c38"}
 # Ubuntu 18.04 SSD Volume Type
-variable "ami" {default = "ami-07b4f3c02c7f83d59"}
+//variable "ami" {default = "ami-07b4f3c02c7f83d59"}
+variable "ami" {default = "ami-06f2f779464715dc5"}
 
 //variable "instance_type" {default = "m5a.8xlarge"}
-variable "instance_type" {default = "c5n.4xlarge"}
+//variable "instance_type" {default = "c5n.4xlarge"}
 //variable "instance_type" {default = "h1.4xlarge"}
+variable "instance_type" {default = "m5.metal"}
 variable "volume_size" {default = 50}
 
 # Playbook Constants

@@ -42,5 +42,6 @@ resource "aws_instance" "snaps-boot-host" {
     type     = "ssh"
     user     = var.sudo_user
     private_key = file(var.private_key_file)
+    timeout = "10m"
   }
 }

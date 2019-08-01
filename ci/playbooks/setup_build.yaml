@@ -17,9 +17,6 @@
 
   gather_facts: no
 
-  vars:
-    as_root: "{{ run_as_root | default('False') }}"
-
   tasks:
   - name: Delete {{ src_copy_dir }}/snaps-boot directory
     become: yes
@@ -64,43 +61,16 @@
       src: templates/hosts.yaml.j2
       dest: "{{ hosts_yaml_path }}"
 
-  - name: Install as ROOT
-    block:
-      - name: pre clean as ROOT
-        shell: "python {{ src_copy_dir }}/snaps-boot/iaas_launch.py -f {{ hosts_yaml_path }} -pc >> /tmp/snaps-boot.log"
-        ignore_errors: True
+  - name: pre clean
+    shell: "python {{ src_copy_dir }}/snaps-boot/iaas_launch.py -f {{ hosts_yaml_path }} -pc >> /tmp/snaps-boot.log"
+    ignore_errors: True
 
-      - name: Install as ROOT
-        shell: "python {{ src_copy_dir }}/snaps-boot/iaas_launch.py -f {{ hosts_yaml_path }} -p -or >> /tmp/snaps-boot.log"
-        ignore_errors: True
-        register: out_root
-    when: as_root|bool
-    become: yes
-    become_method: sudo
-    become_user: root
+  - name: Install
+    shell: "python {{ src_copy_dir }}/snaps-boot/iaas_launch.py -f {{ hosts_yaml_path }} -p -or >> /tmp/snaps-boot.log"
+    register: deploy_out
+    ignore_errors: True
 
-  - name: Evaluate Install as ROOT
-    block:
-    - debug:
-        var: out_root.stderr_lines
-    - fail: msg="iaas_launch.py -f {{ hosts_yaml_path }} -p command failed"
-    when: as_root|bool and out_root.rc != 0
-
-  - name: Install as {{ ansible_user_id }}
-    block:
-      - name: pre clean as {{ ansible_user_id }}
-        shell: "python {{ src_copy_dir }}/snaps-boot/iaas_launch.py -f {{ hosts_yaml_path }} -pc >> /tmp/snaps-boot.log"
-        ignore_errors: True
-
-      - name: Install as {{ ansible_user_id }}
-        shell: "python {{ src_copy_dir }}/snaps-boot/iaas_launch.py -f {{ hosts_yaml_path }} -p -or >> /tmp/snaps-boot.log"
-        register: out_user
-        ignore_errors: True
-    when: not as_root|bool
-
-  - name: Evaluate Install as {{ ansible_user_id }}
-    block:
-      - debug:
-          var: out_user.stderr_lines
-      - fail: msg="iaas_launch.py -f {{ hosts_yaml_path }} -p command failed"
-    when: not as_root|bool and out_user.rc != 0
+  - debug:
+      var: out_user.stderr_lines
+  - fail: msg="iaas_launch.py -f {{ hosts_yaml_path }} -p command failed"
+    when: deploy_out.rc != 0

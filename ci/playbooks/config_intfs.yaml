@@ -17,38 +17,16 @@
 
   gather_facts: no
 
-  vars:
-    as_root: "{{ run_as_root | default('False') }}"
-
   tasks:
-  - name: Statically configure PXE machines' NICs as ROOT
-    become: yes
-    become_method: sudo
-    become_user: root
-    shell: "python {{ snaps_boot_dir }}//iaas_launch.py -f {{ hosts_yaml_path }} -s >> /tmp/snaps-boot.log"
-    register: out_root
-    ignore_errors: True
-    when: as_root|bool
-
-  - name: iaas_launch errors
-    debug:
-      var: out_root.stderr_lines
-    when: as_root|bool and out_root.rc != 0
-
   - name: Statically configure PXE machines' NICs
     shell: "python {{ snaps_boot_dir }}//iaas_launch.py -f {{ hosts_yaml_path }} -s -or >> /tmp/snaps-boot.log"
-    register: out_user
+    register: out_config
     ignore_errors: True
-    when: not as_root|bool
 
-  - name: iaas_launch errors
+  - name: iaas_launch output
     debug:
-      var: out_user.stderr_lines
-    when: not as_root|bool and out_user.rc != 0
-
-  - name: Validating iaas_launch returned 0
-    fail: msg="iaas_launch.py -s command failed"
-    when: (as_root|bool and out_root.rc != 0) or (not as_root|bool and out_user.rc != 0)
+      var: out_config.stderr_lines
+    when: out_config.rc != 0
 
   - name: Pause 2 min to ensure the machines have begun their power cycle
     pause:

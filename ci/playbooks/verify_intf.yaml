@@ -18,36 +18,32 @@
   gather_facts: no
 
   tasks:
-    - name: Wait for SSH port to {{ host_ips }}
+    - name: Wait for SSH port to {{ host_ip }}
       wait_for:
-        host: "{{ item }}"
+        host: "{{ host_ip }}"
         port: 22
         timeout: "{{ timeout }}"
         state: started
-      loop: "{{ host_ips }}"
 
-    - name: Attempting to verify SSH connection to {{ host_ips }} with {{ username }}
-      command: "ssh -o StrictHostKeyChecking=no {{ username }}@{{ item }} exit"
-      loop: "{{ host_ips }}"
+    - name: Attempting to verify SSH connection to {{ host_ip }} with {{ username }}
+      command: "ssh -o StrictHostKeyChecking=no {{ host_ip }}@{{ host_ip }} exit"
       register: result
       ignore_errors: yes
 
     - name: Pause on error for 2 min as port 22 could come up and down during OS installation
       pause:
         minutes: 2
-      when: result.results[0].rc != 0 and result.results[1].rc != 0 and result.results[2].rc != 0
+      when: result.result.rc != 0 and
 
-    - name: Wait for SSH port again to {{ host_ips }}
+    - name: Wait for SSH port again to {{ host_ip }}
       wait_for:
-        host: "{{ item }}"
+        host: "{{ host_ip }}"
         port: 22
         timeout: "{{ timeout }}"
         state: started
-      loop: "{{ host_ips }}"
-      when: result.results[0].rc != 0 and result.results[1].rc != 0 and result.results[2].rc != 0
+      when: result.result.rc != 0 and
 
-    - name: Attempting to verify file exists via SSH connection to {{ host_ips }} with {{ username }}
-      command: "ssh -o StrictHostKeyChecking=no {{ username }}@{{ item }} exit"
-      loop: "{{ host_ips }}"
+    - name: Attempting to verify file exists via SSH connection to {{ host_ip }} with {{ username }}
+      command: "ssh -o StrictHostKeyChecking=no {{ username }}@{{ host_ip }} exit"
       register: result
-      when: result.results[0].rc != 0 and result.results[1].rc != 0 and result.results[2].rc != 0
+      when: result.result.rc != 0 and
