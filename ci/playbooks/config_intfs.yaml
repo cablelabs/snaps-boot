@@ -49,3 +49,7 @@
   - name: Validating iaas_launch returned 0
     fail: msg="iaas_launch.py -s command failed"
     when: (as_root|bool and out_root.rc != 0) or (not as_root|bool and out_user.rc != 0)
+
+  - name: Pause 2 min to ensure the machines have begun their power cycle
+    pause:
+      minutes: 2

@@ -49,6 +49,7 @@ variable "SETUP_KVM_SERVERS" {default = "../playbooks/kvm/servers.yaml"}
 variable "SETUP_SRC" {default = "../playbooks/setup_src.yaml"}
 variable "SETUP_DRP" {default = "../playbooks/setup_drp.yaml"}
 variable "VERIFY_INTFS" {default = "../playbooks/verify_intfs.yaml"}
+variable "VERIFY_APT_PROXY" {default = "../playbooks/verify_apt.yaml"}
 variable "CONFIG_INTFS" {default = "../playbooks/config_intfs.yaml"}
 variable "VERIFY_INTFS_CHECK_FILE" {default = "/var/log/hello_world"}
 

@@ -17,28 +17,15 @@
 
   gather_facts: no
 
-  vars:
-    as_root: "{{ run_as_root | default('False') }}"
-
   tasks:
-  - name: Attempting to verify file exists via SSH connection to {{ ip_addr }} as ROOT with {{ username }}
-    become: yes
-    become_method: sudo
-    become_user: root
-    command: "python {{ snaps_boot_dir }}/ci/scripts/validate_ssh_ip.py -u {{ username }} -i {{ ip_addr }} -t {{ timeout }} -c 'ls -l {{ check_file }}'"
-    when: as_root|bool and check_file is defined
+    - name: Wait for SSH port to {{ host_ips }}
+      wait_for:
+        host: "{{ item }}"
+        port: 22
+        timeout: "{{ timeout }}"
+        state: started
+      loop: "{{ host_ips }}"
 
-  - name: Attempting to verify SSH connection to {{ ip_addr }} with {{ username }} as root
-    become: yes
-    become_method: sudo
-    become_user: root
-    command: "python {{ snaps_boot_dir }}/ci/scripts/validate_ssh_ip.py -u {{ username }} -i {{ ip_addr }} -t {{ timeout }}"
-    when: as_root|bool and check_file is undefined
-
-  - name: Attempting to verify file exists via SSH connection to {{ ip_addr }} with user {{ username }} as me
-    command: "python {{ snaps_boot_dir }}/ci/scripts/validate_ssh_ip.py -u {{ username }} -i {{ ip_addr }} -t {{ timeout }} -c 'ls -l {{ check_file }}'"
-    when: not as_root|bool and check_file is defined
-
-  - name: Attempting to verify SSH connection to {{ ip_addr }} with user {{ username }} as me
-    command: "python {{ snaps_boot_dir }}/ci/scripts/validate_ssh_ip.py -u {{ username }} -i {{ ip_addr }} -t {{ timeout }}"
-    when: not as_root|bool and check_file is undefined
+    - name: Attempting to verify file exists via SSH connection to {{ host_ips }} with {{ username }}
+      command: "ssh -o StrictHostKeyChecking=no {{ username }}@{{ item }} exit"
+      loop: "{{ host_ips }}"

@@ -502,26 +502,17 @@ ansible:
     hosts:
     - build-vm
     variables:
-      snaps_boot_dir:
-        type: string
-        value: {{ src_copy_dir }}/snaps-boot
-      check_file:
-        type: string
-        value: /var/log/hello_world
-      ip_addr:
+      host_ip:
         type: port
         vm_name: pxe-vm-1
         port_name: pxe-admin-port-1
         port_value: ip_address
       username:
         type: string
-        value: {{ pxe_machine_user }}
+        value: root
       timeout:
         type: string
         value: 1800
-      run_as_root:
-        type: string
-        value: {{ run_as_root | default(True) }}
 
   # Verify admin interface on pxe-vm-2 was configured
   - playbook_location: {{ local_snaps_boot_dir }}/ci/playbooks/verify_intfs.yaml
