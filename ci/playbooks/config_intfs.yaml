@@ -15,8 +15,10 @@
 ---
 - hosts: all
 
+  gather_facts: no
+
   vars:
-    run_as_root: "{{ run_as_root | default('True') }}"
+    as_root: "{{ run_as_root | default('False') }}"
 
   tasks:
   - name: Statically configure PXE machines' NICs as ROOT
@@ -26,24 +28,24 @@
     shell: "python {{ snaps_boot_dir }}//iaas_launch.py -f {{ hosts_yaml_path }} -s >> /tmp/snaps-boot.log"
     register: out_root
     ignore_errors: True
-    when: run_as_root
+    when: as_root|bool
 
   - name: iaas_launch errors
     debug:
       var: out_root.stderr_lines
-    when: run_as_root and out_root.rc != 0
+    when: as_root|bool and out_root.rc != 0
 
   - name: Statically configure PXE machines' NICs
     shell: "python {{ snaps_boot_dir }}//iaas_launch.py -f {{ hosts_yaml_path }} -s -or >> /tmp/snaps-boot.log"
     register: out_user
     ignore_errors: True
-    when: not run_as_root
+    when: not as_root|bool
 
   - name: iaas_launch errors
     debug:
       var: out_user.stderr_lines
-    when: not run_as_root and out_user.rc != 0
+    when: not as_root|bool and out_user.rc != 0
 
   - name: Validating iaas_launch returned 0
     fail: msg="iaas_launch.py -s command failed"
-    when: (run_as_root and out_root.rc != 0) or (not run_as_root and out_user.rc != 0)
+    when: (as_root|bool and out_root.rc != 0) or (not as_root|bool and out_user.rc != 0)

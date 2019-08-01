@@ -15,8 +15,10 @@
 ---
 - hosts: all
 
+  gather_facts: no
+
   vars:
-    run_as_root: "{{ run_as_root | default('True') }}"
+    as_root: "{{ run_as_root | default('False') }}"
 
   tasks:
   - name: Attempting to verify file exists via SSH connection to {{ ip_addr }} as ROOT with {{ username }}
@@ -24,19 +26,19 @@
     become_method: sudo
     become_user: root
     command: "python {{ snaps_boot_dir }}/ci/scripts/validate_ssh_ip.py -u {{ username }} -i {{ ip_addr }} -t {{ timeout }} -c 'ls -l {{ check_file }}'"
-    when: run_as_root and check_file is defined
+    when: as_root|bool and check_file is defined
 
   - name: Attempting to verify SSH connection to {{ ip_addr }} as ROOT with {{ username }}
     become: yes
     become_method: sudo
     become_user: root
     command: "python {{ snaps_boot_dir }}/ci/scripts/validate_ssh_ip.py -u {{ username }} -i {{ ip_addr }} -t {{ timeout }}"
-    when: run_as_root and check_file is undefined
+    when: as_root|bool and check_file is undefined
 
-  - name: Attempting to verify file exists via SSH connection to {{ ip_addr }}
+  - name: Attempting to verify file exists via SSH connection to {{ ip_addr }} as {{ username }}
     command: "python {{ snaps_boot_dir }}/ci/scripts/validate_ssh_ip.py -u {{ username }} -i {{ ip_addr }} -t {{ timeout }} -c 'ls -l {{ check_file }}'"
-    when: not run_as_root and check_file is defined
+    when: not as_root|bool and check_file is defined
 
-  - name: Attempting to verify SSH connection to {{ ip_addr }}
+  - name: Attempting to verify SSH connection to {{ ip_addr }} as {{ username }}
     command: "python {{ snaps_boot_dir }}/ci/scripts/validate_ssh_ip.py -u {{ username }} -i {{ ip_addr }} -t {{ timeout }}"
-    when: not run_as_root and check_file is undefined
+    when: not as_root|bool and check_file is undefined

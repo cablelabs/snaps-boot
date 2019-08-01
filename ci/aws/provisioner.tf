@@ -267,10 +267,9 @@ ${var.VERIFY_INTFS} \
 --key-file ${local.remote_priv_key_file} \
 --ssh-common-args="-o ProxyCommand='ssh ${var.sudo_user}@${aws_instance.snaps-boot-host.public_ip} nc ${var.build_ip_prfx}.${var.build_ip_suffix} 22'" \
 --extra-vars "\
-run_as_root=False
 snaps_boot_dir=${var.src_copy_dir}/snaps-boot
 check_file=${var.VERIFY_INTFS_CHECK_FILE}
-username=${var.sudo_user}
+username=root
 ip_addr=${var.priv_ip_prfx}.${var.node_1_suffix}
 src_copy_dir=${var.src_copy_dir}
 timeout=${var.initial_boot_timeout}
@@ -292,10 +291,9 @@ ${var.VERIFY_INTFS} \
 --key-file ${local.remote_priv_key_file} \
 --ssh-common-args="-o ProxyCommand='ssh ${var.sudo_user}@${aws_instance.snaps-boot-host.public_ip} nc ${var.build_ip_prfx}.${var.build_ip_suffix} 22'" \
 --extra-vars "\
-run_as_root=False
 snaps_boot_dir=${var.src_copy_dir}/snaps-boot
 check_file=${var.VERIFY_INTFS_CHECK_FILE}
-username=${var.sudo_user}
+username=root
 ip_addr=${var.priv_ip_prfx}.${var.node_2_suffix}
 src_copy_dir=${var.src_copy_dir}
 timeout=${var.initial_boot_timeout}
@@ -317,10 +315,9 @@ ${var.VERIFY_INTFS} \
 --key-file ${local.remote_priv_key_file} \
 --ssh-common-args="-o ProxyCommand='ssh ${var.sudo_user}@${aws_instance.snaps-boot-host.public_ip} nc ${var.build_ip_prfx}.${var.build_ip_suffix} 22'" \
 --extra-vars "\
-run_as_root=False
 snaps_boot_dir=${var.src_copy_dir}/snaps-boot
 check_file=${var.VERIFY_INTFS_CHECK_FILE}
-username=${var.sudo_user}
+username=root
 ip_addr=${var.priv_ip_prfx}.${var.node_3_suffix}
 src_copy_dir=${var.src_copy_dir}
 timeout=${var.initial_boot_timeout}
@@ -342,7 +339,6 @@ ${var.CONFIG_INTFS} \
 --key-file ${local.remote_priv_key_file} \
 --ssh-common-args="-o ProxyCommand='ssh ${var.sudo_user}@${aws_instance.snaps-boot-host.public_ip} nc ${var.build_ip_prfx}.${var.build_ip_suffix} 22'" \
 --extra-vars "\
-run_as_root=False
 snaps_boot_dir=${var.src_copy_dir}/snaps-boot
 hosts_yaml_path=${var.hosts_yaml_path}
 check_file=${var.VERIFY_INTFS_CHECK_FILE}
@@ -364,10 +360,9 @@ ${var.VERIFY_INTFS} \
 --key-file ${local.remote_priv_key_file} \
 --ssh-common-args="-o ProxyCommand='ssh ${var.sudo_user}@${aws_instance.snaps-boot-host.public_ip} nc ${var.build_ip_prfx}.${var.build_ip_suffix} 22'" \
 --extra-vars "\
-run_as_root=False
 snaps_boot_dir=${var.src_copy_dir}/snaps-boot
 check_file=${var.VERIFY_INTFS_CHECK_FILE}
-username=${var.sudo_user}
+username=root
 ip_addr=${var.admin_ip_prfx}.${var.node_1_suffix}
 src_copy_dir=${var.src_copy_dir}
 timeout=${var.std_boot_timeout}
@@ -389,10 +384,9 @@ ${var.VERIFY_INTFS} \
 --key-file ${local.remote_priv_key_file} \
 --ssh-common-args="-o ProxyCommand='ssh ${var.sudo_user}@${aws_instance.snaps-boot-host.public_ip} nc ${var.build_ip_prfx}.${var.build_ip_suffix} 22'" \
 --extra-vars "\
-run_as_root=False
 snaps_boot_dir=${var.src_copy_dir}/snaps-boot
 check_file=${var.VERIFY_INTFS_CHECK_FILE}
-username=${var.sudo_user}
+username=root
 ip_addr=${var.pub_ip_prfx}.${var.node_1_suffix}
 src_copy_dir=${var.src_copy_dir}
 timeout=${var.std_boot_timeout}
@@ -414,10 +408,9 @@ ${var.VERIFY_INTFS} \
 --key-file ${local.remote_priv_key_file} \
 --ssh-common-args="-o ProxyCommand='ssh ${var.sudo_user}@${aws_instance.snaps-boot-host.public_ip} nc ${var.build_ip_prfx}.${var.build_ip_suffix} 22'" \
 --extra-vars "\
-run_as_root=False
 snaps_boot_dir=${var.src_copy_dir}/snaps-boot
 check_file=${var.VERIFY_INTFS_CHECK_FILE}
-username=${var.sudo_user}
+username=root
 ip_addr=${var.admin_ip_prfx}.${var.node_2_suffix}
 src_copy_dir=${var.src_copy_dir}
 timeout=${var.std_boot_timeout}
@@ -439,10 +432,9 @@ ${var.VERIFY_INTFS} \
 --key-file ${local.remote_priv_key_file} \
 --ssh-common-args="-o ProxyCommand='ssh ${var.sudo_user}@${aws_instance.snaps-boot-host.public_ip} nc ${var.build_ip_prfx}.${var.build_ip_suffix} 22'" \
 --extra-vars "\
-run_as_root=False
 snaps_boot_dir=${var.src_copy_dir}/snaps-boot
 check_file=${var.VERIFY_INTFS_CHECK_FILE}
-username=${var.sudo_user}
+username=root
 ip_addr=${var.pub_ip_prfx}.${var.node_2_suffix}
 src_copy_dir=${var.src_copy_dir}
 timeout=${var.std_boot_timeout}
@@ -464,10 +456,9 @@ ${var.VERIFY_INTFS} \
 --key-file ${local.remote_priv_key_file} \
 --ssh-common-args="-o ProxyCommand='ssh ${var.sudo_user}@${aws_instance.snaps-boot-host.public_ip} nc ${var.build_ip_prfx}.${var.build_ip_suffix} 22'" \
 --extra-vars "\
-run_as_root=False
 snaps_boot_dir=${var.src_copy_dir}/snaps-boot
 check_file=${var.VERIFY_INTFS_CHECK_FILE}
-username=${var.sudo_user}
+username=root
 ip_addr=${var.admin_ip_prfx}.${var.node_3_suffix}
 src_copy_dir=${var.src_copy_dir}
 timeout=${var.std_boot_timeout}
@@ -489,10 +480,9 @@ ${var.VERIFY_INTFS} \
 --key-file ${local.remote_priv_key_file} \
 --ssh-common-args="-o ProxyCommand='ssh ${var.sudo_user}@${aws_instance.snaps-boot-host.public_ip} nc ${var.build_ip_prfx}.${var.build_ip_suffix} 22'" \
 --extra-vars "\
-run_as_root=False
 snaps_boot_dir=${var.src_copy_dir}/snaps-boot
 check_file=${var.VERIFY_INTFS_CHECK_FILE}
-username=${var.sudo_user}
+username=root
 ip_addr=${var.pub_ip_prfx}.${var.node_3_suffix}
 src_copy_dir=${var.src_copy_dir}
 timeout=${var.std_boot_timeout}

@@ -15,8 +15,10 @@
 ---
 - hosts: all
 
+  gather_facts: no
+
   vars:
-    run_as_root: "{{ run_as_root | default('True') }}"
+    as_root: "{{ run_as_root | default('False') }}"
 
   tasks:
   - name: Configure apt with /etc/apt/apt.conf.bak
@@ -35,7 +37,7 @@
 
     - name: Attempting to Install pyOpenSSL to {{ ip_addr }} as ROOT
       shell: "python {{ snaps_boot_dir }}/ci/scripts/validate_ssh_ip.py -u {{ username }} -i {{ ip_addr }} -c 'pip install pyOpenSSL --proxy {{ build_admin_ip }}:{{ http_proxy_port }}' -t {{ timeout }}"
-    when: run_as_root
+    when: as_root|bool
     become: yes
     become_method: sudo
     become_user: root
@@ -50,7 +52,7 @@
 
       - name: Attempting to Install pyOpenSSL to {{ ip_addr }}
         shell: "python {{ snaps_boot_dir }}/ci/scripts/validate_ssh_ip.py -u {{ username }} -i {{ ip_addr }} -c 'sudo pip install pyOpenSSL --proxy {{ build_admin_ip }}:{{ http_proxy_port }}' -t {{ timeout }}"
-    when: not run_as_root
+    when: not as_root|bool
 
   - name: Remove apt.conf
     become: yes
