@@ -13,14 +13,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 ---
-- hosts: all
+- name: Wait for SSH port to {{ ip_addr }} with timeout value {{ to }}
+  wait_for:
+    host: "{{ ip_addr }}"
+    port: 22
+    timeout: "{{ to }}"
+    state: started
 
-  gather_facts: no
-
-  tasks:
-    - include_tasks: connect_via_ssh.yaml
-      vars:
-        ip_addr: "{{ item }}"
-        user: "{{ username }}"
-        to: "{{ timeout }}"
-      loop: "{{ host_ips }}"
+- name: Attempting to verify SSH connection to {{ ip_addr }} with {{ user }}
+  command: "ssh -o StrictHostKeyChecking=no {{ user }}@{{ ip_addr }} exit"
+  retries: 12
+  delay: 10
+  register: out
+  until: out.rc == 0

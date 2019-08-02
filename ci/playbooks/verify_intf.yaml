@@ -18,12 +18,8 @@
   gather_facts: no
 
   tasks:
-    - name: Wait for SSH port to {{ host_ip }} with timeout value {{ timeout }}
-      wait_for:
-        host: "{{ host_ip }}"
-        port: 22
-        timeout: "{{ timeout }}"
-        state: started
-
-    - name: Attempting to verify SSH connection to {{ host_ip }} with {{ username }}
-      command: "ssh -o StrictHostKeyChecking=no {{ username }}@{{ host_ip }} exit"
+    - include_tasks: connect_via_ssh.yaml
+      vars:
+        ip_addr: "{{ host_ip }}"
+        user: "{{ username }}"
+        to: "{{ timeout }}"
