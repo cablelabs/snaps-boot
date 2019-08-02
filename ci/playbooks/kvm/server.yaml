@@ -55,7 +55,7 @@
             src: servers/net-config.yaml.j2
             dest: "/tmp/{{ vm_name }}-net-config.yaml"
 
-        - name: Create userdata file for cloud-init with public key {{ public_key }}
+        - name: Create userdata file for cloud-init
           template:
             src: servers/userdata.yaml.j2
             dest: "/tmp/{{ vm_name }}-userdata.yaml"

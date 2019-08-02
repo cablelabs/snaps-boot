@@ -18,7 +18,11 @@
   gather_facts: no
 
   tasks:
-    - name: Wait for SSH port to {{ host_ip }}
+    - name: Sleep {{ delay }}
+      pause:
+        seconds: "{{ delay | default(0) }}"
+
+    - name: Wait for SSH port to {{ host_ip }} with timeout value {{ timeout }}
       wait_for:
         host: "{{ host_ip }}"
         port: 22
@@ -26,24 +30,6 @@
         state: started
 
     - name: Attempting to verify SSH connection to {{ host_ip }} with {{ username }}
-      command: "ssh -o StrictHostKeyChecking=no {{ host_ip }}@{{ host_ip }} exit"
-      register: result
-      ignore_errors: yes
-
-    - name: Pause on error for 2 min as port 22 could come up and down during OS installation
-      pause:
-        minutes: 2
-      when: result.result.rc != 0 and
-
-    - name: Wait for SSH port again to {{ host_ip }}
-      wait_for:
-        host: "{{ host_ip }}"
-        port: 22
-        timeout: "{{ timeout }}"
-        state: started
-      when: result.result.rc != 0 and
-
-    - name: Attempting to verify file exists via SSH connection to {{ host_ip }} with {{ username }}
       command: "ssh -o StrictHostKeyChecking=no {{ username }}@{{ host_ip }} exit"
-      register: result
-      when: result.result.rc != 0 and
+      retries: 3
+      delay: 3

@@ -328,7 +328,6 @@ ansible:
     hosts:
       - build-vm
     post_processing:
-      sleep: 15
       reboot:
       - pxe-vm-1
       - pxe-vm-2
@@ -510,6 +509,9 @@ ansible:
       timeout:
         type: string
         value: 1800
+      delay:
+        type: string
+        value: 900
 
   # Verify admin interface on pxe-vm-2 was configured
   - playbook_location: {{ local_snaps_boot_dir }}/ci/playbooks/verify_intf.yaml
@@ -579,6 +581,9 @@ ansible:
       timeout:
         type: string
         value: 300
+      delay:
+        type: string
+        value: 120
 
   # Verify admin interface on pxe-vm-2 was configured
   - playbook_location: {{ local_snaps_boot_dir }}/ci/playbooks/verify_intf.yaml

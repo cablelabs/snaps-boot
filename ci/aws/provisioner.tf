@@ -254,9 +254,16 @@ resource "null_resource" "snaps-boot-nodes-power-cycle" {
   }
 }
 
+resource "null_resource" "snaps-post-reboot-sleep" {
+  depends_on = [null_resource.snaps-boot-nodes-power-cycle]
+  provisioner "local-exec" {
+    command = "sleep ${var.initial_boot_sleep}"
+  }
+}
+
 # Validate private interface is active
 resource "null_resource" "snaps-boot-verify-priv-intfs" {
-  depends_on = [null_resource.snaps-boot-nodes-power-cycle]
+  depends_on = [null_resource.snaps-post-reboot-sleep]
 
   # Setup KVM on the VM to create VMs on it for testing snaps-boot
   provisioner "local-exec" {
