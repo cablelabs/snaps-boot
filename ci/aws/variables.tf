@@ -98,5 +98,4 @@ variable "vm_host_pub_key" {default = "~/.ssh/id_rsa.pub"}
 variable "vm_host_priv_key" {default = "~/.ssh/id_rsa"}
 
 variable "initial_boot_timeout" {default = "1800"}
-variable "initial_boot_sleep" {default = "300"}
 variable "std_boot_timeout" {default = "120"}
