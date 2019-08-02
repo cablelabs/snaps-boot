@@ -16,7 +16,7 @@
 
     libvirt server configuration
 -->
-<domain type='qemu'>
+<domain type='kvm'>
   <name>{{ name }}</name>d
   <memory>{{ memory | default('4194304') }}</memory>
   <vcpu>{{ cpus | default('2') }}</vcpu>
