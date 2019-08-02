@@ -18,10 +18,6 @@
   gather_facts: no
 
   tasks:
-    - name: Sleep {{ delay }}
-      pause:
-        seconds: "{{ delay | default(0) }}"
-
     - name: Wait for SSH port to {{ host_ip }} with timeout value {{ timeout }}
       wait_for:
         host: "{{ host_ip }}"
@@ -31,5 +27,3 @@
 
     - name: Attempting to verify SSH connection to {{ host_ip }} with {{ username }}
       command: "ssh -o StrictHostKeyChecking=no {{ username }}@{{ host_ip }} exit"
-      retries: 3
-      delay: 3

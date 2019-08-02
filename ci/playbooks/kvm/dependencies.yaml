@@ -27,6 +27,10 @@
         update_cache: yes
         name:
           - qemu-kvm
+          - libvirt-clients
+          - libvirt-daemon-system
+          - bridge-utils
+          - virt-manager
           - libvirt-bin
           - virtinst
           - python-lxml

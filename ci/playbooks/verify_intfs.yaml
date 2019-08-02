@@ -29,5 +29,3 @@
     - name: Attempting to verify SSH connection to {{ host_ips }} with {{ username }}
       command: "ssh -o StrictHostKeyChecking=no {{ username }}@{{ item }} exit"
       loop: "{{ host_ips }}"
-      retries: 3
-      delay: 3
