@@ -32,7 +32,7 @@ resource "null_resource" "snaps-boot-remote-key-gen" {
     ]
   }
   connection {
-    host = aws_instance.snaps-boot-host.public_ip
+    host = aws_spot_instance_request.snaps-boot-host.public_ip
     type     = "ssh"
     user     = var.sudo_user
     private_key = file(var.private_key_file)
@@ -43,7 +43,7 @@ resource "null_resource" "snaps-boot-remote-key-gen" {
 resource "null_resource" "snaps-boot-get-host-pub-key" {
   depends_on = [null_resource.snaps-boot-remote-key-gen]
   provisioner "local-exec" {
-    command = "scp -o StrictHostKeyChecking=no ${var.sudo_user}@${aws_instance.snaps-boot-host.public_ip}:~/.ssh/id_rsa.pub ${local.remote_pub_key_file}"
+    command = "scp -o StrictHostKeyChecking=no ${var.sudo_user}@${aws_spot_instance_request.snaps-boot-host.public_ip}:~/.ssh/id_rsa.pub ${local.remote_pub_key_file}"
   }
 }
 
@@ -51,7 +51,7 @@ resource "null_resource" "snaps-boot-get-host-pub-key" {
 resource "null_resource" "snaps-boot-get-host-priv-key" {
   depends_on = [null_resource.snaps-boot-remote-key-gen]
   provisioner "local-exec" {
-    command = "scp -o StrictHostKeyChecking=no ${var.sudo_user}@${aws_instance.snaps-boot-host.public_ip}:~/.ssh/id_rsa ${local.remote_priv_key_file}"
+    command = "scp -o StrictHostKeyChecking=no ${var.sudo_user}@${aws_spot_instance_request.snaps-boot-host.public_ip}:~/.ssh/id_rsa ${local.remote_priv_key_file}"
   }
 }
 
@@ -63,7 +63,7 @@ resource "null_resource" "snaps-boot-proxy-setup" {
   provisioner "local-exec" {
     command = <<EOT
 ${var.ANSIBLE_CMD} -u ${var.sudo_user} \
--i ${aws_instance.snaps-boot-host.public_ip}, \
+-i ${aws_spot_instance_request.snaps-boot-host.public_ip}, \
 ${var.SETUP_HOST_PROXY} \
 --key-file ${var.private_key_file} \
 --extra-vars "\
@@ -81,7 +81,7 @@ resource "null_resource" "snaps-boot-kvm-setup" {
   provisioner "local-exec" {
     command = <<EOT
 ${var.ANSIBLE_CMD} -u ${var.sudo_user} \
--i ${aws_instance.snaps-boot-host.public_ip}, \
+-i ${aws_spot_instance_request.snaps-boot-host.public_ip}, \
 ${var.SETUP_KVM_DEPENDENCIES} \
 --key-file ${var.private_key_file} \
 EOT
@@ -95,7 +95,7 @@ resource "null_resource" "snaps-boot-network-setup" {
   provisioner "local-exec" {
     command = <<EOT
 ${var.ANSIBLE_CMD} -u ${var.sudo_user} \
--i ${aws_instance.snaps-boot-host.public_ip}, \
+-i ${aws_spot_instance_request.snaps-boot-host.public_ip}, \
 ${var.SETUP_KVM_NETWORKS} \
 --key-file ${var.private_key_file} \
 --extra-vars "\
@@ -125,7 +125,7 @@ resource "null_resource" "snaps-boot-server-setup" {
   provisioner "local-exec" {
     command = <<EOT
 ${var.ANSIBLE_CMD} -u ${var.sudo_user} \
--i ${aws_instance.snaps-boot-host.public_ip}, \
+-i ${aws_spot_instance_request.snaps-boot-host.public_ip}, \
 ${var.SETUP_KVM_SERVERS} \
 --key-file ${var.private_key_file} \
 --extra-vars "\
@@ -182,7 +182,7 @@ ${var.ANSIBLE_CMD} -u ${var.sudo_user} \
 -i ${var.build_ip_prfx}.${var.build_ip_suffix}, \
 ${var.SETUP_SRC} \
 --key-file ${local.remote_priv_key_file} \
---ssh-common-args="-o ProxyCommand='ssh ${var.sudo_user}@${aws_instance.snaps-boot-host.public_ip} nc ${var.build_ip_prfx}.${var.build_ip_suffix} 22'" \
+--ssh-common-args="-o ProxyCommand='ssh ${var.sudo_user}@${aws_spot_instance_request.snaps-boot-host.public_ip} nc ${var.build_ip_prfx}.${var.build_ip_suffix} 22'" \
 --extra-vars " \
 src_copy_dir=${var.src_copy_dir}
 proxy_host=${var.build_ip_prfx}.1
@@ -204,7 +204,7 @@ ${var.ANSIBLE_CMD} -u ${var.sudo_user} \
 -i ${var.build_ip_prfx}.${var.build_ip_suffix}, \
 ${var.SETUP_DRP} \
 --key-file ${local.remote_priv_key_file} \
---ssh-common-args="-o ProxyCommand='ssh ${var.sudo_user}@${aws_instance.snaps-boot-host.public_ip} nc ${var.build_ip_prfx}.${var.build_ip_suffix} 22'" \
+--ssh-common-args="-o ProxyCommand='ssh ${var.sudo_user}@${aws_spot_instance_request.snaps-boot-host.public_ip} nc ${var.build_ip_prfx}.${var.build_ip_suffix} 22'" \
 --extra-vars "\
 src_copy_dir=${var.src_copy_dir}
 post_script_file=${var.post_script_file}
@@ -247,7 +247,7 @@ resource "null_resource" "snaps-boot-nodes-power-cycle" {
     ]
   }
   connection {
-    host = aws_instance.snaps-boot-host.public_ip
+    host = aws_spot_instance_request.snaps-boot-host.public_ip
     type     = "ssh"
     user     = var.sudo_user
     private_key = file(var.private_key_file)
@@ -265,7 +265,7 @@ ${var.ANSIBLE_CMD} -u ${var.sudo_user} \
 -i ${var.build_ip_prfx}.${var.build_ip_suffix}, \
 ${var.VERIFY_INTFS} \
 --key-file ${local.remote_priv_key_file} \
---ssh-common-args="-o ProxyCommand='ssh ${var.sudo_user}@${aws_instance.snaps-boot-host.public_ip} nc ${var.build_ip_prfx}.${var.build_ip_suffix} 22'" \
+--ssh-common-args="-o ProxyCommand='ssh ${var.sudo_user}@${aws_spot_instance_request.snaps-boot-host.public_ip} nc ${var.build_ip_prfx}.${var.build_ip_suffix} 22'" \
 --extra-vars "{
 'username': 'root',
 'host_ips': ['${var.priv_ip_prfx}.${var.node_1_suffix}',
@@ -289,7 +289,7 @@ ${var.ANSIBLE_CMD} -u ${var.sudo_user} \
 -i ${var.build_ip_prfx}.${var.build_ip_suffix}, \
 ${var.CONFIG_INTFS} \
 --key-file ${local.remote_priv_key_file} \
---ssh-common-args="-o ProxyCommand='ssh ${var.sudo_user}@${aws_instance.snaps-boot-host.public_ip} nc ${var.build_ip_prfx}.${var.build_ip_suffix} 22'" \
+--ssh-common-args="-o ProxyCommand='ssh ${var.sudo_user}@${aws_spot_instance_request.snaps-boot-host.public_ip} nc ${var.build_ip_prfx}.${var.build_ip_suffix} 22'" \
 --extra-vars "\
 snaps_boot_dir=${var.src_copy_dir}/snaps-boot
 hosts_yaml_path=${var.hosts_yaml_path}
@@ -310,7 +310,7 @@ ${var.ANSIBLE_CMD} -u ${var.sudo_user} \
 -i ${var.build_ip_prfx}.${var.build_ip_suffix}, \
 ${var.VERIFY_INTFS} \
 --key-file ${local.remote_priv_key_file} \
---ssh-common-args="-o ProxyCommand='ssh ${var.sudo_user}@${aws_instance.snaps-boot-host.public_ip} nc ${var.build_ip_prfx}.${var.build_ip_suffix} 22'" \
+--ssh-common-args="-o ProxyCommand='ssh ${var.sudo_user}@${aws_spot_instance_request.snaps-boot-host.public_ip} nc ${var.build_ip_prfx}.${var.build_ip_suffix} 22'" \
 --extra-vars "{
 'username': 'root',
 'host_ips': ['${var.admin_ip_prfx}.${var.node_1_suffix}',
@@ -337,7 +337,7 @@ ${var.ANSIBLE_CMD} -u ${var.sudo_user} \
 -i ${var.build_ip_prfx}.${var.build_ip_suffix}, \
 ${var.VERIFY_APT_PROXY} \
 --key-file ${local.remote_priv_key_file} \
---ssh-common-args="-o ProxyCommand='ssh ${var.sudo_user}@${aws_instance.snaps-boot-host.public_ip} nc ${var.build_ip_prfx}.${var.build_ip_suffix} 22'" \
+--ssh-common-args="-o ProxyCommand='ssh ${var.sudo_user}@${aws_spot_instance_request.snaps-boot-host.public_ip} nc ${var.build_ip_prfx}.${var.build_ip_suffix} 22'" \
 --extra-vars "{
 'username': 'root',
 'ip_addr': '${var.priv_ip_prfx}.${var.node_1_suffix}',

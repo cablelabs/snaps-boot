@@ -12,8 +12,11 @@
 # limitations under the License.
 
 # AWS EC2 Instances
-resource "aws_instance" "snaps-boot-host" {
+resource "aws_spot_instance_request" "snaps-boot-host" {
   ami = var.ami
+  spot_type = "one-time"
+  # Set wait_for_fulfillment to true to obtain instance attributes
+  wait_for_fulfillment = "true"
   instance_type = var.instance_type
   key_name = aws_key_pair.snaps-boot-pk.key_name
   availability_zone = var.availability_zone
