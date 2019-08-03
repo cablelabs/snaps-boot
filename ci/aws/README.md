@@ -2,13 +2,11 @@
 Readme for information on running _snaps-boot_ CI
 
 ## Build Host Requirements
-
-  - Python installed
-  - Ansible has been installed into the Python runtime
-  - Download and install Terraform from <https://www.terraform.io/downloads.html>
+- Python installed
+- Ansible has been installed into the Python runtime
+- Download and install Terraform from <https://www.terraform.io/downloads.html>
 
 ## Setup bare metal host on AWS and execute deployment from the build host
-    
 Run the following bash command from this directory:
 ```bash
 export TF_CLI_CONFIG_FILE="{snaps-config dir}/aws/terraform_rc"
