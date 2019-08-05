@@ -328,18 +328,11 @@ ansible:
     hosts:
       - build-vm
     post_processing:
-      sleep: 15
       reboot:
       - pxe-vm-1
       - pxe-vm-2
       - pxe-vm-3
     variables:
-      pxe_config:
-        type: string
-        value: {{ install_type }}
-      src_snaps_boot_dir:
-        type: string
-        value: {{ local_snaps_boot_dir }}
       src_copy_dir:
         type: string
         value: {{ src_copy_dir }}
@@ -348,8 +341,8 @@ ansible:
         value: {{ src_copy_dir }}/snaps-boot/ci/scripts/post_script
       priv_addr:
         type: network
-        network_name: admin-net
-        subnet_name: admin-subnet
+        network_name: priv-net
+        subnet_name: priv-subnet
         value: cidr_ip
       admin_ip_1:
         type: port
@@ -361,11 +354,16 @@ ansible:
         vm_name: pxe-vm-1
         port_name: pxe-admin-port-1
         port_value: mac_address
-      private_ip_1:
+      priv_ip_1:
         type: port
         vm_name: pxe-vm-1
         port_name: pxe-priv-port-1
         port_value: ip_address
+      priv_mac_1:
+        type: port
+        vm_name: pxe-vm-1
+        port_name: pxe-priv-port-1
+        port_value: mac_address
       public_ip_1:
         type: port
         vm_name: pxe-vm-1
@@ -381,16 +379,26 @@ ansible:
         vm_name: pxe-vm-2
         port_name: pxe-admin-port-2
         port_value: mac_address
-      private_ip_2:
+      priv_ip_2:
         type: port
         vm_name: pxe-vm-2
         port_name: pxe-priv-port-2
         port_value: ip_address
+      priv_mac_2:
+        type: port
+        vm_name: pxe-vm-2
+        port_name: pxe-priv-port-2
+        port_value: mac_address
       public_ip_2:
         type: port
         vm_name: pxe-vm-2
         port_name: pxe-pub-port-2
         port_value: ip_address
+      priv_mac_3:
+        type: port
+        vm_name: pxe-vm-3
+        port_name: pxe-priv-port-3
+        port_value: mac_address
       admin_ip_3:
         type: port
         vm_name: pxe-vm-3
@@ -401,7 +409,7 @@ ansible:
         vm_name: pxe-vm-3
         port_name: pxe-admin-port-3
         port_value: mac_address
-      private_ip_3:
+      priv_ip_3:
         type: port
         vm_name: pxe-vm-3
         port_name: pxe-priv-port-3
@@ -418,8 +426,8 @@ ansible:
         value: gateway_ip
       broadcast_addr:
         type: network
-        network_name: admin-net
-        subnet_name: admin-subnet
+        network_name: priv-net
+        subnet_name: priv-subnet
         value: broadcast_ip
       domain_name:
         type: string
@@ -435,8 +443,8 @@ ansible:
         value: 7200
       netmask:
         type: network
-        network_name: admin-net
-        subnet_name: admin-subnet
+        network_name: priv-net
+        subnet_name: priv-subnet
         value: netmask
       ip_range:
         type: network
@@ -445,13 +453,18 @@ ansible:
         value: ip_range
       router_ip:
         type: network
-        network_name: admin-net
-        subnet_name: admin-subnet
+        network_name: priv-net
+        subnet_name: priv-subnet
         value: gateway_ip
       build_admin_ip:
         type: port
         vm_name: build-vm
         port_name: build-admin-port
+        port_value: ip_address
+      build_priv_ip:
+        type: port
+        vm_name: build-vm
+        port_name: build-priv-port
         port_value: ip_address
       http_proxy_port:
         type: string
@@ -471,89 +484,68 @@ ansible:
       hosts_yaml_path:
         type: string
         value: {{ hosts_yaml_target_path }}
-      run_as_root:
+      http_proxy:
         type: string
-        value: {{ run_as_root  | default(True) }}
+        value: {{ http_proxy  | default('\'\'') }}
+      https_proxy:
+        type: string
+        value: {{ http_proxy  | default('\'\'') }}
 {% endif %}
 
   # Verify admin interface on pxe-vm-1 was configured
 {% if run_validation | default(True) %}
-  - playbook_location: {{ local_snaps_boot_dir }}/ci/playbooks/verify_intfs.yaml
+  - playbook_location: {{ local_snaps_boot_dir }}/ci/playbooks/verify_intf.yaml
     hosts:
     - build-vm
     variables:
-      snaps_boot_dir:
-        type: string
-        value: {{ src_copy_dir }}/snaps-boot
-      check_file:
-        type: string
-        value: /var/log/hello_world
-      ip_addr:
+      host_ip:
         type: port
         vm_name: pxe-vm-1
-        port_name: pxe-admin-port-1
+        port_name: pxe-priv-port-1
         port_value: ip_address
       username:
         type: string
-        value: {{ pxe_machine_user }}
+        value: root
       timeout:
         type: string
         value: 1800
-      run_as_root:
+      delay:
         type: string
-        value: {{ run_as_root | default(True) }}
+        value: 900
 
   # Verify admin interface on pxe-vm-2 was configured
-  - playbook_location: {{ local_snaps_boot_dir }}/ci/playbooks/verify_intfs.yaml
+  - playbook_location: {{ local_snaps_boot_dir }}/ci/playbooks/verify_intf.yaml
     hosts:
     - build-vm
     variables:
-      snaps_boot_dir:
-        type: string
-        value: {{ src_copy_dir }}/snaps-boot
-      check_file:
-        type: string
-        value: /var/log/hello_world
-      ip_addr:
+      host_ip:
         type: port
         vm_name: pxe-vm-2
-        port_name: pxe-admin-port-2
+        port_name: pxe-priv-port-2
         port_value: ip_address
       username:
         type: string
-        value: {{ pxe_machine_user }}
+        value: root
       timeout:
         type: string
-        value: 300
-      run_as_root:
-        type: string
-        value: {{ run_as_root | default(True) }}
+        value: 1800
 
   # Verify admin interface on pxe-vm-3 was configured
-  - playbook_location: {{ local_snaps_boot_dir }}/ci/playbooks/verify_intfs.yaml
+  - playbook_location: {{ local_snaps_boot_dir }}/ci/playbooks/verify_intf.yaml
     hosts:
     - build-vm
     variables:
-      snaps_boot_dir:
-        type: string
-        value: {{ src_copy_dir }}/snaps-boot
-      check_file:
-        type: string
-        value: /var/log/hello_world
-      ip_addr:
+      host_ip:
         type: port
         vm_name: pxe-vm-3
-        port_name: pxe-admin-port-3
+        port_name: pxe-priv-port-3
         port_value: ip_address
       username:
         type: string
-        value: {{ pxe_machine_user }}
+        value: root
       timeout:
         type: string
         value: 300
-      run_as_root:
-        type: string
-        value: {{ run_as_root | default(True) }}
 {% endif %}
 
   # Statically configure interfaces
@@ -570,235 +562,169 @@ ansible:
       hosts_yaml_path:
         type: string
         value: {{ hosts_yaml_target_path }}
-      run_as_root:
-        type: string
-        value: {{ run_as_root | default(True) }}
 {% endif %}
 
   # Verify admin interface on pxe-vm-1 was configured
 {% if run_validation | default(True) %}
-  - playbook_location: {{ local_snaps_boot_dir }}/ci/playbooks/verify_intfs.yaml
+  - playbook_location: {{ local_snaps_boot_dir }}/ci/playbooks/verify_intf.yaml
     hosts:
     - build-vm
     variables:
-      snaps_boot_dir:
-        type: string
-        value: {{ src_copy_dir }}/snaps-boot
-      check_file:
-        type: string
-        value: /var/log/hello_world
-      ip_addr:
+      host_ip:
         type: port
         vm_name: pxe-vm-1
         port_name: pxe-admin-port-1
         port_value: ip_address
       username:
         type: string
-        value: {{ pxe_machine_user }}
+        value: root
       timeout:
         type: string
-        value: 120
-      run_as_root:
+        value: 300
+      delay:
         type: string
-        value: {{ run_as_root | default(True) }}
+        value: 120
 
   # Verify admin interface on pxe-vm-2 was configured
-  - playbook_location: {{ local_snaps_boot_dir }}/ci/playbooks/verify_intfs.yaml
+  - playbook_location: {{ local_snaps_boot_dir }}/ci/playbooks/verify_intf.yaml
     hosts:
     - build-vm
     variables:
-      snaps_boot_dir:
-        type: string
-        value: {{ src_copy_dir }}/snaps-boot
-      check_file:
-        type: string
-        value: /var/log/hello_world
-      ip_addr:
+      host_ip:
         type: port
         vm_name: pxe-vm-2
         port_name: pxe-admin-port-2
         port_value: ip_address
       username:
         type: string
-        value: {{ pxe_machine_user }}
+        value: root
       timeout:
         type: string
-        value: 120
-      run_as_root:
-        type: string
-        value: {{ run_as_root | default(True) }}
+        value: 300
 
   # Verify admin interface on pxe-vm-3 was configured
-  - playbook_location: {{ local_snaps_boot_dir }}/ci/playbooks/verify_intfs.yaml
+  - playbook_location: {{ local_snaps_boot_dir }}/ci/playbooks/verify_intf.yaml
     hosts:
     - build-vm
     variables:
-      snaps_boot_dir:
-        type: string
-        value: {{ src_copy_dir }}/snaps-boot
-      check_file:
-        type: string
-        value: /var/log/hello_world
-      ip_addr:
+      host_ip:
         type: port
         vm_name: pxe-vm-3
         port_name: pxe-admin-port-3
         port_value: ip_address
       username:
         type: string
-        value: {{ pxe_machine_user }}
+        value: root
       timeout:
         type: string
-        value: 120
-      run_as_root:
-        type: string
-        value: {{ run_as_root | default(True) }}
+        value: 300
 
   # Verify private interface on pxe-vm-1 was configured
-  - playbook_location: {{ local_snaps_boot_dir }}/ci/playbooks/verify_intfs.yaml
+  - playbook_location: {{ local_snaps_boot_dir }}/ci/playbooks/verify_intf.yaml
     hosts:
     - build-vm
     variables:
-      snaps_boot_dir:
-        type: string
-        value: {{ src_copy_dir }}/snaps-boot
-      ip_addr:
+      host_ip:
         type: port
         vm_name: pxe-vm-1
         port_name: pxe-priv-port-1
         port_value: ip_address
       username:
         type: string
-        value: {{ pxe_machine_user }}
+        value: root
       timeout:
         type: string
         value: 120
-      run_as_root:
-        type: string
-        value: {{ run_as_root | default(True) }}
 
   # Verify private interface on pxe-vm-2 was configured
-  - playbook_location: {{ local_snaps_boot_dir }}/ci/playbooks/verify_intfs.yaml
+  - playbook_location: {{ local_snaps_boot_dir }}/ci/playbooks/verify_intf.yaml
     hosts:
     - build-vm
     variables:
-      snaps_boot_dir:
-        type: string
-        value: {{ src_copy_dir }}/snaps-boot
-      ip_addr:
+      host_ip:
         type: port
         vm_name: pxe-vm-2
         port_name: pxe-priv-port-2
         port_value: ip_address
       username:
         type: string
-        value: {{ pxe_machine_user }}
+        value: root
       timeout:
         type: string
         value: 120
-      run_as_root:
-        type: string
-        value: {{ run_as_root | default(True) }}
 
   # Verify private interface on pxe-vm-3 was configured
-  - playbook_location: {{ local_snaps_boot_dir }}/ci/playbooks/verify_intfs.yaml
+  - playbook_location: {{ local_snaps_boot_dir }}/ci/playbooks/verify_intf.yaml
     hosts:
     - build-vm
     variables:
-      snaps_boot_dir:
-        type: string
-        value: {{ src_copy_dir }}/snaps-boot
-      ip_addr:
+      host_ip:
         type: port
         vm_name: pxe-vm-3
         port_name: pxe-priv-port-3
         port_value: ip_address
       username:
         type: string
-        value: {{ pxe_machine_user }}
+        value: root
       timeout:
         type: string
         value: 120
-      run_as_root:
-        type: string
-        value: {{ run_as_root | default(True) }}
 
   # Verify public interface on pxe-vm-1 was configured
-  - playbook_location: {{ local_snaps_boot_dir }}/ci/playbooks/verify_intfs.yaml
+  - playbook_location: {{ local_snaps_boot_dir }}/ci/playbooks/verify_intf.yaml
     hosts:
     - build-vm
     variables:
-      snaps_boot_dir:
-        type: string
-        value: {{ src_copy_dir }}/snaps-boot
-      ip_addr:
+      host_ip:
         type: port
         vm_name: pxe-vm-1
         port_name: pxe-pub-port-1
         port_value: ip_address
       username:
         type: string
-        value: {{ pxe_machine_user }}
+        value: root
       timeout:
         type: string
         value: 120
-      run_as_root:
-        type: string
-        value: {{ run_as_root | default(True) }}
 
   # Verify public interface on pxe-vm-2 was configured
-  - playbook_location: {{ local_snaps_boot_dir }}/ci/playbooks/verify_intfs.yaml
+  - playbook_location: {{ local_snaps_boot_dir }}/ci/playbooks/verify_intf.yaml
     hosts:
     - build-vm
     variables:
-      snaps_boot_dir:
-        type: string
-        value: {{ src_copy_dir }}/snaps-boot
-      ip_addr:
+      host_ip:
         type: port
         vm_name: pxe-vm-2
         port_name: pxe-pub-port-2
         port_value: ip_address
       username:
         type: string
-        value: {{ pxe_machine_user }}
+        value: root
       timeout:
         type: string
         value: 120
-      run_as_root:
-        type: string
-        value: {{ run_as_root | default(True) }}
 
   # Verify public interface on pxe-vm-3 was configured
-  - playbook_location: {{ local_snaps_boot_dir }}/ci/playbooks/verify_intfs.yaml
+  - playbook_location: {{ local_snaps_boot_dir }}/ci/playbooks/verify_intf.yaml
     hosts:
       - build-vm
     variables:
-      snaps_boot_dir:
-        type: string
-        value: {{ src_copy_dir }}/snaps-boot
-      ip_addr:
+      host_ip:
         type: port
         vm_name: pxe-vm-3
         port_name: pxe-pub-port-3
         port_value: ip_address
       username:
         type: string
-        value: {{ pxe_machine_user }}
+        value: root
       timeout:
         type: string
         value: 120
-      run_as_root:
-        type: string
-        value: {{ run_as_root | default(True) }}
 
   - playbook_location: {{ local_snaps_boot_dir }}/ci/playbooks/verify_apt.yaml
     hosts:
     - build-vm
     variables:
-      snaps_boot_dir:
-        type: string
-        value: {{ src_copy_dir }}/snaps-boot
       ip_addr:
         type: port
         vm_name: pxe-vm-1
@@ -806,80 +732,6 @@ ansible:
         port_value: ip_address
       username:
         type: string
-        value: {{ pxe_machine_user }}
-      timeout:
-        type: string
-        value: 120
-      run_as_root:
-        type: string
-        value: {{ run_as_root | default(True) }}
-      build_admin_ip:
-        type: port
-        vm_name: build-vm
-        port_name: build-admin-port
-        port_value: ip_address
-      http_proxy_port:
-        type: string
-        value: 3142
-
-  - playbook_location: {{ local_snaps_boot_dir }}/ci/playbooks/verify_apt.yaml
-    hosts:
-    - build-vm
-    variables:
-      snaps_boot_dir:
-        type: string
-        value: {{ src_copy_dir }}/snaps-boot
-      ip_addr:
-        type: port
-        vm_name: pxe-vm-2
-        port_name: pxe-pub-port-2
-        port_value: ip_address
-      username:
-        type: string
-        value: {{ pxe_machine_user }}
-      timeout:
-        type: string
-        value: 120
-      run_as_root:
-        type: string
-        value: {{ run_as_root | default(True) }}
-      build_admin_ip:
-        type: port
-        vm_name: build-vm
-        port_name: build-admin-port
-        port_value: ip_address
-      http_proxy_port:
-        type: string
-        value: 3142
-
-  - playbook_location: {{ local_snaps_boot_dir }}/ci/playbooks/verify_apt.yaml
-    hosts:
-    - build-vm
-    variables:
-      snaps_boot_dir:
-        type: string
-        value: {{ src_copy_dir }}/snaps-boot
-      ip_addr:
-        type: port
-        vm_name: pxe-vm-3
-        port_name: pxe-pub-port-3
-        port_value: ip_address
-      username:
-        type: string
-        value: {{ pxe_machine_user }}
-      timeout:
-        type: string
-        value: 120
-      run_as_root:
-        type: string
-        value: {{ run_as_root | default(True) }}
-      build_admin_ip:
-        type: port
-        vm_name: build-vm
-        port_name: build-admin-port
-        port_value: ip_address
-      http_proxy_port:
-        type: string
-        value: 3142
+        value: root
 
 {% endif %}

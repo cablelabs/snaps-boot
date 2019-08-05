@@ -13,7 +13,6 @@
 # limitations under the License.
 
 import logging
-import time
 
 from pyghmi.ipmi.command import Command
 from pyghmi.exceptions import IpmiException

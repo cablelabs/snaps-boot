@@ -1,6 +1,2 @@
 cryptography
-mock
-PyYAML
-requests
-netaddr
 pyghmi

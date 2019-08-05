@@ -1,0 +1,118 @@
+# Copyright (c) 2019 Cable Television Laboratories, Inc. ("CableLabs")
+#                    and others.  All rights reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at:
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# Setting up PXE servers on KVM.
+# see https://ubuntu.com/blog/early-experiences-with-pxe-net-boot-of-kvm-vms-on-ubuntu-for-s390x
+#
+# This playbook is responsible for creating all of the snaps-boot libvirt CI
+# servers
+---
+- hosts: all
+  gather_facts: no
+  tasks:
+    - name: Install dependencies
+      become: yes
+      apt:
+        name:
+          - libguestfs-tools
+          - cloud-image-utils
+
+- import_playbook: server.yaml
+  vars:
+    vm_name: "{{ build_vm_name }}"
+    vm_type: ubuntu
+    srvr_password: "{{ build_password }}"
+    public_keys:
+    - "{{ lookup('file', '{{ build_public_key_file }}') }}"
+    - "{{ local_public_key }}"
+    networks:
+    - name: "{{ build_net_name }}"
+      mac: "{{ build_mac_0 }}"
+      ip: "{{ build_ip_prfx }}.{{ build_ip_sfx }}"
+      bits: "{{ build_ip_bits }}"
+      gateway: "{{ build_gateway }}"
+      nic_name: "{{ build_nic_name }}"
+
+    - name: "{{ priv_net_name }}"
+      mac: "{{ build_mac_1 }}"
+      ip: "{{ priv_ip_prfx }}.{{ build_ip_sfx }}"
+      bits: "24"
+      gateway: "{{ priv_ip_prfx }}.1"
+      nic_name: "ens8"
+
+    - name: "{{ admin_net_name }}"
+      mac: "{{ build_mac_2 }}"
+      ip: "{{ admin_ip_prfx }}.{{ build_ip_sfx }}"
+      bits: "24"
+      gateway: "{{ admin_ip_prfx }}.1"
+      nic_name: "ens9"
+
+    - name: "{{ pub_net_name }}"
+      mac: "{{ build_mac_3 }}"
+      ip: "{{ pub_ip_prfx }}.{{ build_ip_sfx }}"
+      bits: "24"
+      gateway: "{{ pub_ip_prfx }}.1"
+      nic_name: "ens10"
+
+- import_playbook: server.yaml
+  vars:
+    vm_name: pxe-node-1
+    vm_type: pxe
+    networks:
+    - name: "{{ priv_net_name }}"
+      mac: "{{ node_1_mac_1 }}"
+
+    - name: "{{ admin_net_name }}"
+      mac: "{{ node_1_mac_2 }}"
+
+    - name: "{{ pub_net_name }}"
+      mac: "{{ node_1_mac_3 }}"
+
+- import_playbook: server.yaml
+  vars:
+    vm_name: pxe-node-2
+    vm_type: pxe
+    networks:
+    - name: "{{ priv_net_name }}"
+      mac: "{{ node_2_mac_1 }}"
+
+    - name: "{{ admin_net_name }}"
+      mac: "{{ node_2_mac_2 }}"
+
+    - name: "{{ pub_net_name }}"
+      mac: "{{ node_2_mac_3 }}"
+
+- import_playbook: server.yaml
+  vars:
+    vm_name: pxe-node-3
+    vm_type: pxe
+    networks:
+    - name: "{{ priv_net_name }}"
+      mac: "{{ node_3_mac_1 }}"
+
+    - name: "{{ admin_net_name }}"
+      mac: "{{ node_3_mac_2 }}"
+
+    - name: "{{ pub_net_name }}"
+      mac: "{{ node_3_mac_3 }}"
+
+- hosts: all
+  gather_facts: no
+  tasks:
+  - name: Wait for {{ build_ip_prfx }}.{{ build_ip_sfx }} port 22 to be opened
+    wait_for:
+      host: "{{ build_ip_prfx }}.{{ build_ip_sfx }}"
+      port: 22
+      timeout: 300
+      state: started

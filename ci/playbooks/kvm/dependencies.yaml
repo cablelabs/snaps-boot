@@ -1,4 +1,4 @@
-# Copyright (c) 2017 Cable Television Laboratories, Inc. ("CableLabs")
+# Copyright (c) 2019 Cable Television Laboratories, Inc. ("CableLabs")
 #                    and others.  All rights reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,12 +15,22 @@
 ---
 - hosts: all
 
+  become: yes
+  become_method: sudo
+  become_user: root
+
   gather_facts: no
 
   tasks:
-    - include_tasks: connect_via_ssh.yaml
-      vars:
-        ip_addr: "{{ item }}"
-        user: "{{ username }}"
-        to: "{{ timeout }}"
-      loop: "{{ host_ips }}"
+    - name: Install apt dependencies
+      apt:
+        update_cache: yes
+        name:
+          - qemu-kvm
+          - libvirt-clients
+          - libvirt-daemon-system
+          - bridge-utils
+          - virt-manager
+          - libvirt-bin
+          - virtinst
+          - python-lxml

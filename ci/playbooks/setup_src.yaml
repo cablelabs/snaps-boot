@@ -1,0 +1,82 @@
+# Copyright (c) 2017 Cable Television Laboratories, Inc. ("CableLabs")
+#                    and others.  All rights reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at:
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+---
+- hosts: all
+
+  gather_facts: no
+
+  pre_tasks:
+    - name: Install python
+      raw: sudo apt install python -y
+      register: out
+      until: out.rc == 0
+      retries: 30
+      delay: 5
+
+  tasks:
+    - name: Install apt dependencies
+      become: yes
+      become_method: sudo
+      become_user: root
+      apt:
+        update_cache: yes
+        name:
+          - python-pip
+      retries: 3
+      delay: 5
+      register: out
+
+    - name: Delete {{ src_copy_dir }}/snaps-boot directory
+      become: yes
+      become_method: sudo
+      become_user: root
+      file:
+        state: absent
+        dest: "{{ src_copy_dir }}/snaps-boot"
+      ignore_errors: yes
+
+    - name: Copy this source tree to {{ src_copy_dir }}/snaps-boot
+      synchronize:
+        src: ../../../
+        dest: "{{ src_copy_dir }}/snaps-boot"
+        dirs: yes
+        partial: yes
+        private_key: ~/.ssh/id_rsa
+        rsync_timeout: 60
+        use_ssh_args: yes
+        rsync_opts:
+          - "--exclude=.idea"
+          - "--exclude=venv"
+          - "--exclude=.git/objects/pack"
+          - "--exclude=ci/aws/terraform/.terraform"
+
+    - name: Install snaps-boot requirements-git.txt
+      become: yes
+      become_method: sudo
+      become_user: root
+      command: pip install -r {{ src_copy_dir }}/snaps-boot/requirements-git.txt
+      environment:
+        http_proxy: "http://{{ proxy_host }}:{{ proxy_port }}"
+        https_proxy: "https://{{ proxy_host }}:{{ proxy_port }}"
+
+    - name: Install snaps-boot
+      become: yes
+      become_method: sudo
+      become_user: root
+      pip:
+        name: file:///tmp/snaps-boot
+      environment:
+        http_proxy: "http://{{ proxy_host }}:{{ proxy_port }}"
+        https_proxy: "http://{{ proxy_host }}:{{ proxy_port }}"

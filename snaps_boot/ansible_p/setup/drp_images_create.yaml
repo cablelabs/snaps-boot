@@ -13,6 +13,15 @@
 ---
 - hosts: localhost
 
+  gather_facts: no
+
   tasks:
   - name: Upload Ubuntu 16.04 ISO to DRP
     command: drpcli bootenvs uploadiso ubuntu-16.04-install
+    register: out
+    until: out.rc == 0
+    retries: 3
+    delay: 10
+    environment:
+      http_proxy: "{{ http_proxy }}"
+      https_proxy: "{{ https_proxy }}"

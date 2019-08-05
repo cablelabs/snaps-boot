@@ -20,7 +20,6 @@
   tasks:
     - include_tasks: connect_via_ssh.yaml
       vars:
-        ip_addr: "{{ item }}"
+        ip_addr: "{{ host_ip }}"
         user: "{{ username }}"
         to: "{{ timeout }}"
-      loop: "{{ host_ips }}"

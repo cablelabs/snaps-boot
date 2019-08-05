@@ -19,12 +19,12 @@ PROVISION:
     subnet:
     - address: {{ priv_addr }}
       bind_host:
-      - ip: {{ admin_ip_1 }}
-        mac: {{ admin_mac_1 }}
-      - ip: {{ admin_ip_2 }}
-        mac: {{ admin_mac_2 }}
-      - ip: {{ admin_ip_3 }}
-        mac: {{ admin_mac_3 }}
+      - ip: {{ priv_ip_1 }}
+        mac: {{ priv_mac_1 }}
+      - ip: {{ priv_ip_2 }}
+        mac: {{ priv_mac_2 }}
+      - ip: {{ priv_ip_3 }}
+        mac: {{ priv_mac_3 }}
       broadcast-address: {{ broadcast_addr }}
       default-lease: 7600
       dn: {{ domain_name }}
@@ -38,17 +38,17 @@ PROVISION:
       type: management
   PROXY:
     ftp_proxy: ""
-    http_proxy: ""
-    https_proxy: ""
-    ngcacher_proxy: "http://{{ build_admin_ip }}:{{ http_proxy_port }}"
+    http_proxy: "{{ http_proxy }}"
+    https_proxy: "{{ https_proxy }}"
+    ngcacher_proxy: "http://{{ build_priv_ip }}:{{ http_proxy_port }}"
   PXE:
     # TODO - Determine exactly what this value does!
     password: "password"
-    server_ip: {{ build_admin_ip }}
+    server_ip: {{ build_priv_ip }}
     user: foo
   STATIC:
     host:
-    - access_ip: {{ admin_ip_1 }}
+    - access_ip: {{ priv_ip_1 }}
       name: Controller
       interfaces:
         - address: {{ admin_ip_1 }}
@@ -59,7 +59,7 @@ PROVISION:
           name: Admin_Interface
           netmask: {{ netmask }}
           type: tenant
-        - address: {{ private_ip_1 }}
+        - address: {{ priv_ip_1 }}
           dn: ""
           dns: ""
           gateway: "0.0.0.0"
@@ -75,7 +75,7 @@ PROVISION:
           name: Public_Interface
           netmask: {{ netmask }}
           type: data
-    - access_ip: {{ admin_ip_2 }}
+    - access_ip: {{ priv_ip_2 }}
       name: Compute1
       interfaces:
       - address: {{ admin_ip_2 }}
@@ -86,7 +86,7 @@ PROVISION:
         name: Admin_Interface
         netmask: {{ netmask }}
         type: tenant
-      - address: {{ private_ip_2 }}
+      - address: {{ priv_ip_2 }}
         dn: ""
         dns: ""
         gateway: "0.0.0.0"
@@ -102,7 +102,7 @@ PROVISION:
         name: Public_Interface
         netmask: {{ netmask }}
         type: data
-    - access_ip: {{ admin_ip_3 }}
+    - access_ip: {{ priv_ip_3 }}
       name: Compute2
       interfaces:
       - address: {{ admin_ip_3 }}
@@ -113,7 +113,7 @@ PROVISION:
         name: Admin_Interface
         netmask: {{ netmask }}
         type: tenant
-      - address: {{ private_ip_3 }}
+      - address: {{ priv_ip_3 }}
         dn: ""
         dns: ""
         gateway: "0.0.0.0"

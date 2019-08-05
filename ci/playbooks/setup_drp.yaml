@@ -1,0 +1,54 @@
+# Copyright (c) 2017 Cable Television Laboratories, Inc. ("CableLabs")
+#                    and others.  All rights reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at:
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+---
+- hosts: all
+
+  gather_facts: no
+
+  tasks:
+    - name: Apply template and copy hosts.yaml.j2 to {{ hosts_yaml_path }}
+      template:
+        src: templates/hosts.yaml.j2
+        dest: "{{ hosts_yaml_path }}"
+      vars:
+        admin_ip_1: "{{ admin_ip_prfx }}.{{ ip_suffix_1 }}"
+        admin_ip_2: "{{ admin_ip_prfx }}.{{ ip_suffix_2 }}"
+        admin_ip_3: "{{ admin_ip_prfx }}.{{ ip_suffix_3 }}"
+        priv_addr: "{{ priv_ip_prfx }}.0"
+        ip_range: "{{ priv_ip_prfx }}.101 {{ priv_ip_prfx }}.254"
+        priv_ip_1: "{{ priv_ip_prfx }}.{{ ip_suffix_1 }}"
+        priv_ip_2: "{{ priv_ip_prfx }}.{{ ip_suffix_2 }}"
+        priv_ip_3: "{{ priv_ip_prfx }}.{{ ip_suffix_3 }}"
+        public_ip_1: "{{ pub_ip_prfx }}.{{ ip_suffix_1 }}"
+        public_ip_2: "{{ pub_ip_prfx }}.{{ ip_suffix_2 }}"
+        public_ip_3: "{{ pub_ip_prfx }}.{{ ip_suffix_3 }}"
+        public_gateway: "{{ pub_ip_prfx }}.1"
+        build_priv_ip: "{{ priv_ip_prfx }}.{{ build_ip_suffix }}"
+        http_proxy: "http://{{ org_proxy }}"
+        https_proxy: "https://{{ org_proxy }}"
+
+    - name: Cleanup any old deployments
+      shell: "python {{ src_copy_dir }}/snaps-boot/iaas_launch.py -f {{ hosts_yaml_path }} -pc -or >> /tmp/snaps-boot.log"
+      ignore_errors: True
+
+    - name: Setup DRP
+      shell: "python {{ src_copy_dir }}/snaps-boot/iaas_launch.py -f {{ hosts_yaml_path }} -p -or >> /tmp/snaps-boot.log"
+      register: out
+      ignore_errors: True
+
+    - debug:
+        var: out_user.stderr_lines
+    - fail: msg="iaas_launch.py -f {{ hosts_yaml_path }} -p command failed"
+      when: out.rc != 0
