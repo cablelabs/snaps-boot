@@ -177,7 +177,7 @@ Configuration parameter defined in this section are explained below.
 | ftp_proxy | N | Proxy to be used for FTP. |
 | http_proxy | N | Proxy to be used for HTTP traffic. |
 | https_proxy | N | Proxy to be used for HTTPS traffic. |
-| ngcacher_proxy | N | Proxy should be set in case the servers are behind corporate firewalls. |
+| ngcacher_proxy | Y | Required always; irrespective of whether the servers are behind corporate firewall/Proxy or not. |
 
 
 > Note: If proxy configuration is not required use null value **“”**
