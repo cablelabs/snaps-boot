@@ -14,9 +14,9 @@
 # AWS EC2 Instances
 resource "aws_spot_instance_request" "snaps-boot-host" {
   ami = var.ami
-  spot_type = "one-time"
-  # Set wait_for_fulfillment to true to obtain instance attributes
-  wait_for_fulfillment = "true"
+  spot_type = var.spot_type
+  # wait_for_fulfillment needs to be true to obtain instance attributes
+  wait_for_fulfillment = var.wait_for_fulfillment
   instance_type = var.instance_type
   key_name = aws_key_pair.snaps-boot-pk.key_name
   availability_zone = var.availability_zone

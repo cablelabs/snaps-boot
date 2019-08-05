@@ -36,9 +36,9 @@ variable "availability_zone" {default = "us-west-2b"}
 //variable "ami" {default = "ami-07b4f3c02c7f83d59"}
 variable "ami" {default = "ami-06f2f779464715dc5"}
 
-//variable "instance_type" {default = "m5a.8xlarge"}
-//variable "instance_type" {default = "c5n.4xlarge"}
-//variable "instance_type" {default = "h1.4xlarge"}
+variable "spot_type" {default = "one-time"}
+// Set wait_for_fulfillment to true in order to obtain instance attributes
+variable "wait_for_fulfillment" {default = "true"}
 variable "instance_type" {default = "m5.metal"}
 variable "volume_size" {default = 50}
 
