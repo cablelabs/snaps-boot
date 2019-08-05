@@ -83,6 +83,7 @@ d-i partman/choose_partition select finish
 d-i partman/confirm boolean true
 d-i partman-lvm/confirm boolean true
 d-i partman-lvm/confirm_nooverwrite boolean true
+d-i partman-lvm/confirm_nochanges boolean true
 d-i partman/confirm_nooverwrite boolean true
 d-i partman-efi/non_efi_system boolean true
 # Partitioner Prompt Confirmations
@@ -90,8 +91,6 @@ d-i partman-auto/purge_lvm_from_device boolean true
 d-i partman-md/confirm boolean true
 d-i partman-md/confirm_nochanges boolean true
 d-i partman-md/confirm_nooverwrite boolean true
-d-i partman-lvm/confirm_nochanges boolean true
-d-i partman-lvm/confirm_nooverwrite boolean true
 
 # User Accounts
 d-i debian-installer/locale string en_US

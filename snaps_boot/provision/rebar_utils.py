@@ -43,7 +43,7 @@ def install_config_drp(rebar_session, boot_conf):
     logger.info('Setting up Digital Rebar service and objects')
     __setup_proxy_server(boot_conf)
     __setup_drp(boot_conf)
-    __create_images()
+    __create_images(boot_conf)
     __create_subnet(rebar_session, boot_conf)
     __create_workflows()
     __upload_postscript(boot_conf)
@@ -103,18 +103,20 @@ def __teardown_drp():
         logger.warn('Unable to teardown DRP - [%s]', e)
 
 
-def __create_images():
+def __create_images(boot_conf):
     """
     Creates a Digital Rebar image objects
     :raises Exceptions
     """
     # TODO/FIXME - find appropriate API to perform these tasks
     logger.info('Setting up Digital Rebar images')
-    pack_dir = pkg_resources.resource_filename('snaps_boot', 'drp_content')
+    prov_conf = boot_conf['PROVISION']
+    http_proxy = prov_conf['PROXY']['http_proxy']
+    https_proxy = prov_conf['PROXY']['https_proxy']
     playbook_path = pkg_resources.resource_filename(
         'snaps_boot.ansible_p.setup', 'drp_images_create.yaml')
     ansible_utils.apply_playbook(playbook_path, variables={
-        'content_dir': pack_dir})
+        'http_proxy': http_proxy, 'https_proxy': https_proxy})
 
 
 def __delete_images():
