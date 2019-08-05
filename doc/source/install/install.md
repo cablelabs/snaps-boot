@@ -99,7 +99,7 @@ node is behind corporate firewall. Set the http/https proxy for apt.
 ### 2.4 Build Server Setup
 
 The Build Server is where you run SNAPS-Boot. You will need to install
-Ubuntu 16.04 Xenial as host OS. This host needs to be able to reach the Internet
+Ubuntu 18.04 Bionic as host OS. This host needs to be able to reach the Internet
 to download the software.
 
 1. Install Ubuntu on the Build Server

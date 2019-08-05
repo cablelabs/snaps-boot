@@ -72,7 +72,7 @@ openstack:
         format: qcow2
         public: True
         image_user: ubuntu
-        download_url: https://cloud-images.ubuntu.com/xenial/current/xenial-server-cloudimg-amd64-disk1.img
+        download_url: https://cloud-images.ubuntu.com/bionic/current/bionic-server-cloudimg-amd64.img
     - image:
         os_creds_name: admin-creds
         name: pxe-image-{{ build_num }}
