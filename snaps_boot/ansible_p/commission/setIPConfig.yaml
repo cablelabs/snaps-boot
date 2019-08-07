@@ -54,7 +54,7 @@
   - name: Configuring nodes with static ip for external network
     blockinfile:
       dest: /etc/netplan/01-netcfg.yaml
-      insertafter: "ethernets:"
+      insertafter: EOF
       marker: "# {mark} ANSIBLE MANAGED BLOCK {{ iface }}"
       block: |
         # Make sure the interface block below has enough indentation
@@ -70,7 +70,7 @@
   - name: Configuring nodes with static ip for tenant network
     blockinfile:
       dest: /etc/netplan/01-netcfg.yaml
-      insertafter: "ethernets:"
+      insertafter: EOF
       marker: "# {mark} ANSIBLE MANAGED BLOCK {{ iface }}"
       block: |
         # Make sure the interface block below has enough indentation
