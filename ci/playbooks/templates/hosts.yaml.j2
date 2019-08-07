@@ -59,7 +59,7 @@ PROVISION:
           name: Admin_Interface
           netmask: {{ netmask }}
           type: tenant
-        - address: {{ priv_ip_1 }}
+        - address: {{ priv_ip_1 }}/24
           dn: ""
           dns: ""
           gateway: "0.0.0.0"
@@ -86,7 +86,7 @@ PROVISION:
         name: Admin_Interface
         netmask: {{ netmask }}
         type: tenant
-      - address: {{ priv_ip_2 }}
+      - address: {{ priv_ip_2 }}/24
         dn: ""
         dns: ""
         gateway: "0.0.0.0"
@@ -113,7 +113,7 @@ PROVISION:
         name: Admin_Interface
         netmask: {{ netmask }}
         type: tenant
-      - address: {{ priv_ip_3 }}
+      - address: {{ priv_ip_3 }}/24
         dn: ""
         dns: ""
         gateway: "0.0.0.0"
