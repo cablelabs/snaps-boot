@@ -40,7 +40,7 @@
     when: result.rc != 0
 
   - name: Install Digital Rebar
-    command: /tmp/drp-install.sh --version='tip' install
+    command: /tmp/drp-install.sh --version='stable' install
     when: result.rc != 0
 
   - name: Add static IP to Digital Rebar service configuration file
