@@ -34,7 +34,7 @@
 
   - name: Download Digital Rebar
     get_url:
-      url: http://get.rebar.digital/tip
+      url: http://get.rebar.digital/stable
       dest: /tmp/drp-install.sh
       mode: 0755
     when: result.rc != 0
