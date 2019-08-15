@@ -41,9 +41,9 @@
 
   - name: Install Digital Rebar
     command: "/tmp/drp-install.sh --version='{{ drp_version }}' install"
-    retries: 10
+    retries: 3
     delay: 10
-    when: result.rc != 0
+    ignore_errors: yes
 
   - name: Check to see if DRP has been installed
     command: drpcli
