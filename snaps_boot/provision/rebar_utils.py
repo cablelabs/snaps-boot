@@ -86,11 +86,13 @@ def __setup_drp(boot_conf):
     prov_conf = boot_conf['PROVISION']
     http_proxy = prov_conf['PROXY']['http_proxy']
     https_proxy = prov_conf['PROXY']['https_proxy']
+    drp_version = prov_conf['digitalRebar'].get('version', 'stable')
     playbook_path = pkg_resources.resource_filename(
         'snaps_boot.ansible_p.setup', 'drp_setup.yaml')
     ansible_utils.apply_playbook(playbook_path, variables={
         'server_ip': boot_conf['PROVISION']['PXE']['server_ip'],
-        'http_proxy': http_proxy, 'https_proxy': https_proxy})
+        'http_proxy': http_proxy, 'https_proxy': https_proxy,
+        'drp_version': drp_version})
 
 
 def __teardown_drp():

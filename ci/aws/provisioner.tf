@@ -129,6 +129,9 @@ ${var.ANSIBLE_CMD} -u ${var.sudo_user} \
 ${var.SETUP_KVM_SERVERS} \
 --key-file ${var.private_key_file} \
 --extra-vars "\
+aws_access_key=${var.access_key}
+aws_secret_key=${var.secret_key}
+image_s3_bucket=snaps-ci
 pxe_img=/var/lib/libvirt/images/libvirt-pxe.qcow2
 target_user=${var.sudo_user}
 build_net_name=${var.build_net_name}
@@ -206,6 +209,7 @@ ${var.SETUP_DRP} \
 --key-file ${local.remote_priv_key_file} \
 --ssh-common-args="-o ProxyCommand='ssh ${var.sudo_user}@${aws_spot_instance_request.snaps-boot-host.public_ip} nc ${var.build_ip_prfx}.${var.build_ip_suffix} 22'" \
 --extra-vars "\
+nameserver=${var.build_ip_prfx}.1
 src_copy_dir=${var.src_copy_dir}
 post_script_file=${var.post_script_file}
 priv_ip_prfx=${var.priv_ip_prfx}
