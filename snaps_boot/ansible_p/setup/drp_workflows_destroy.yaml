@@ -14,5 +14,5 @@
 - hosts: localhost
 
   tasks:
-  - name: Destroy DRP Workflows for Ubuntu 16.04
-    command: drpcli workflows destroy ubuntu16
+  - name: Destroy DRP Workflows for SNAPS
+    command: drpcli workflows destroy snaps-ubuntu-18.04-hwe

@@ -74,7 +74,7 @@ The current release of SNAPS-Boot is tested on the following platform.
 
 | Category | Software version |
 | -------- | ---------------- |
-| Operating System |  Ubuntu 16.04 |
+| Operating System |  Ubuntu 18.04 |
 | Scripting | Python 2.7.X |
 | Framework |  Ansible 2.3.3.0 |
 
@@ -99,7 +99,7 @@ node is behind corporate firewall. Set the http/https proxy for apt.
 ### 2.4 Build Server Setup
 
 The Build Server is where you run SNAPS-Boot. You will need to install
-Ubuntu 16.04 Xenial as host OS. This host needs to be able to reach the Internet
+Ubuntu 18.04 Bionic as host OS. This host needs to be able to reach the Internet
 to download the software.
 
 1. Install Ubuntu on the Build Server

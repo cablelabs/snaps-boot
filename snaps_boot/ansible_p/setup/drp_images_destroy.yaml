@@ -14,5 +14,5 @@
 - hosts: localhost
 
   tasks:
-  - name: Delete Ubuntu 16.04 ISO to DRP
-    command: drpcli bootenvs destroy ubuntu-16.04-install
+  - name: Delete Ubuntu 18.04 ISO to DRP
+    command: drpcli bootenvs destroy hwe-ubuntu-18.04-install

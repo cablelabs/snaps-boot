@@ -1,7 +1,7 @@
 {
   "Available": true,
   "BootParams": "debian-installer/locale=en_US.utf8 console-setup/layoutcode=us keyboard-configuration/layoutcode=us netcfg/dhcp_timeout=120 netcfg/choose_interface=auto url={{.Machine.Url}}/seed netcfg/get_hostname={{.Machine.Name}} root=/dev/ram rw quiet {{if .ParamExists \"kernel-console\"}}{{.Param \"kernel-console\"}}{{end}} -- {{if .ParamExists \"kernel-console\"}}{{.Param \"kernel-console\"}}{{end}}",
-  "Description": "Ubuntu-16.04 HWE kernel install points to the latest release version",
+  "Description": "Ubuntu-18.04 HWE kernel install",
   "Documentation": "NOTE: Default Ubuntu ISOs will attempt to check internet repositories, \nthis can cause problems during provisioning if your environment does not have outbound access.\nWorkaround this by defining Options 3 (Gateway) and 6 (DNS) for your machines' Subnet.\n",
   "Errors": [],
   "Initrds": [
@@ -14,16 +14,15 @@
     "icon": "linux",
     "title": "SNAPS Content"
   },
-  "Name": "hwe-ubuntu-16.04-install",
+  "Name": "hwe-ubuntu-18.04-install",
   "OS": {
-    "Codename": "",
+    "Codename": "Bionic Beaver",
     "Family": "ubuntu",
-    "IsoFile": "ubuntu-16.04.6-server-amd64.iso",
-    "IsoSha256": "c94de1cc2e10160f325eb54638a5b5aa38f181d60ee33dae9578d96d932ee5f8",
-    "IsoUrl": "http://mirror.math.princeton.edu/pub/ubuntu-iso/16.04/ubuntu-16.04.6-server-amd64.iso",
-    "Name": "ubuntu-16.04",
-    "Version": "16.04"
-  },
+    "IsoFile": "ubuntu-18.04.3-server-amd64.iso",
+    "IsoSha256": "a5b0ea5918f850124f3d72ef4b85bda82f0fcd02ec721be19c1a6952791c8ee8",
+    "IsoUrl": "http://cdimage.ubuntu.com/releases/18.04/release/ubuntu-18.04.3-server-amd64.iso",
+    "Name": "ubuntu-18.04",
+    "Version": "18.04"  },
   "OnlyUnknown": false,
   "OptionalParams": [
     "part-scheme",
