@@ -18,6 +18,12 @@
   gather_facts: no
 
   tasks:
+    - name: Configure DNS
+      become: yes
+      lineinfile:
+        path: /etc/resolv.conf
+        line: "nameserver {{ nameserver }}"
+
     - name: Apply template and copy hosts.yaml.j2 to {{ hosts_yaml_path }}
       template:
         src: templates/hosts.yaml.j2
@@ -49,6 +55,6 @@
       ignore_errors: True
 
     - debug:
-        var: out_user.stderr_lines
+        var: out.stderr_lines
     - fail: msg="iaas_launch.py -f {{ hosts_yaml_path }} -p command failed"
       when: out.rc != 0

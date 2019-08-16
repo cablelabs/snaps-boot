@@ -34,14 +34,19 @@
 
   - name: Download Digital Rebar
     get_url:
-      url: http://get.rebar.digital/tip
+      url: "http://get.rebar.digital/{{ drp_version }}"
       dest: /tmp/drp-install.sh
       mode: 0755
     when: result.rc != 0
 
   - name: Install Digital Rebar
-    command: /tmp/drp-install.sh --version='tip' install
-    when: result.rc != 0
+    command: "/tmp/drp-install.sh --version='{{ drp_version }}' install"
+    retries: 3
+    delay: 10
+    ignore_errors: yes
+
+  - name: Check to see if DRP has been installed
+    command: drpcli
 
   - name: Add static IP to Digital Rebar service configuration file
     lineinfile:
