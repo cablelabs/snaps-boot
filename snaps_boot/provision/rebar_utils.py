@@ -29,8 +29,8 @@ from snaps_common.ansible_snaps import ansible_utils
 
 logger = logging.getLogger('rebar_utils')
 
-LOCAL_PRIV_KEY_FILE = os.path.expanduser('~/snaps-boot.priv_key')
-LOCAL_PUB_KEY_FILE = os.path.expanduser('~/snaps-boot.pub_key')
+LOCAL_PRIV_KEY_FILE = os.path.expanduser('~/.ssh/id_rsa')
+LOCAL_PUB_KEY_FILE = os.path.expanduser('~/.ssh/id_rsa.pub')
 
 
 def install_config_drp(rebar_session, boot_conf):
@@ -324,26 +324,13 @@ def __instantiate_drp_reservations(rebar_session, boot_conf):
     return out
 
 
-def __generate_ssh_keys():
+def __get_pub_key():
     """
     Ensures that the build server has SSH keys to inject into nodes
     :return: the public key value
     """
     logger.info('Generate SSH keys')
     public_key, private_key, created = __create_keys()
-
-    if created:
-        playbook_path = pkg_resources.resource_filename(
-            'snaps_boot.ansible_p.setup', 'copy_keys.yaml')
-
-        # TODO/FIXME - Make this key location configurable
-        ansible_utils.apply_playbook(
-            playbook_path,
-            variables={
-                'pub_key_val': public_key,
-                'priv_key_val': private_key,
-            })
-
     return public_key
 
 
@@ -407,31 +394,32 @@ def __create_machines(rebar_session, boot_conf):
     :param boot_conf: the boot configuration
     :raises Exceptions
     """
-    public_key = __generate_ssh_keys()
+    public_key = __get_pub_key()
 
     machines = __instantiate_drp_machines(rebar_session, boot_conf)
     logger.info('Attempting to create %s DRP machines', len(machines))
     for machine in machines:
         logger.debug('Attempting to create DRP machine %s', machine)
         machine.create()
-        __add_machine_params(boot_conf, machine, public_key)
+        # TODO - Make keys configurable for different users
+        __add_machine_params(boot_conf, machine, {'root': public_key})
         logger.info('Created machine %s', machine)
 
 
-def __add_machine_params(boot_conf, machine, public_key):
+def __add_machine_params(boot_conf, machine, pk_dict):
     """
     Adds parameters to machine object
     :param boot_conf: the boot configuration
     :raises Exception
     """
     logger.info('Adding parameters to machine %s', machine)
-    params = __create_machine_params(boot_conf, machine, public_key)
+    params = __create_machine_params(boot_conf, machine, pk_dict)
     for param in params:
         logger.info('Adding param %s', param)
         machine.add_param_values(param)
 
 
-def __create_machine_params(boot_conf, machine, public_key):
+def __create_machine_params(boot_conf, machine, pk_dict):
     """
     Instantiates all drp-python ParamsConfigModel objects
     :param boot_conf: the boot configuration
@@ -506,7 +494,7 @@ def __create_machine_params(boot_conf, machine, public_key):
     out.append(ParamsModel(name='select-kickseed',
                            value='snaps-net-seed.tmpl'))
 
-    out.append(ParamsModel(name='access-keys', value={'root': public_key}))
+    out.append(ParamsModel(name='access-keys', value=pk_dict))
     return out
 
 
