@@ -375,13 +375,8 @@ def __create_keys(key_size=2048):
 
 
 def __get_existing_keys():
-    os.chmod(LOCAL_PUB_KEY_FILE, 0600)
-    os.chmod(LOCAL_PRIV_KEY_FILE, 0600)
-
-    logger.info('File [%s] exists [%s]',
-                LOCAL_PUB_KEY_FILE, os.path.isfile(LOCAL_PUB_KEY_FILE))
-    logger.info('File [%s] exists [%s]',
-                LOCAL_PRIV_KEY_FILE, os.path.isfile(LOCAL_PRIV_KEY_FILE))
+    logger.info('Checking if file [%s] exists', LOCAL_PUB_KEY_FILE)
+    logger.info('Checking if file [%s] exists', LOCAL_PRIV_KEY_FILE)
 
     if (not os.path.isfile(LOCAL_PUB_KEY_FILE)
             or not os.path.isfile(LOCAL_PRIV_KEY_FILE)):

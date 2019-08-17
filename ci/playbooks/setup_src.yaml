@@ -18,6 +18,20 @@
   gather_facts: no
 
   tasks:
+    - name: apt update
+      become: yes
+      become_method: sudo
+      become_user: root
+      apt:
+        update_cache: yes
+      register: result_update
+      until: result_update is not failed
+      retries: 30
+      delay: 5
+    - fail:
+        msg: result_update.stdout
+      when: result_update is failed
+
     - name: Install python-pip
       become: yes
       become_method: sudo
@@ -25,10 +39,13 @@
       apt:
         update_cache: yes
         name: python-pip
-      register: result
-      until: result is not failed
+      register: result_pip
+      until: result_pip is not failed
       retries: 30
       delay: 5
+    - fail:
+        msg: result_pip.stdout
+      when: result_pip is failed
 
     - name: Delete {{ src_copy_dir }}/snaps-boot directory
       become: yes
