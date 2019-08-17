@@ -330,8 +330,13 @@ def __get_pub_key():
     :return: the public key value
     """
     logger.info('Generate SSH keys')
-    public_key, private_key, created = __create_keys()
-    return public_key
+    public_key, private_key = __get_existing_keys()
+
+    if public_key and private_key:
+        logger.info('Existing pubic key [%s]', public_key)
+        return public_key
+    else:
+        return __create_keys()[0]
 
 
 def __create_keys(key_size=2048):
@@ -361,8 +366,8 @@ def __create_keys(key_size=2048):
             format=serialization.PrivateFormat.TraditionalOpenSSL,
             encryption_algorithm=serialization.NoEncryption())
 
-        logger.info('Generated public key - %s', public_key)
-        logger.info('Generated private key - %s', private_key)
+        logger.debug('Generated public key - %s', public_key)
+        logger.debug('Generated private key - %s', private_key)
 
         __store_current_key(public_key, private_key)
 
@@ -370,6 +375,14 @@ def __create_keys(key_size=2048):
 
 
 def __get_existing_keys():
+    os.chmod(LOCAL_PUB_KEY_FILE, 0600)
+    os.chmod(LOCAL_PRIV_KEY_FILE, 0600)
+
+    logger.info('File [%s] exists [%s]',
+                LOCAL_PUB_KEY_FILE, os.path.isfile(LOCAL_PUB_KEY_FILE))
+    logger.info('File [%s] exists [%s]',
+                LOCAL_PRIV_KEY_FILE, os.path.isfile(LOCAL_PRIV_KEY_FILE))
+
     if (not os.path.isfile(LOCAL_PUB_KEY_FILE)
             or not os.path.isfile(LOCAL_PRIV_KEY_FILE)):
         logger.warn('Keys not found [%s] & [%s]',
@@ -389,8 +402,10 @@ def __store_current_key(pubic_key, private_key):
                 LOCAL_PUB_KEY_FILE, LOCAL_PRIV_KEY_FILE)
     with open(LOCAL_PUB_KEY_FILE, 'wb') as pub_key_file:
         pub_key_file.write(pubic_key)
+        os.chmod(LOCAL_PUB_KEY_FILE, 0600)
     with open(LOCAL_PRIV_KEY_FILE, 'wb') as priv_key_file:
         priv_key_file.write(private_key)
+        os.chmod(LOCAL_PRIV_KEY_FILE, 0600)
 
 
 def __create_machines(rebar_session, boot_conf):

@@ -18,14 +18,13 @@
   gather_facts: no
 
   tasks:
-    - name: Install apt dependencies
+    - name: Install python-pip
       become: yes
       become_method: sudo
       become_user: root
       apt:
         update_cache: yes
-        name:
-          - python-pip
+        name: python-pip
       register: result
       until: result is not failed
       retries: 30
