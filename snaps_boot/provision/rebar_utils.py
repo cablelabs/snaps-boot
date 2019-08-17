@@ -345,8 +345,10 @@ def __create_keys(key_size=2048):
     public_key, private_key = __get_existing_keys()
 
     if public_key and private_key:
+        logger.info('Existing pubic key [%s]', public_key)
         return public_key, private_key, False
     else:
+        logger.info('Generate keys')
         keys = rsa.generate_private_key(
             backend=default_backend(), public_exponent=65537,
             key_size=key_size)
@@ -370,6 +372,8 @@ def __create_keys(key_size=2048):
 def __get_existing_keys():
     if (not os.path.isfile(LOCAL_PUB_KEY_FILE)
             or not os.path.isfile(LOCAL_PRIV_KEY_FILE)):
+        logger.warn('Keys not found [%s] & [%s]',
+                    LOCAL_PUB_KEY_FILE, LOCAL_PRIV_KEY_FILE)
         return None, None
 
     with open(LOCAL_PUB_KEY_FILE, 'r') as ssh_pub_key_file:
@@ -381,6 +385,8 @@ def __get_existing_keys():
 
 
 def __store_current_key(pubic_key, private_key):
+    logger.info('Writing keys to [%s] & [%s]',
+                LOCAL_PUB_KEY_FILE, LOCAL_PRIV_KEY_FILE)
     with open(LOCAL_PUB_KEY_FILE, 'wb') as pub_key_file:
         pub_key_file.write(pubic_key)
     with open(LOCAL_PRIV_KEY_FILE, 'wb') as priv_key_file:

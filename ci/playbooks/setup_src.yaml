@@ -17,14 +17,6 @@
 
   gather_facts: no
 
-  pre_tasks:
-    - name: Install python
-      raw: sudo apt install python -y
-      register: out
-      until: out.rc == 0
-      retries: 30
-      delay: 5
-
   tasks:
     - name: Install apt dependencies
       become: yes
@@ -34,9 +26,10 @@
         update_cache: yes
         name:
           - python-pip
+      register: result
+      until: result is not failed
       retries: 3
       delay: 5
-      register: out
 
     - name: Delete {{ src_copy_dir }}/snaps-boot directory
       become: yes
