@@ -17,6 +17,14 @@
 
   gather_facts: no
 
+  pre_tasks:
+    - name: Install python
+      raw: sudo apt install python python-apt -y
+      register: out
+      until: out.rc == 0
+      retries: 30
+      delay: 5
+
   tasks:
     - name: Install apt dependencies
       become: yes
