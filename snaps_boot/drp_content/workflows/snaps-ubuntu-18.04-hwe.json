@@ -8,11 +8,11 @@
     "icon": "tag",
     "title": ""
   },
-  "Name": "snaps-ubuntu-16.04-hwe",
-  "Description": "Install ubuntu 16.04 HWE kernel",
+  "Name": "snaps-ubuntu-18.04-hwe",
+  "Description": "Install ubuntu 18.04 HWE kernel",
   "Documentation": "",
   "Stages": [
-    "hwe-ubuntu-16.04-install",
+    "hwe-ubuntu-18.04-install",
     "snaps-post-install",
     "complete"
   ]

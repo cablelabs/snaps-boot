@@ -57,6 +57,7 @@ d-i partman-auto/method string lvm
 # contains an old LVM configuration, the user will normally receive a
 # warning. This can be preseeded away...
 d-i partman-lvm/device_remove_lvm boolean true
+d-i partman-lvm/device_remove_lvm_span boolean true
 # The same applies to pre-existing software RAID array:
 d-i partman-md/device_remove_md boolean true
 # And the same goes for the confirmation to write the lvm partitions.
@@ -82,17 +83,20 @@ d-i partman/choose_partition select finish
 d-i partman/confirm boolean true
 d-i partman-lvm/confirm boolean true
 d-i partman-lvm/confirm_nooverwrite boolean true
+d-i partman-lvm/confirm_nochanges boolean true
 d-i partman/confirm_nooverwrite boolean true
 d-i partman-efi/non_efi_system boolean true
-
+# Partitioner Prompt Confirmations
+d-i partman-auto/purge_lvm_from_device boolean true
+d-i partman-md/confirm boolean true
+d-i partman-md/confirm_nochanges boolean true
+d-i partman-md/confirm_nooverwrite boolean true
 
 # User Accounts
 d-i debian-installer/locale string en_US
 d-i passwd/root-login boolean true
 d-i passwd/root-password password {{.Param "seed/root-password"}}
 d-i passwd/root-password-again password {{.Param "seed/root-password"}}
-
-
 
 # Create new user
 d-i passwd/user-fullname string {{.Param "seed/user-fullname"}}
@@ -102,7 +106,6 @@ d-i passwd/user-password-again password {{.Param "seed/user-password"}}
 
 # Don't encrypt the home directory
 d-i user-setup/encrypt-home boolean false
-
 
 # Verbose output and no boot splash screen.
 d-i debian-installer/quiet boolean false
@@ -121,16 +124,33 @@ d-i apt-setup/universe boolean true
 
 ### Package selection
 #tasksel tasksel/first multiselect ubuntu-server
+d-i debian-installer/allow_unauthenticated string true
 tasksel	tasksel/force-tasks	string server
+tasksel tasksel/first multiselect standard, server
+d-i pkgsel/include string openssh-server curl python efibootmgr {{if .ParamExists "extra-packages"}}{{ range $index, $element := (.Param "extra-packages") }}{{if $index}} {{end}}{{$element}}{{end}}{{end}}
+d-i pkgsel/update-policy select none
+d-i pkgsel/language-pack-patterns	string
+d-i pkgsel/install-language-support	boolean false
 
+{{if .ParamExists "ubuntu-hwe-kernel"}}{{if eq (.Param "ubuntu-hwe-kernel") true -}}
+{{$osver := (printf "%s" .Env.OS.Version) -}}
+# set the HWE kernel if requested via the Param "ubuntu-hwe-kernel" set to true
+# WARNING: verify that 'hwe-{{$osver}}' is valid HWE for selected Ubuntu version
+d-i  base-installer/kernel/altmeta   string hwe-{{$osver}}
+{{end}}{{end -}}
 
 # Individual additional packages to install
-d-i pkgsel/include string openssh-server build-essential curl wget ntp python libltdl7 {{if .ParamExists "extra-packages"}}{{ range $index, $element := (.Param "extra-packages") }}{{if $index}} {{end}}{{$element}}{{end}}{{end}}
-#d-i pkgsel/language-packs multiselect en
-d-i 	pkgsel/language-pack-patterns	string
-d-i 	pkgsel/install-language-support	boolean false
+d-i pkgsel/include string openssh-server build-essential curl wget python libltdl7 {{if .ParamExists "extra-packages"}}{{ range $index, $element := (.Param "extra-packages") }}{{if $index}} {{end}}{{$element}}{{end}}{{end}}
 
 {{if .ParamExists "kernel-console"}}d-i debian-installer/add-kernel-opts string {{.Param "kernel-console"}}{{end}}
+
+# Completion questions
+d-i cdrom-detect/eject boolean false
+d-i finish-install/reboot_in_progress note
+
+xserver-xorg xserver-xorg/autodetect_monitor boolean true
+xserver-xorg xserver-xorg/config/monitor/selection-method select medium
+xserver-xorg xserver-xorg/config/monitor/mode-list select 1024x768 @ 60 Hz
 
 ### Boot loader installation
 # This is fairly safe to set, it makes grub install automatically to the MBR

@@ -1,7 +1,7 @@
 {
   "Available": true,
-  "BootEnv": "hwe-ubuntu-16.04-install",
-  "Description": "Ubuntu 16.04 HWE stack installation stage.  References latest release",
+  "BootEnv": "hwe-ubuntu-18.04-install",
+  "Description": "Ubuntu 18.04 HWE stack installation stage.  References latest release",
   "Documentation": "",
   "Errors": [],
   "Meta": {
@@ -9,7 +9,7 @@
     "icon": "download",
     "title": "SNAPS Content"
   },
-  "Name": "hwe-ubuntu-16.04-install",
+  "Name": "hwe-ubuntu-18.04-install",
   "OptionalParams": [],
   "Profiles": [],
   "ReadOnly": false,

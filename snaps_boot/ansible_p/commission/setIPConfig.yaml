@@ -27,36 +27,73 @@
     https_proxy: "{{ https_proxy }}"
 
   tasks:
-  - name: Configuring nodes with static ip for mangment network
-    lineinfile:
-      dest: /etc/network/interfaces
-      state: present
-      backrefs: yes
-      regexp: "iface {{ iface }} inet dhcp"
-      line: "iface {{ iface}} inet static\naddress {{ address }} \nnetmask {{netmask}}"
+  - name: Configuring nodes with netplan
+    blockinfile:
+      dest: /etc/netplan/01-netcfg.yaml
+      backup: yes
+      create: yes
+      insertbefore: BOF
+      block: |
+        network:
+          version: 2
+          renderer: networkd
+          ethernets:
+
+  - name: Configuring nodes with static ip for management network
+    blockinfile:
+      dest: /etc/netplan/01-netcfg.yaml
+      insertafter: "ethernets:"
+      marker: "# {mark} ANSIBLE MANAGED BLOCK {{ iface }}"
+      block: |
+        # Make sure the interface block below has enough indentation
+                {{ iface }}:
+                  addresses: [{{ address }}]
+                  dhcp4: no
     when: is_mng|bool and true
 
   - name: Configuring nodes with static ip for external network
-    lineinfile:
-      dest: /etc/network/interfaces
-      line: "auto {{ iface }}\niface {{ iface}} inet static\naddress {{ address }} \nnetmask {{ netmask }} \ngateway {{ gateway }}\ndns-nameservers {{ dns }}\ndns-search {{ dn }}\nup route add netmask {{ netmask }} gw {{ gateway }}"
+    blockinfile:
+      dest: /etc/netplan/01-netcfg.yaml
+      insertafter: EOF
+      marker: "# {mark} ANSIBLE MANAGED BLOCK {{ iface }}"
+      block: |
+        # Make sure the interface block below has enough indentation
+                {{ iface }}:
+                  addresses: [{{ address }}]
+                  dhcp4: no
+                  gateway4: {{ gateway }}
+                  nameservers:
+                    addresses: [{{ dns }}]
+                    search: [{{ dn }}]
     when: is_ext|bool and true
 
   - name: Configuring nodes with static ip for tenant network
-    lineinfile:
-      dest: /etc/network/interfaces
-      line: "auto {{ iface }}\niface {{ iface }} inet static\naddress {{ address }} \nnetmask {{ netmask }}"
+    blockinfile:
+      dest: /etc/netplan/01-netcfg.yaml
+      insertafter: EOF
+      marker: "# {mark} ANSIBLE MANAGED BLOCK {{ iface }}"
+      block: |
+        # Make sure the interface block below has enough indentation
+                {{ iface }}:
+                  addresses: [{{ address }}]
+                  dhcp4: no
     when: is_tnt|bool and true
 
-  - name: Backing up resolv.conf
-    command: cp /etc/resolvconf/resolv.conf.d/base /etc/resolvconf/resolv.conf.d/base.bak
-    ignore_errors: True
+  - name: Adding nameserver entries in resolved.conf
+    blockinfile:
+      dest: /etc/systemd/resolved.conf
+      backup: yes
+      insertafter: "[Resolve]"
+      marker: "# {mark} ANSIBLE MANAGED BLOCK FOR DNS"
+      block: |
+        DNS={{ dns }}
+        Domains={{ dn }}
     when: is_ext|bool and true
 
-  - name: Adding nameserver entries in resolv.conf
-    lineinfile:
-      dest: /etc/resolvconf/resolv.conf.d/base
-      line: "nameserver {{ dns }}\nsearch {{ dn }}"
+  - name: Creating a new symlink for resolv.conf
+    shell: |
+      unlink /etc/resolv.conf
+      ln -s /run/systemd/resolve/resolv.conf /etc/resolv.conf
     when: is_ext|bool and true
 
   - name: Copy apt.conf to /etc/apt/apt.conf.bak
@@ -64,6 +101,20 @@
       src: /etc/apt/apt.conf
       dest: /etc/apt/apt.conf.bak
       remote_src: True
+    when: is_ext|bool and true
+
+  - name: Set name resolver order
+    lineinfile:
+      path: /etc/nsswitch.conf
+      backup: yes
+      regexp: '^hosts:'
+      line: 'hosts:	files resolve [!UNAVAIL=return] dns'
+    when: is_ext|bool and true
+
+  - name: Set IPv4 preference for apt
+    lineinfile:
+      path: /etc/gai.conf
+      line: 'precedence ::ffff:0:0/96 100'
     when: is_ext|bool and true
 
   - name: restarting system
