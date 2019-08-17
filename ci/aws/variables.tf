@@ -26,14 +26,6 @@ variable "private_key_file" {default = "~/.ssh/id_rsa"}
 variable "sudo_user" {default = "ubuntu"}
 variable "region" {default = "us-west-2"}
 variable "availability_zone" {default = "us-west-2b"}
-//variable "availability_zone" {default = "us-west-2a"}
-
-# snaps-boot image with KVM and generic.qcow2 TODO DELETE AMI
-//variable "ami" {default = "ami-044440dc7a3d75d2b"}
-# Ubuntu 16.04 SSD Volume Type
-//variable "ami" {default = "ami-0b37e9efc396e4c38"}
-# Ubuntu 18.04 SSD Volume Type
-//variable "ami" {default = "ami-07b4f3c02c7f83d59"}
 variable "ami" {default = "ami-06f2f779464715dc5"}
 
 variable "spot_type" {default = "one-time"}
