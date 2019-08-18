@@ -271,7 +271,7 @@ ${var.VERIFY_INTFS} \
 --key-file ${local.remote_priv_key_file} \
 --ssh-common-args="-o ProxyCommand='ssh ${var.sudo_user}@${aws_spot_instance_request.snaps-boot-host.public_ip} nc ${var.build_ip_prfx}.${var.build_ip_suffix} 22'" \
 --extra-vars "{
-'username': 'root',
+'username': '${var.sudo_user}',
 'host_ips': ['${var.priv_ip_prfx}.${var.node_1_suffix}',
              '${var.priv_ip_prfx}.${var.node_2_suffix}',
              '${var.priv_ip_prfx}.${var.node_3_suffix}',
@@ -316,7 +316,7 @@ ${var.VERIFY_INTFS} \
 --key-file ${local.remote_priv_key_file} \
 --ssh-common-args="-o ProxyCommand='ssh ${var.sudo_user}@${aws_spot_instance_request.snaps-boot-host.public_ip} nc ${var.build_ip_prfx}.${var.build_ip_suffix} 22'" \
 --extra-vars "{
-'username': 'root',
+'username': '${var.sudo_user}',
 'host_ips': ['${var.admin_ip_prfx}.${var.node_1_suffix}',
               '${var.admin_ip_prfx}.${var.node_2_suffix}',
               '${var.admin_ip_prfx}.${var.node_3_suffix}',
@@ -343,7 +343,7 @@ ${var.VERIFY_APT_PROXY} \
 --key-file ${local.remote_priv_key_file} \
 --ssh-common-args="-o ProxyCommand='ssh ${var.sudo_user}@${aws_spot_instance_request.snaps-boot-host.public_ip} nc ${var.build_ip_prfx}.${var.build_ip_suffix} 22'" \
 --extra-vars "{
-'username': 'root',
+'username': '${var.sudo_user}',
 'ip_addr': '${var.priv_ip_prfx}.${var.node_1_suffix}',
 }"\
 EOT
