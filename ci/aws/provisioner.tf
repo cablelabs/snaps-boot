@@ -171,12 +171,22 @@ EOT
 }
 
 ###### STOP HERE IF ONLY WANT TO BUILD AN IMAGE ######
+# Wait for a couple minutes for the build server to properly initialize
+# TODO/FIXME - need a better means to ensure subsequent playbooks will not fail
+resource "null_resource" "snaps-boot-build-server-soak" {
+  depends_on = [null_resource.snaps-boot-server-setup]
+
+  # Install KVM dependencies
+  provisioner "local-exec" {
+    command = 'sleep 120'
+  }
+}
 
 ###### BEGIN HERE IF ONLY WANT TO RUN CI AGAINST ABOVE IMAGE ######
 
 # Call ansible scripts to run snaps-boot
 resource "null_resource" "snaps-boot-src-setup" {
-  depends_on = [null_resource.snaps-boot-server-setup]
+  depends_on = [null_resource.snaps-boot-build-server-soak]
 
   # Setup KVM on the VM to create VMs on it for testing snaps-boot
   provisioner "local-exec" {
@@ -271,7 +281,7 @@ ${var.VERIFY_INTFS} \
 --key-file ${local.remote_priv_key_file} \
 --ssh-common-args="-o ProxyCommand='ssh ${var.sudo_user}@${aws_spot_instance_request.snaps-boot-host.public_ip} nc ${var.build_ip_prfx}.${var.build_ip_suffix} 22'" \
 --extra-vars "{
-'username': '${var.sudo_user}',
+'username': 'root',
 'host_ips': ['${var.priv_ip_prfx}.${var.node_1_suffix}',
              '${var.priv_ip_prfx}.${var.node_2_suffix}',
              '${var.priv_ip_prfx}.${var.node_3_suffix}',
@@ -297,7 +307,6 @@ ${var.CONFIG_INTFS} \
 --extra-vars "\
 snaps_boot_dir=${var.src_copy_dir}/snaps-boot
 hosts_yaml_path=${var.hosts_yaml_path}
-check_file=${var.VERIFY_INTFS_CHECK_FILE}
 "\
 EOT
   }
@@ -316,7 +325,7 @@ ${var.VERIFY_INTFS} \
 --key-file ${local.remote_priv_key_file} \
 --ssh-common-args="-o ProxyCommand='ssh ${var.sudo_user}@${aws_spot_instance_request.snaps-boot-host.public_ip} nc ${var.build_ip_prfx}.${var.build_ip_suffix} 22'" \
 --extra-vars "{
-'username': '${var.sudo_user}',
+'username': 'root',
 'host_ips': ['${var.admin_ip_prfx}.${var.node_1_suffix}',
               '${var.admin_ip_prfx}.${var.node_2_suffix}',
               '${var.admin_ip_prfx}.${var.node_3_suffix}',
@@ -343,7 +352,7 @@ ${var.VERIFY_APT_PROXY} \
 --key-file ${local.remote_priv_key_file} \
 --ssh-common-args="-o ProxyCommand='ssh ${var.sudo_user}@${aws_spot_instance_request.snaps-boot-host.public_ip} nc ${var.build_ip_prfx}.${var.build_ip_suffix} 22'" \
 --extra-vars "{
-'username': '${var.sudo_user}',
+'username': 'root',
 'ip_addr': '${var.priv_ip_prfx}.${var.node_1_suffix}',
 }"\
 EOT

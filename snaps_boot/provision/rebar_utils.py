@@ -467,12 +467,6 @@ def __create_machine_params(boot_conf, machine, public_key):
     out.append(ParamsModel(name='seed/user-password', value=user_password))
     out.append(ParamsModel(name='seed/username', value=user))
     out.append(ParamsModel(name='seed/user-fullname', value=fullname))
-    out.append(ParamsModel(
-        name='preseed/late_command',
-        value='echo "{0} ALL=(ALL:ALL) NOPASSWD:ALL" > /etc/sudoers.d/{0}'.format(user)))
-    out.append(ParamsModel(
-        name='preseed/late_command',
-        value='chmod 0440 /etc/sudoers.d/{0}'.format(user)))
     out.append(ParamsModel(name='operating-system-disk', value=install_disk))
     if kernel_choice:
         out.append(

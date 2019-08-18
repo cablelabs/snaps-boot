@@ -17,6 +17,10 @@
 
   gather_facts: no
 
+  environment:
+    http_proxy: "http://{{ proxy_host }}:{{ proxy_port }}"
+    https_proxy: "https://{{ proxy_host }}:{{ proxy_port }}"
+
   tasks:
     - name: apt update
       become: yes
@@ -75,16 +79,14 @@
       become_method: sudo
       become_user: root
       command: pip install -r {{ src_copy_dir }}/snaps-boot/requirements-git.txt
-      environment:
-        http_proxy: "http://{{ proxy_host }}:{{ proxy_port }}"
-        https_proxy: "https://{{ proxy_host }}:{{ proxy_port }}"
+      retries: 30
+      delay: 5
 
     - name: Install snaps-boot
       become: yes
       become_method: sudo
       become_user: root
+      retries: 30
+      delay: 5
       pip:
         name: file:///tmp/snaps-boot
-      environment:
-        http_proxy: "http://{{ proxy_host }}:{{ proxy_port }}"
-        https_proxy: "http://{{ proxy_host }}:{{ proxy_port }}"
