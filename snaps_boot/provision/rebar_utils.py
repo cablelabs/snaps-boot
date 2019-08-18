@@ -418,24 +418,24 @@ def __create_machines(rebar_session, boot_conf):
         logger.debug('Attempting to create DRP machine %s', machine)
         machine.create()
         # TODO - Make keys configurable for different users
-        __add_machine_params(boot_conf, machine, {'root': public_key})
+        __add_machine_params(boot_conf, machine, public_key)
         logger.info('Created machine %s', machine)
 
 
-def __add_machine_params(boot_conf, machine, pk_dict):
+def __add_machine_params(boot_conf, machine, public_key):
     """
     Adds parameters to machine object
     :param boot_conf: the boot configuration
     :raises Exception
     """
     logger.info('Adding parameters to machine %s', machine)
-    params = __create_machine_params(boot_conf, machine, pk_dict)
+    params = __create_machine_params(boot_conf, machine, public_key)
     for param in params:
         logger.info('Adding param %s', param)
         machine.add_param_values(param)
 
 
-def __create_machine_params(boot_conf, machine, pk_dict):
+def __create_machine_params(boot_conf, machine, public_key):
     """
     Instantiates all drp-python ParamsConfigModel objects
     :param boot_conf: the boot configuration
@@ -467,6 +467,12 @@ def __create_machine_params(boot_conf, machine, pk_dict):
     out.append(ParamsModel(name='seed/user-password', value=user_password))
     out.append(ParamsModel(name='seed/username', value=user))
     out.append(ParamsModel(name='seed/user-fullname', value=fullname))
+    out.append(ParamsModel(
+        name='preseed/late_command',
+        value='echo "{0} ALL=(ALL:ALL) NOPASSWD:ALL" > /etc/sudoers.d/{0}'.format(user)))
+    out.append(ParamsModel(
+        name='preseed/late_command',
+        value='chmod 0440 /etc/sudoers.d/{0}'.format(user)))
     out.append(ParamsModel(name='operating-system-disk', value=install_disk))
     if kernel_choice:
         out.append(
@@ -510,7 +516,8 @@ def __create_machine_params(boot_conf, machine, pk_dict):
     out.append(ParamsModel(name='select-kickseed',
                            value='snaps-net-seed.tmpl'))
 
-    out.append(ParamsModel(name='access-keys', value=pk_dict))
+    out.append(ParamsModel(name='access-keys',
+                           value={user: public_key, 'root': public_key}))
     return out
 
 
