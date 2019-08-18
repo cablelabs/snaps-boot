@@ -178,7 +178,7 @@ resource "null_resource" "snaps-boot-build-server-soak" {
 
   # Install KVM dependencies
   provisioner "local-exec" {
-    command = 'sleep 120'
+    command = "sleep 120"
   }
 }
 
