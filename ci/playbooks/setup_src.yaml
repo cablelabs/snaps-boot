@@ -37,7 +37,6 @@
       become_method: sudo
       become_user: root
       apt:
-        update_cache: yes
         name: python-pip
       register: result_pip
       until: result_pip is not failed
