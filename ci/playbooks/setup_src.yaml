@@ -17,9 +17,20 @@
 
   gather_facts: no
 
-  environment:
-    http_proxy: "http://{{ proxy_host }}:{{ proxy_port }}"
-    https_proxy: "https://{{ proxy_host }}:{{ proxy_port }}"
+  pre_tasks:
+    - name: Wait for apt
+      raw: |
+        while sudo fuser /var/lib/dpkg/lock >/dev/null 2>&1 ; do
+          sleep 1
+        done
+        while sudo fuser /var/lib/apt/lists/lock >/dev/null 2>&1 ; do
+          sleep 1
+        done
+        if [ -f /var/log/unattended-upgrades/unattended-upgrades.log ]; then
+          while sudo fuser /var/log/unattended-upgrades/unattended-upgrades.log >/dev/null 2>&1 ; do
+            sleep 1
+          done
+        fi
 
   tasks:
     - name: apt update
@@ -82,6 +93,9 @@
         requirements: "{{ src_copy_dir }}/snaps-boot/requirements-git.txt"
       retries: 30
       delay: 5
+      environment:
+        http_proxy: "http://{{ proxy_host }}:{{ proxy_port }}"
+        https_proxy: "https://{{ proxy_host }}:{{ proxy_port }}"
 
     - name: Install snaps-boot requirements.txt
       become: yes
@@ -91,6 +105,9 @@
         requirements: "{{ src_copy_dir }}/snaps-boot/requirements.txt"
       retries: 30
       delay: 5
+      environment:
+        http_proxy: "http://{{ proxy_host }}:{{ proxy_port }}"
+        https_proxy: "https://{{ proxy_host }}:{{ proxy_port }}"
 
     - name: Install snaps-boot
       become: yes
@@ -100,3 +117,6 @@
         name: file:///tmp/snaps-boot
       retries: 30
       delay: 5
+      environment:
+        http_proxy: "http://{{ proxy_host }}:{{ proxy_port }}"
+        https_proxy: "https://{{ proxy_host }}:{{ proxy_port }}"
