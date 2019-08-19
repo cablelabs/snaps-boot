@@ -170,23 +170,9 @@ EOT
   }
 }
 
-###### STOP HERE IF ONLY WANT TO BUILD AN IMAGE ######
-# Wait for a couple minutes for the build server to properly initialize
-# TODO/FIXME - need a better means to ensure subsequent playbooks will not fail
-resource "null_resource" "snaps-boot-build-server-soak" {
-  depends_on = [null_resource.snaps-boot-server-setup]
-
-  # Install KVM dependencies
-  provisioner "local-exec" {
-    command = "sleep 120"
-  }
-}
-
-###### BEGIN HERE IF ONLY WANT TO RUN CI AGAINST ABOVE IMAGE ######
-
 # Call ansible scripts to run snaps-boot
 resource "null_resource" "snaps-boot-src-setup" {
-  depends_on = [null_resource.snaps-boot-build-server-soak]
+  depends_on = [null_resource.snaps-boot-server-setup]
 
   # Setup KVM on the VM to create VMs on it for testing snaps-boot
   provisioner "local-exec" {

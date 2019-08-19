@@ -78,7 +78,17 @@
       become: yes
       become_method: sudo
       become_user: root
-      command: pip install -r {{ src_copy_dir }}/snaps-boot/requirements-git.txt
+      pip:
+        requirements: "{{ src_copy_dir }}/snaps-boot/requirements-git.txt"
+      retries: 30
+      delay: 5
+
+    - name: Install snaps-boot requirements.txt
+      become: yes
+      become_method: sudo
+      become_user: root
+      pip:
+        requirements: "{{ src_copy_dir }}/snaps-boot/requirements.txt"
       retries: 30
       delay: 5
 
@@ -86,7 +96,7 @@
       become: yes
       become_method: sudo
       become_user: root
-      retries: 30
-      delay: 5
       pip:
         name: file:///tmp/snaps-boot
+      retries: 30
+      delay: 5
