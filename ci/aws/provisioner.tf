@@ -174,7 +174,7 @@ EOT
 resource "null_resource" "snaps-boot-wait" {
   depends_on = [null_resource.snaps-boot-server-setup]
 
-  # Install KVM dependencies
+  # Wait a bit to let new VM settle down (this should be replaced eventually)
   provisioner "local-exec" {
     command = "sleep 120"
   }
