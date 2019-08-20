@@ -193,8 +193,8 @@ Configuration parameter defined in this section are explained below.
 
 | Parameter | Required | Description |
 | --------- | ----------- | ----------- |
-| http_proxy | N | Proxy to be used for HTTP traffic. |
-| https_proxy | N | Proxy to be used for HTTPS traffic. |
+| http_proxy | N | Set as the environment variable on all deployed nodes. |
+| https_proxy | N | Set as the environment variable on all deployed nodes. |
 
 
 #### PXE:
