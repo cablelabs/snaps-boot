@@ -170,9 +170,19 @@ EOT
   }
 }
 
+# Wait a bit
+resource "null_resource" "snaps-boot-wait" {
+  depends_on = [null_resource.snaps-boot-server-setup]
+
+  # Install KVM dependencies
+  provisioner "local-exec" {
+    command = "sleep 120"
+  }
+}
+
 # Call ansible scripts to run snaps-boot
 resource "null_resource" "snaps-boot-src-setup" {
-  depends_on = [null_resource.snaps-boot-server-setup]
+  depends_on = [null_resource.snaps-boot-wait]
 
   # Setup KVM on the VM to create VMs on it for testing snaps-boot
   provisioner "local-exec" {
