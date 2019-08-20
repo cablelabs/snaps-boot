@@ -493,10 +493,14 @@ def __create_machine_params(boot_conf, machine, public_key):
                                       ':8091/files/post_script'))
             break
 
-    # TODO/FIXME - all of these should probably be a global params
-    http_proxy = prov_conf['PROXY']['http_proxy']
-    https_proxy = prov_conf['PROXY']['https_proxy']
+    machine_proxy = prov_conf.get('NODE_PROXY', prov_conf['PROXY'])
+    http_proxy = None
+    https_proxy = None
+    if machine_proxy:
+        http_proxy = machine_proxy['http_proxy']
+        https_proxy = machine_proxy['https_proxy']
     apt_proxy = prov_conf['PROXY']['ngcacher_proxy']
+
     if http_proxy:
         out.append(ParamsModel(name='post/http-proxy', value=http_proxy))
     if https_proxy:
