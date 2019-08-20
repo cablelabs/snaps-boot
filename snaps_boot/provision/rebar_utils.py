@@ -493,7 +493,7 @@ def __create_machine_params(boot_conf, machine, public_key):
                                       ':8091/files/post_script'))
             break
 
-    machine_proxy = prov_conf.get('NODE_PROXY', prov_conf['PROXY'])
+    machine_proxy = prov_conf.get('NODE_PROXY')
     http_proxy = None
     https_proxy = None
     if machine_proxy:
