@@ -493,12 +493,12 @@ def __create_machine_params(boot_conf, machine, public_key):
                                       ':8091/files/post_script'))
             break
 
-    machine_proxy = prov_conf.get('NODE_PROXY')
+    node_proxy = prov_conf.get('NODE_PROXY')
     http_proxy = None
     https_proxy = None
-    if machine_proxy:
-        http_proxy = machine_proxy['http_proxy']
-        https_proxy = machine_proxy['https_proxy']
+    if node_proxy:
+        http_proxy = node_proxy['http_proxy']
+        https_proxy = node_proxy['https_proxy']
     apt_proxy = prov_conf['PROXY']['ngcacher_proxy']
 
     if http_proxy:
