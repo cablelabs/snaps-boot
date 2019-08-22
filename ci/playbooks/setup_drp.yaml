@@ -46,11 +46,11 @@
         https_proxy: "https://{{ org_proxy }}"
 
     - name: Cleanup any old deployments
-      shell: "python {{ src_copy_dir }}/snaps-boot/iaas_launch.py -f {{ hosts_yaml_path }} -pc -or >> /tmp/snaps-boot.log"
+      shell: "python {{ src_copy_dir }}/snaps-boot/iaas_launch.py -f {{ hosts_yaml_path }} -pc >> /tmp/snaps-boot.log"
       ignore_errors: True
 
     - name: Setup DRP
-      shell: "python {{ src_copy_dir }}/snaps-boot/iaas_launch.py -f {{ hosts_yaml_path }} -p -or >> /tmp/snaps-boot.log"
+      shell: "python {{ src_copy_dir }}/snaps-boot/iaas_launch.py -f {{ hosts_yaml_path }} -p >> /tmp/snaps-boot.log"
       register: out
       ignore_errors: True
 

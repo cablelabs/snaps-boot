@@ -18,25 +18,60 @@
   gather_facts: no
 
   pre_tasks:
-    - name: Install python
-      raw: sudo apt install python -y
-      register: out
-      until: out.rc == 0
-      retries: 30
-      delay: 5
+    - name: Wait for dpkg lock
+      raw: |
+        while sudo fuser /var/lib/dpkg/lock >/dev/null 2>&1 ; do
+          sleep 5
+        done
+
+    - name: Wait for apt lock
+      raw: |
+        while sudo fuser /var/lib/apt/lists/lock >/dev/null 2>&1 ; do
+          sleep 5
+        done
+
+    - name: Wait for unattended-upgrades
+      raw: |
+        if [ -f /var/log/unattended-upgrades/unattended-upgrades.log ]; then
+          while sudo fuser /var/log/unattended-upgrades/unattended-upgrades.log >/dev/null 2>&1 ; do
+            sleep 5
+          done
+        fi
+
+    - name: Wait for python
+      raw: |
+        while true; do
+          if hash python &>/dev/null; then break; fi
+        done
 
   tasks:
-    - name: Install apt dependencies
+    - name: apt update
       become: yes
       become_method: sudo
       become_user: root
       apt:
         update_cache: yes
-        name:
-          - python-pip
-      retries: 3
+      register: result_update
+      until: result_update is not failed
+      retries: 30
       delay: 5
-      register: out
+    - fail:
+        msg: result_update.stdout
+      when: result_update is failed
+
+    - name: Install python-pip
+      become: yes
+      become_method: sudo
+      become_user: root
+      apt:
+        name: python-pip
+      register: result_pip
+      until: result_pip is not failed
+      retries: 30
+      delay: 5
+    - fail:
+        msg: result_pip.stdout
+      when: result_pip is failed
 
     - name: Delete {{ src_copy_dir }}/snaps-boot directory
       become: yes
@@ -53,7 +88,6 @@
         dest: "{{ src_copy_dir }}/snaps-boot"
         dirs: yes
         partial: yes
-        private_key: ~/.ssh/id_rsa
         rsync_timeout: 60
         use_ssh_args: yes
         rsync_opts:
@@ -64,12 +98,14 @@
 
     - name: Install snaps-boot requirements-git.txt
       become: yes
-      become_method: sudo
-      become_user: root
-      command: pip install -r {{ src_copy_dir }}/snaps-boot/requirements-git.txt
+      command: "pip install -r requirements-git.txt"
+      retries: 30
+      delay: 5
       environment:
         http_proxy: "http://{{ proxy_host }}:{{ proxy_port }}"
         https_proxy: "https://{{ proxy_host }}:{{ proxy_port }}"
+      args:
+        chdir: "{{ src_copy_dir }}/snaps-boot/"
 
     - name: Install snaps-boot
       become: yes
@@ -77,6 +113,8 @@
       become_user: root
       pip:
         name: file:///tmp/snaps-boot
+      retries: 30
+      delay: 5
       environment:
         http_proxy: "http://{{ proxy_host }}:{{ proxy_port }}"
-        https_proxy: "http://{{ proxy_host }}:{{ proxy_port }}"
+        https_proxy: "https://{{ proxy_host }}:{{ proxy_port }}"

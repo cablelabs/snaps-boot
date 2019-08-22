@@ -170,13 +170,19 @@ EOT
   }
 }
 
-###### STOP HERE IF ONLY WANT TO BUILD AN IMAGE ######
+# Wait a bit
+resource "null_resource" "snaps-boot-wait" {
+  depends_on = [null_resource.snaps-boot-server-setup]
 
-###### BEGIN HERE IF ONLY WANT TO RUN CI AGAINST ABOVE IMAGE ######
+  # Wait a bit to let new VM settle down (this should be replaced eventually)
+  provisioner "local-exec" {
+    command = "sleep 120"
+  }
+}
 
 # Call ansible scripts to run snaps-boot
 resource "null_resource" "snaps-boot-src-setup" {
-  depends_on = [null_resource.snaps-boot-server-setup]
+  depends_on = [null_resource.snaps-boot-wait]
 
   # Setup KVM on the VM to create VMs on it for testing snaps-boot
   provisioner "local-exec" {
@@ -297,7 +303,6 @@ ${var.CONFIG_INTFS} \
 --extra-vars "\
 snaps_boot_dir=${var.src_copy_dir}/snaps-boot
 hosts_yaml_path=${var.hosts_yaml_path}
-check_file=${var.VERIFY_INTFS_CHECK_FILE}
 "\
 EOT
   }

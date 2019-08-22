@@ -183,6 +183,20 @@ Configuration parameter defined in this section are explained below.
 > Note: If proxy configuration is not required use null value **“”**
 for each of the parameters.  Do not remove the line from the file.
 
+#### NODE_PROXY:
+
+If the proxy server for the nodes is different than for the build machine,
+NODE_PROXY will be used to add http_proxy and https_proxy environment values
+into the nodes. This is optional and PROXY values will be used as defaults
+
+Configuration parameter defined in this section are explained below.
+
+| Parameter | Required | Description |
+| --------- | ----------- | ----------- |
+| http_proxy | N | Set as the environment variable on all deployed nodes. |
+| https_proxy | N | Set as the environment variable on all deployed nodes. |
+
+
 #### PXE:
 
 Configuration parameter defined here are used by PXE server, usually the Build Server.

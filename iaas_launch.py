@@ -50,10 +50,7 @@ def __run(arguments):
     logger.info('Launching Operation Starts ........')
 
     user = getpass.getuser()
-    if user != 'root' and arguments.override_root is ARG_NOT_SET:
-        raise Exception('Must be the root user. Please use -or to override')
-    else:
-        logger.info('Running as user %s', user)
+    logger.info('Running as user %s', user)
 
     config_filepath = os.path.expanduser(arguments.config)
     logger.info('Reading configuration file [%s]', config_filepath)
@@ -190,14 +187,6 @@ if __name__ == '__main__':
         default=ARG_NOT_SET,
         # TODO/FIXME - Description is incorrect
         help='When used, the pxe server environment will be removed')
-    parser.add_argument(
-        '-or',
-        '--override-root',
-        dest='override_root',
-        nargs='?',
-        default=ARG_NOT_SET,
-        # TODO/FIXME - Description is incorrect
-        help='root user override')
     args = parser.parse_args()
 
     if (args.hardware is ARG_NOT_SET and args.boot is ARG_NOT_SET and

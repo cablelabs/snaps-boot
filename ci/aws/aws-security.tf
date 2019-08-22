@@ -32,6 +32,18 @@ resource "aws_security_group" "snaps-boot" {
     cidr_blocks = ["0.0.0.0/0"]
   }
   ingress {
+    from_port = 8080
+    to_port = 8080
+    protocol = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+  ingress {
+    from_port = 8092
+    to_port = 8092
+    protocol = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+  ingress {
     from_port = var.proxy_port
     to_port = var.proxy_port
     protocol = "tcp"

@@ -29,8 +29,8 @@ from snaps_common.ansible_snaps import ansible_utils
 
 logger = logging.getLogger('rebar_utils')
 
-LOCAL_PRIV_KEY_FILE = os.path.expanduser('~/snaps-boot.priv_key')
-LOCAL_PUB_KEY_FILE = os.path.expanduser('~/snaps-boot.pub_key')
+LOCAL_PRIV_KEY_FILE = os.path.expanduser('~/.ssh/id_rsa')
+LOCAL_PUB_KEY_FILE = os.path.expanduser('~/.ssh/id_rsa.pub')
 
 
 def install_config_drp(rebar_session, boot_conf):
@@ -324,27 +324,19 @@ def __instantiate_drp_reservations(rebar_session, boot_conf):
     return out
 
 
-def __generate_ssh_keys():
+def __get_pub_key():
     """
     Ensures that the build server has SSH keys to inject into nodes
     :return: the public key value
     """
     logger.info('Generate SSH keys')
-    public_key, private_key, created = __create_keys()
+    public_key, private_key = __get_existing_keys()
 
-    if created:
-        playbook_path = pkg_resources.resource_filename(
-            'snaps_boot.ansible_p.setup', 'copy_keys.yaml')
-
-        # TODO/FIXME - Make this key location configurable
-        ansible_utils.apply_playbook(
-            playbook_path,
-            variables={
-                'pub_key_val': public_key,
-                'priv_key_val': private_key,
-            })
-
-    return public_key
+    if public_key and private_key:
+        logger.info('Existing pubic key [%s]', public_key)
+        return public_key
+    else:
+        return __create_keys()[0]
 
 
 def __create_keys(key_size=2048):
@@ -358,8 +350,10 @@ def __create_keys(key_size=2048):
     public_key, private_key = __get_existing_keys()
 
     if public_key and private_key:
+        logger.info('Existing pubic key [%s]', public_key)
         return public_key, private_key, False
     else:
+        logger.info('Generate keys')
         keys = rsa.generate_private_key(
             backend=default_backend(), public_exponent=65537,
             key_size=key_size)
@@ -372,8 +366,8 @@ def __create_keys(key_size=2048):
             format=serialization.PrivateFormat.TraditionalOpenSSL,
             encryption_algorithm=serialization.NoEncryption())
 
-        logger.info('Generated public key - %s', public_key)
-        logger.info('Generated private key - %s', private_key)
+        logger.debug('Generated public key - %s', public_key)
+        logger.debug('Generated private key - %s', private_key)
 
         __store_current_key(public_key, private_key)
 
@@ -381,8 +375,13 @@ def __create_keys(key_size=2048):
 
 
 def __get_existing_keys():
+    logger.info('Checking if file [%s] exists', LOCAL_PUB_KEY_FILE)
+    logger.info('Checking if file [%s] exists', LOCAL_PRIV_KEY_FILE)
+
     if (not os.path.isfile(LOCAL_PUB_KEY_FILE)
             or not os.path.isfile(LOCAL_PRIV_KEY_FILE)):
+        logger.warn('Keys not found [%s] & [%s]',
+                    LOCAL_PUB_KEY_FILE, LOCAL_PRIV_KEY_FILE)
         return None, None
 
     with open(LOCAL_PUB_KEY_FILE, 'r') as ssh_pub_key_file:
@@ -394,10 +393,14 @@ def __get_existing_keys():
 
 
 def __store_current_key(pubic_key, private_key):
+    logger.info('Writing keys to [%s] & [%s]',
+                LOCAL_PUB_KEY_FILE, LOCAL_PRIV_KEY_FILE)
     with open(LOCAL_PUB_KEY_FILE, 'wb') as pub_key_file:
         pub_key_file.write(pubic_key)
+        os.chmod(LOCAL_PUB_KEY_FILE, 0600)
     with open(LOCAL_PRIV_KEY_FILE, 'wb') as priv_key_file:
         priv_key_file.write(private_key)
+        os.chmod(LOCAL_PRIV_KEY_FILE, 0600)
 
 
 def __create_machines(rebar_session, boot_conf):
@@ -407,13 +410,14 @@ def __create_machines(rebar_session, boot_conf):
     :param boot_conf: the boot configuration
     :raises Exceptions
     """
-    public_key = __generate_ssh_keys()
+    public_key = __get_pub_key()
 
     machines = __instantiate_drp_machines(rebar_session, boot_conf)
     logger.info('Attempting to create %s DRP machines', len(machines))
     for machine in machines:
         logger.debug('Attempting to create DRP machine %s', machine)
         machine.create()
+        # TODO - Make keys configurable for different users
         __add_machine_params(boot_conf, machine, public_key)
         logger.info('Created machine %s', machine)
 
@@ -489,10 +493,14 @@ def __create_machine_params(boot_conf, machine, public_key):
                                       ':8091/files/post_script'))
             break
 
-    # TODO/FIXME - all of these should probably be a global params
-    http_proxy = prov_conf['PROXY']['http_proxy']
-    https_proxy = prov_conf['PROXY']['https_proxy']
+    node_proxy = prov_conf.get('NODE_PROXY')
+    http_proxy = None
+    https_proxy = None
+    if node_proxy:
+        http_proxy = node_proxy['http_proxy']
+        https_proxy = node_proxy['https_proxy']
     apt_proxy = prov_conf['PROXY']['ngcacher_proxy']
+
     if http_proxy:
         out.append(ParamsModel(name='post/http-proxy', value=http_proxy))
     if https_proxy:
@@ -506,7 +514,8 @@ def __create_machine_params(boot_conf, machine, public_key):
     out.append(ParamsModel(name='select-kickseed',
                            value='snaps-net-seed.tmpl'))
 
-    out.append(ParamsModel(name='access-keys', value={'root': public_key}))
+    out.append(ParamsModel(name='access-keys',
+                           value={user: public_key, 'root': public_key}))
     return out
 
 
