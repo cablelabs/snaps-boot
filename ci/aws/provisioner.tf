@@ -30,6 +30,7 @@ ${var.ANSIBLE_CMD} -u ${var.sudo_user} \
 ${var.WAIT_FOR_BUILD} \
 --extra-vars " \
 host=${var.build_ip_prfx}.${var.build_ip_suffix}
+pause_time=30
 "\
 EOT
   }
@@ -40,6 +41,7 @@ resource "null_resource" "snaps-boot-inject-pub-key-to-build" {
   depends_on = [null_resource.snaps-hyperbuild-wait-for-build]
   provisioner "remote-exec" {
     inline = [
+      "ssh -o StrictHostKeyChecking=no ${var.build_ip_prfx}.${var.build_ip_suffix} 'rm -f ~/.ssh/known_hosts'",
       "ssh -o StrictHostKeyChecking=no ${var.sudo_user}@${var.build_ip_prfx}.${var.build_ip_suffix} 'touch ~/.ssh/authorized_keys'",
       "ssh -o StrictHostKeyChecking=no ${var.sudo_user}@${var.build_ip_prfx}.${var.build_ip_suffix} 'echo ${aws_key_pair.snaps-boot-pk.public_key} >> /home/${var.sudo_user}/.ssh/authorized_keys'",
       "ssh -o StrictHostKeyChecking=no ${var.sudo_user}@${var.build_ip_prfx}.${var.build_ip_suffix} 'chmod 600 ~/.ssh/authorized_keys'",
