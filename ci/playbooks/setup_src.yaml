@@ -20,59 +20,28 @@
   pre_tasks:
     - name: Wait for dpkg lock
       raw: |
+        sleep 10
         while sudo fuser /var/lib/dpkg/lock >/dev/null 2>&1 ; do
           sleep 5
         done
 
     - name: Wait for apt lock
       raw: |
+        sleep 10
         while sudo fuser /var/lib/apt/lists/lock >/dev/null 2>&1 ; do
           sleep 5
         done
 
     - name: Wait for unattended-upgrades
       raw: |
+        sleep 10
         if [ -f /var/log/unattended-upgrades/unattended-upgrades.log ]; then
           while sudo fuser /var/log/unattended-upgrades/unattended-upgrades.log >/dev/null 2>&1 ; do
             sleep 5
           done
         fi
 
-    - name: Wait for python
-      raw: |
-        while true; do
-          if hash python &>/dev/null; then break; fi
-        done
-
   tasks:
-    - name: apt update
-      become: yes
-      become_method: sudo
-      become_user: root
-      apt:
-        update_cache: yes
-      register: result_update
-      until: result_update is not failed
-      retries: 30
-      delay: 5
-    - fail:
-        msg: result_update.stdout
-      when: result_update is failed
-
-    - name: Install python-pip
-      become: yes
-      become_method: sudo
-      become_user: root
-      apt:
-        name: python-pip
-      register: result_pip
-      until: result_pip is not failed
-      retries: 30
-      delay: 5
-    - fail:
-        msg: result_pip.stdout
-      when: result_pip is failed
-
     - name: Delete {{ src_copy_dir }}/snaps-boot directory
       become: yes
       become_method: sudo
@@ -95,6 +64,34 @@
           - "--exclude=venv"
           - "--exclude=.git/objects/pack"
           - "--exclude=ci/aws/terraform/.terraform"
+
+#    - name: apt update
+#      become: yes
+#      become_method: sudo
+#      become_user: root
+#      apt:
+#        update_cache: yes
+#      register: result_update
+#      until: result_update is not failed
+#      retries: 30
+#      delay: 5
+#    - fail:
+#        msg: result_update.stdout
+#      when: result_update is failed
+
+    - name: Install python-pip
+      become: yes
+      become_method: sudo
+      become_user: root
+      apt:
+        name: python-pip
+      register: result_pip
+      until: result_pip is not failed
+      retries: 30
+      delay: 5
+    - fail:
+        msg: result_pip.stdout
+      when: result_pip is failed
 
     - name: Install snaps-boot requirements-git.txt
       become: yes

@@ -33,6 +33,7 @@
         admin_ip_2: "{{ admin_ip_prfx }}.{{ ip_suffix_2 }}"
         admin_ip_3: "{{ admin_ip_prfx }}.{{ ip_suffix_3 }}"
         priv_addr: "{{ priv_ip_prfx }}.0"
+        broadcast_addr: "{{ bcast_addr }}"
         ip_range: "{{ priv_ip_prfx }}.101 {{ priv_ip_prfx }}.254"
         priv_ip_1: "{{ priv_ip_prfx }}.{{ ip_suffix_1 }}"
         priv_ip_2: "{{ priv_ip_prfx }}.{{ ip_suffix_2 }}"

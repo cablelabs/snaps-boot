@@ -66,7 +66,7 @@
     ignore_errors: True
 
   - name: Install
-    shell: "python {{ src_copy_dir }}/snaps-boot/iaas_launch.py -f {{ hosts_yaml_path }} -p -or >> /tmp/snaps-boot.log"
+    shell: "python {{ src_copy_dir }}/snaps-boot/iaas_launch.py -f {{ hosts_yaml_path }} -p >> /tmp/snaps-boot.log"
     register: deploy_out
     ignore_errors: True
 

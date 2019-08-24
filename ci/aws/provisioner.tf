@@ -18,171 +18,46 @@ resource "null_resource" "snaps-boot-pk-setup" {
   }
 }
 
-locals {
-  remote_pub_key_file = "/tmp/${var.build_id}-remote-pk.pub"
-  remote_priv_key_file = "/tmp/${var.build_id}-remote-pk"
+# Call ansible scripts to run snaps-hyperbuild
+resource "null_resource" "snaps-hyperbuild-wait-for-build" {
+  depends_on = [null_resource.snaps-boot-pk-setup]
+
+  # Setup KVM on the VM to create VMs on it for testing snaps-hyperbuild
+  provisioner "local-exec" {
+    command = <<EOT
+${var.ANSIBLE_CMD} -u ${var.sudo_user} \
+-i ${aws_spot_instance_request.snaps-boot-host.public_ip}, \
+${var.WAIT_FOR_BUILD} \
+--extra-vars " \
+host=${var.build_ip_prfx}.${var.build_ip_suffix}
+pause_time=30
+"\
+EOT
+  }
 }
 
-# Call ensure SSH key has correct permissions
-resource "null_resource" "snaps-boot-remote-key-gen" {
-  depends_on = [null_resource.snaps-boot-pk-setup]
+# Add local key to build server
+resource "null_resource" "snaps-boot-inject-pub-key-to-build" {
+  depends_on = [null_resource.snaps-hyperbuild-wait-for-build]
   provisioner "remote-exec" {
     inline = [
-      "ssh-keygen -t rsa -N '' -f ${var.vm_host_priv_key}",
+      "ssh -o StrictHostKeyChecking=no ${var.build_ip_prfx}.${var.build_ip_suffix} 'rm -f ~/.ssh/known_hosts'",
+      "ssh -o StrictHostKeyChecking=no ${var.sudo_user}@${var.build_ip_prfx}.${var.build_ip_suffix} 'touch ~/.ssh/authorized_keys'",
+      "ssh -o StrictHostKeyChecking=no ${var.sudo_user}@${var.build_ip_prfx}.${var.build_ip_suffix} 'echo ${aws_key_pair.snaps-boot-pk.public_key} >> /home/${var.sudo_user}/.ssh/authorized_keys'",
+      "ssh -o StrictHostKeyChecking=no ${var.sudo_user}@${var.build_ip_prfx}.${var.build_ip_suffix} 'chmod 600 ~/.ssh/authorized_keys'",
     ]
   }
   connection {
     host = aws_spot_instance_request.snaps-boot-host.public_ip
-    type     = "ssh"
-    user     = var.sudo_user
+    type = "ssh"
+    user = var.sudo_user
     private_key = file(var.private_key_file)
-  }
-}
-
-# Call ensure SSH key has correct permissions
-resource "null_resource" "snaps-boot-get-host-pub-key" {
-  depends_on = [null_resource.snaps-boot-remote-key-gen]
-  provisioner "local-exec" {
-    command = "scp -o StrictHostKeyChecking=no ${var.sudo_user}@${aws_spot_instance_request.snaps-boot-host.public_ip}:~/.ssh/id_rsa.pub ${local.remote_pub_key_file}"
-  }
-}
-
-# Call ensure SSH key has correct permissions
-resource "null_resource" "snaps-boot-get-host-priv-key" {
-  depends_on = [null_resource.snaps-boot-remote-key-gen]
-  provisioner "local-exec" {
-    command = "scp -o StrictHostKeyChecking=no ${var.sudo_user}@${aws_spot_instance_request.snaps-boot-host.public_ip}:~/.ssh/id_rsa ${local.remote_priv_key_file}"
-  }
-}
-
-# Call ansible scripts to setup KVM
-resource "null_resource" "snaps-boot-proxy-setup" {
-  depends_on = [null_resource.snaps-boot-get-host-pub-key]
-
-  # Install KVM dependencies
-  provisioner "local-exec" {
-    command = <<EOT
-${var.ANSIBLE_CMD} -u ${var.sudo_user} \
--i ${aws_spot_instance_request.snaps-boot-host.public_ip}, \
-${var.SETUP_HOST_PROXY} \
---key-file ${var.private_key_file} \
---extra-vars "\
-proxy_port=${var.proxy_port}
-"\
-EOT
-  }
-}
-
-# Call ansible scripts to setup KVM
-resource "null_resource" "snaps-boot-kvm-setup" {
-  depends_on = [null_resource.snaps-boot-proxy-setup]
-
-  # Install KVM dependencies
-  provisioner "local-exec" {
-    command = <<EOT
-${var.ANSIBLE_CMD} -u ${var.sudo_user} \
--i ${aws_spot_instance_request.snaps-boot-host.public_ip}, \
-${var.SETUP_KVM_DEPENDENCIES} \
---key-file ${var.private_key_file} \
-EOT
-  }
-}
-
-# Call ansible scripts to setup KVM networks
-resource "null_resource" "snaps-boot-network-setup" {
-  depends_on = [null_resource.snaps-boot-kvm-setup]
-  # Create KVM networks
-  provisioner "local-exec" {
-    command = <<EOT
-${var.ANSIBLE_CMD} -u ${var.sudo_user} \
--i ${aws_spot_instance_request.snaps-boot-host.public_ip}, \
-${var.SETUP_KVM_NETWORKS} \
---key-file ${var.private_key_file} \
---extra-vars "\
-build_ip_prfx=${var.build_ip_prfx}
-build_vm_name=${var.build_vm_name}
-build_mac_1=${var.build_mac_1}
-build_vm_ip=${var.build_ip_prfx}.${var.build_ip_suffix}
-build_net_name=${var.build_net_name}
-priv_ip_prfx=${var.priv_ip_prfx}
-priv_net_name=${var.priv_net_name}
-admin_ip_prfx=${var.admin_ip_prfx}
-admin_net_name=${var.admin_net_name}
-pub_ip_prfx=${var.pub_ip_prfx}
-pub_net_name=${var.pub_net_name}
-netmask=${var.netmask}
-"\
-EOT
-  }
-}
-
-# Call ansible scripts to setup KVM servers
-resource "null_resource" "snaps-boot-server-setup" {
-  depends_on = [null_resource.snaps-boot-network-setup,
-                null_resource.snaps-boot-get-host-pub-key]
-
-  # Setup KVM on the VM to create VMs on it for testing snaps-boot
-  provisioner "local-exec" {
-    command = <<EOT
-${var.ANSIBLE_CMD} -u ${var.sudo_user} \
--i ${aws_spot_instance_request.snaps-boot-host.public_ip}, \
-${var.SETUP_KVM_SERVERS} \
---key-file ${var.private_key_file} \
---extra-vars "\
-aws_access_key=${var.access_key}
-aws_secret_key=${var.secret_key}
-image_s3_bucket=snaps-ci
-pxe_img=/var/lib/libvirt/images/libvirt-pxe.qcow2
-target_user=${var.sudo_user}
-build_net_name=${var.build_net_name}
-priv_net_name=${var.priv_net_name}
-priv_ip_prfx=${var.priv_ip_prfx}
-admin_net_name=${var.admin_net_name}
-admin_ip_prfx=${var.admin_ip_prfx}
-pub_net_name=${var.pub_net_name}
-pub_ip_prfx=${var.pub_ip_prfx}
-build_vm_name=${var.build_vm_name}
-build_password=${var.build_password}
-build_public_key_file=${local.remote_pub_key_file}
-local_public_key='${aws_key_pair.snaps-boot-pk.public_key}'
-build_ip_prfx=${var.build_ip_prfx}
-build_ip_sfx=${var.build_ip_suffix}
-build_ip_bits=${var.build_ip_bits}
-build_gateway=${var.build_ip_prfx}.1
-build_nic_name=${var.build_nic}
-build_mac_0=${var.build_mac_0}
-build_mac_1=${var.build_mac_1}
-build_mac_2=${var.build_mac_2}
-build_mac_3=${var.build_mac_3}
-node_1_mac_1=${var.node_1_mac_1}
-node_1_mac_2=${var.node_1_mac_2}
-node_1_mac_3=${var.node_1_mac_3}
-node_2_mac_1=${var.node_2_mac_1}
-node_2_mac_2=${var.node_2_mac_2}
-node_2_mac_3=${var.node_2_mac_3}
-node_3_mac_1=${var.node_3_mac_1}
-node_3_mac_2=${var.node_3_mac_2}
-node_3_mac_3=${var.node_3_mac_3}
-proxy_host=${var.build_ip_prfx}.1
-proxy_port=${var.proxy_port}
-"\
-EOT
-  }
-}
-
-# Wait a bit
-resource "null_resource" "snaps-boot-wait" {
-  depends_on = [null_resource.snaps-boot-server-setup]
-
-  # Wait a bit to let new VM settle down (this should be replaced eventually)
-  provisioner "local-exec" {
-    command = "sleep 120"
   }
 }
 
 # Call ansible scripts to run snaps-boot
 resource "null_resource" "snaps-boot-src-setup" {
-  depends_on = [null_resource.snaps-boot-wait]
+  depends_on = [null_resource.snaps-boot-inject-pub-key-to-build]
 
   # Setup KVM on the VM to create VMs on it for testing snaps-boot
   provisioner "local-exec" {
@@ -190,7 +65,6 @@ resource "null_resource" "snaps-boot-src-setup" {
 ${var.ANSIBLE_CMD} -u ${var.sudo_user} \
 -i ${var.build_ip_prfx}.${var.build_ip_suffix}, \
 ${var.SETUP_SRC} \
---key-file ${local.remote_priv_key_file} \
 --ssh-common-args="-o ProxyCommand='ssh ${var.sudo_user}@${aws_spot_instance_request.snaps-boot-host.public_ip} nc ${var.build_ip_prfx}.${var.build_ip_suffix} 22'" \
 --extra-vars " \
 src_copy_dir=${var.src_copy_dir}
@@ -204,7 +78,6 @@ EOT
 # Call ansible scripts to run snaps-boot
 resource "null_resource" "snaps-boot-drp-setup" {
   depends_on = [null_resource.snaps-boot-src-setup]
-//  depends_on = [null_resource.snaps-boot-kvm-setup]
 
   # Setup KVM on the VM to create VMs on it for testing snaps-boot
   provisioner "local-exec" {
@@ -212,7 +85,6 @@ resource "null_resource" "snaps-boot-drp-setup" {
 ${var.ANSIBLE_CMD} -u ${var.sudo_user} \
 -i ${var.build_ip_prfx}.${var.build_ip_suffix}, \
 ${var.SETUP_DRP} \
---key-file ${local.remote_priv_key_file} \
 --ssh-common-args="-o ProxyCommand='ssh ${var.sudo_user}@${aws_spot_instance_request.snaps-boot-host.public_ip} nc ${var.build_ip_prfx}.${var.build_ip_suffix} 22'" \
 --extra-vars "\
 nameserver=${var.build_ip_prfx}.1
@@ -227,7 +99,7 @@ ip_suffix_3=${var.node_3_suffix}
 priv_mac_1=${var.node_1_mac_1}
 priv_mac_2=${var.node_2_mac_1}
 priv_mac_3=${var.node_3_mac_1}
-broadcast_addr=${var.priv_ip_prfx}.255
+bcast_addr=${var.priv_ip_prfx}.255
 domain_name=cablelabs.com
 dns_addr=8.8.8.8
 listen_iface=ens3
@@ -251,9 +123,9 @@ resource "null_resource" "snaps-boot-nodes-power-cycle" {
   depends_on = [null_resource.snaps-boot-drp-setup]
   provisioner "remote-exec" {
     inline = [
-      "sudo virsh reset pxe-node-1",
-      "sudo virsh reset pxe-node-2",
-      "sudo virsh reset pxe-node-3",
+      "sudo virsh reset ${var.node_1_name}",
+      "sudo virsh reset ${var.node_2_name}",
+      "sudo virsh reset ${var.node_3_name}",
     ]
   }
   connection {
@@ -274,7 +146,6 @@ resource "null_resource" "snaps-boot-verify-priv-intfs" {
 ${var.ANSIBLE_CMD} -u ${var.sudo_user} \
 -i ${var.build_ip_prfx}.${var.build_ip_suffix}, \
 ${var.VERIFY_INTFS} \
---key-file ${local.remote_priv_key_file} \
 --ssh-common-args="-o ProxyCommand='ssh ${var.sudo_user}@${aws_spot_instance_request.snaps-boot-host.public_ip} nc ${var.build_ip_prfx}.${var.build_ip_suffix} 22'" \
 --extra-vars "{
 'username': 'root',
@@ -298,11 +169,11 @@ resource "null_resource" "snaps-boot-config-intf" {
 ${var.ANSIBLE_CMD} -u ${var.sudo_user} \
 -i ${var.build_ip_prfx}.${var.build_ip_suffix}, \
 ${var.CONFIG_INTFS} \
---key-file ${local.remote_priv_key_file} \
 --ssh-common-args="-o ProxyCommand='ssh ${var.sudo_user}@${aws_spot_instance_request.snaps-boot-host.public_ip} nc ${var.build_ip_prfx}.${var.build_ip_suffix} 22'" \
 --extra-vars "\
 snaps_boot_dir=${var.src_copy_dir}/snaps-boot
 hosts_yaml_path=${var.hosts_yaml_path}
+check_file=${var.VERIFY_INTFS_CHECK_FILE}
 "\
 EOT
   }
@@ -318,7 +189,6 @@ resource "null_resource" "snaps-boot-verify-admin-priv-intfs" {
 ${var.ANSIBLE_CMD} -u ${var.sudo_user} \
 -i ${var.build_ip_prfx}.${var.build_ip_suffix}, \
 ${var.VERIFY_INTFS} \
---key-file ${local.remote_priv_key_file} \
 --ssh-common-args="-o ProxyCommand='ssh ${var.sudo_user}@${aws_spot_instance_request.snaps-boot-host.public_ip} nc ${var.build_ip_prfx}.${var.build_ip_suffix} 22'" \
 --extra-vars "{
 'username': 'root',
@@ -345,7 +215,6 @@ resource "null_resource" "snaps-boot-verify-apt-proxy-node-1" {
 ${var.ANSIBLE_CMD} -u ${var.sudo_user} \
 -i ${var.build_ip_prfx}.${var.build_ip_suffix}, \
 ${var.VERIFY_APT_PROXY} \
---key-file ${local.remote_priv_key_file} \
 --ssh-common-args="-o ProxyCommand='ssh ${var.sudo_user}@${aws_spot_instance_request.snaps-boot-host.public_ip} nc ${var.build_ip_prfx}.${var.build_ip_suffix} 22'" \
 --extra-vars "{
 'username': 'root',

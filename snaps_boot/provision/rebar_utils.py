@@ -493,27 +493,14 @@ def __create_machine_params(boot_conf, machine, public_key):
                                       ':8091/files/post_script'))
             break
 
-    node_proxy = prov_conf.get('NODE_PROXY')
-    http_proxy = None
-    https_proxy = None
-    if node_proxy:
-        http_proxy = node_proxy['http_proxy']
-        https_proxy = node_proxy['https_proxy']
     apt_proxy = prov_conf['PROXY']['ngcacher_proxy']
-
-    if http_proxy:
-        out.append(ParamsModel(name='post/http-proxy', value=http_proxy))
-    if https_proxy:
-        out.append(ParamsModel(name='post/https-proxy', value=https_proxy))
     if apt_proxy:
         out.append(ParamsModel(name='post/ngcacher-proxy', value=apt_proxy))
-
     out.append(ParamsModel(name='access-ssh-root-mode',
                            value='without-password'))
     out.append(ParamsModel(name='kernel-console', value='ttyS1,115200'))
     out.append(ParamsModel(name='select-kickseed',
                            value='snaps-net-seed.tmpl'))
-
     out.append(ParamsModel(name='access-keys',
                            value={user: public_key, 'root': public_key}))
     return out

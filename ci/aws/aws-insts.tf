@@ -13,7 +13,7 @@
 
 # AWS EC2 Instances
 resource "aws_spot_instance_request" "snaps-boot-host" {
-  ami = var.ami
+  ami = var.boot_ami
   spot_type = var.spot_type
   # wait_for_fulfillment needs to be true to obtain instance attributes
   wait_for_fulfillment = var.wait_for_fulfillment
@@ -35,7 +35,7 @@ resource "aws_spot_instance_request" "snaps-boot-host" {
   # Used to ensure host is really up before attempting to apply ansible playbooks
   provisioner "remote-exec" {
     inline = [
-      "sudo apt install python -y"
+      "echo 'hello ${var.build_id}' /etc/motd"
     ]
   }
 

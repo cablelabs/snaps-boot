@@ -15,22 +15,15 @@
 ---
 - hosts: all
 
-  become: yes
-  become_method: sudo
-  become_user: root
-
   gather_facts: no
 
   tasks:
-    - name: Install apt dependencies
-      apt:
-        update_cache: yes
-        name:
-          - qemu-kvm
-          - libvirt-clients
-          - libvirt-daemon-system
-          - bridge-utils
-          - virt-manager
-          - libvirt-bin
-          - virtinst
-          - python-lxml
+    - name: Wait for port 22 on {{ host }}
+      wait_for:
+        host: "{{ host }}"
+        port: 22
+        timeout: 300
+
+    - name: Pause {{ pause_time | default(60) }} seconds due to some timing issues
+      pause:
+        seconds: "{{ pause_time | default(60) }}"
