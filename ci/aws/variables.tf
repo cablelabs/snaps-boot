@@ -14,9 +14,10 @@
 # Required Variables
 variable "access_key" {}
 variable "secret_key" {}
-variable "git_user" {}
-variable "git_pass" {}
+
 variable "build_id" {}
+
+variable "wait_timeout" {default = "600"}
 
 # Variables that are recommended to change as they won't work in all envs
 variable "public_key_file" {default = "~/.ssh/id_rsa.pub"}

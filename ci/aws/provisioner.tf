@@ -30,6 +30,7 @@ ${var.ANSIBLE_CMD} -u ${var.sudo_user} \
 ${var.WAIT_FOR_BUILD} \
 --extra-vars " \
 host=${var.build_ip_prfx}.${var.build_ip_suffix}
+timeout=${var.wait_timeout}
 pause_time=30
 "\
 EOT
