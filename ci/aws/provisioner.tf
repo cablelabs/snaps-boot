@@ -28,6 +28,7 @@ resource "null_resource" "snaps-hyperbuild-wait-for-build" {
 ${var.ANSIBLE_CMD} -u ${var.sudo_user} \
 -i ${aws_spot_instance_request.snaps-boot-host.public_ip}, \
 ${var.WAIT_FOR_BUILD} \
+--key-file="${var.private_key_file}" \
 --extra-vars " \
 host=${var.build_ip_prfx}.${var.build_ip_suffix}
 pause_time=30
@@ -66,6 +67,7 @@ ${var.ANSIBLE_CMD} -u ${var.sudo_user} \
 -i ${var.build_ip_prfx}.${var.build_ip_suffix}, \
 ${var.SETUP_SRC} \
 --ssh-common-args="-o ProxyCommand='ssh ${var.sudo_user}@${aws_spot_instance_request.snaps-boot-host.public_ip} nc ${var.build_ip_prfx}.${var.build_ip_suffix} 22'" \
+--key-file="${var.private_key_file}" \
 --extra-vars " \
 src_copy_dir=${var.src_copy_dir}
 proxy_host=${var.build_ip_prfx}.1
@@ -86,6 +88,7 @@ ${var.ANSIBLE_CMD} -u ${var.sudo_user} \
 -i ${var.build_ip_prfx}.${var.build_ip_suffix}, \
 ${var.SETUP_DRP} \
 --ssh-common-args="-o ProxyCommand='ssh ${var.sudo_user}@${aws_spot_instance_request.snaps-boot-host.public_ip} nc ${var.build_ip_prfx}.${var.build_ip_suffix} 22'" \
+--key-file="${var.private_key_file}" \
 --extra-vars "\
 nameserver=${var.build_ip_prfx}.1
 src_copy_dir=${var.src_copy_dir}
@@ -147,6 +150,7 @@ ${var.ANSIBLE_CMD} -u ${var.sudo_user} \
 -i ${var.build_ip_prfx}.${var.build_ip_suffix}, \
 ${var.VERIFY_INTFS} \
 --ssh-common-args="-o ProxyCommand='ssh ${var.sudo_user}@${aws_spot_instance_request.snaps-boot-host.public_ip} nc ${var.build_ip_prfx}.${var.build_ip_suffix} 22'" \
+--key-file="${var.private_key_file}" \
 --extra-vars "{
 'username': 'root',
 'host_ips': ['${var.priv_ip_prfx}.${var.node_1_suffix}',
@@ -170,6 +174,7 @@ ${var.ANSIBLE_CMD} -u ${var.sudo_user} \
 -i ${var.build_ip_prfx}.${var.build_ip_suffix}, \
 ${var.CONFIG_INTFS} \
 --ssh-common-args="-o ProxyCommand='ssh ${var.sudo_user}@${aws_spot_instance_request.snaps-boot-host.public_ip} nc ${var.build_ip_prfx}.${var.build_ip_suffix} 22'" \
+--key-file="${var.private_key_file}" \
 --extra-vars "\
 snaps_boot_dir=${var.src_copy_dir}/snaps-boot
 hosts_yaml_path=${var.hosts_yaml_path}
@@ -190,6 +195,7 @@ ${var.ANSIBLE_CMD} -u ${var.sudo_user} \
 -i ${var.build_ip_prfx}.${var.build_ip_suffix}, \
 ${var.VERIFY_INTFS} \
 --ssh-common-args="-o ProxyCommand='ssh ${var.sudo_user}@${aws_spot_instance_request.snaps-boot-host.public_ip} nc ${var.build_ip_prfx}.${var.build_ip_suffix} 22'" \
+--key-file="${var.private_key_file}" \
 --extra-vars "{
 'username': 'root',
 'host_ips': ['${var.admin_ip_prfx}.${var.node_1_suffix}',
@@ -216,6 +222,7 @@ ${var.ANSIBLE_CMD} -u ${var.sudo_user} \
 -i ${var.build_ip_prfx}.${var.build_ip_suffix}, \
 ${var.VERIFY_APT_PROXY} \
 --ssh-common-args="-o ProxyCommand='ssh ${var.sudo_user}@${aws_spot_instance_request.snaps-boot-host.public_ip} nc ${var.build_ip_prfx}.${var.build_ip_suffix} 22'" \
+--key-file="${var.private_key_file}" \
 --extra-vars "{
 'username': 'root',
 'ip_addr': '${var.priv_ip_prfx}.${var.node_1_suffix}',
