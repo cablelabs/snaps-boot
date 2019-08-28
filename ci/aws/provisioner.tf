@@ -31,6 +31,7 @@ ${var.WAIT_FOR_BUILD} \
 --key-file="${var.private_key_file}" \
 --extra-vars " \
 host=${var.build_ip_prfx}.${var.build_ip_suffix}
+timeout=${var.wait_timeout}
 pause_time=5
 "\
 EOT
