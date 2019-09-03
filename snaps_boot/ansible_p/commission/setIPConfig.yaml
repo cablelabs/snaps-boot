@@ -117,11 +117,5 @@
       line: 'precedence ::ffff:0:0/96 100'
     when: is_ext|bool and true
 
-  - name: restarting system
-    shell: /sbin/shutdown -r 1 "Ansible restart"
-    ignore_errors: True
-    register: msg
-    when: is_ext|bool and true
-  - debug:
-      msg: "Please wait host is restarting in 1min. "
-    when: is_ext|bool and true
+  - name: restarting networking
+    command: netplan apply
