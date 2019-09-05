@@ -22,7 +22,7 @@
       wait_for:
         host: "{{ host }}"
         port: 22
-        timeout: 300
+        timeout: "{{ timeout }}"
 
     - name: Pause {{ pause_time | default(60) }} seconds due to some timing issues
       pause:

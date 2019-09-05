@@ -20,24 +20,21 @@
   pre_tasks:
     - name: Wait for dpkg lock
       raw: |
-        sleep 10
         while sudo fuser /var/lib/dpkg/lock >/dev/null 2>&1 ; do
-          sleep 5
+          sleep 2
         done
 
     - name: Wait for apt lock
       raw: |
-        sleep 10
         while sudo fuser /var/lib/apt/lists/lock >/dev/null 2>&1 ; do
-          sleep 5
+          sleep 2
         done
 
     - name: Wait for unattended-upgrades
       raw: |
-        sleep 10
         if [ -f /var/log/unattended-upgrades/unattended-upgrades.log ]; then
           while sudo fuser /var/log/unattended-upgrades/unattended-upgrades.log >/dev/null 2>&1 ; do
-            sleep 5
+            sleep 2
           done
         fi
 
@@ -64,20 +61,6 @@
           - "--exclude=venv"
           - "--exclude=.git/objects/pack"
           - "--exclude=ci/aws/terraform/.terraform"
-
-#    - name: apt update
-#      become: yes
-#      become_method: sudo
-#      become_user: root
-#      apt:
-#        update_cache: yes
-#      register: result_update
-#      until: result_update is not failed
-#      retries: 30
-#      delay: 5
-#    - fail:
-#        msg: result_update.stdout
-#      when: result_update is failed
 
     - name: Install python-pip
       become: yes

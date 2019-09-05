@@ -20,16 +20,16 @@
   vars:
     bak: "{{ bak }}"
   tasks:
-   - name: Backing up interface file
-     command: mv /etc/netplan/01-netcfg.yaml /etc/netplan/01-netcfg.yaml.bak
-     ignore_errors: True
-     when: bak == "Y"
-   - name: Copy backup file
-     command: cp /etc/netplan/01-netcfg.yaml.bak /etc/netplan/01-netcfg.yaml
-     ignore_errors: True
-     when: bak == "N"
-   - name: Backing up apt.conf
-     command: mv /etc/apt/apt.conf.bak /etc/apt/apt.conf
-     ignore_errors: True
-     when: bak == "N"
+    - name: Backing up interface file
+      command: mv /etc/netplan/01-netcfg.yaml /etc/netplan/01-netcfg.yaml.bak
+      ignore_errors: True
+      when: bak == "Y"
+    - name: Copy backup file
+      command: cp /etc/netplan/01-netcfg.yaml.bak /etc/netplan/01-netcfg.yaml
+      ignore_errors: True
+      when: bak == "N"
+    - name: Backing up apt.conf
+      command: mv /etc/apt/apt.conf.bak /etc/apt/apt.conf
+      ignore_errors: True
+      when: bak == "N"
 

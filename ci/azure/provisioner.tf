@@ -13,6 +13,7 @@
 
 # Call ensure SSH key has correct permissions
 resource "null_resource" "snaps-boot-pk-setup" {
+  depends_on = [azurerm_virtual_machine.snaps-boot-host]
   provisioner "local-exec" {
     command = "chmod 600 ${var.private_key_file}"
   }
@@ -26,13 +27,12 @@ resource "null_resource" "snaps-hyperbuild-wait-for-build" {
   provisioner "local-exec" {
     command = <<EOT
 ${var.ANSIBLE_CMD} -u ${var.sudo_user} \
--i ${aws_spot_instance_request.snaps-boot-host.public_ip}, \
+-i ${azurerm_public_ip.snaps-boot-pub-ip.ip_address}, \
 ${var.WAIT_FOR_BUILD} \
---key-file="${var.private_key_file}" \
 --extra-vars " \
 host=${var.build_ip_prfx}.${var.build_ip_suffix}
 timeout=${var.wait_timeout}
-pause_time=5
+pause_time=30
 "\
 EOT
   }
@@ -50,14 +50,14 @@ resource "null_resource" "snaps-boot-inject-pub-key-to-build" {
     inline = [
       "ssh -o StrictHostKeyChecking=no ${var.sudo_user}@${var.build_ip_prfx}.${var.build_ip_suffix} 'rm -f ~/.ssh/known_hosts'",
       "ssh -o StrictHostKeyChecking=no ${var.sudo_user}@${var.build_ip_prfx}.${var.build_ip_suffix} 'touch ~/.ssh/authorized_keys'",
-      "ssh -o StrictHostKeyChecking=no ${var.sudo_user}@${var.build_ip_prfx}.${var.build_ip_suffix} 'echo ${aws_key_pair.snaps-boot-pk.public_key} >> /home/${var.sudo_user}/.ssh/authorized_keys'",
+      "ssh -o StrictHostKeyChecking=no ${var.sudo_user}@${var.build_ip_prfx}.${var.build_ip_suffix} 'echo \"${file(var.public_key_file)}\" >> ~/.ssh/authorized_keys'",
       "ssh -o StrictHostKeyChecking=no ${var.sudo_user}@${var.build_ip_prfx}.${var.build_ip_suffix} 'chmod 600 ~/.ssh/authorized_keys'",
       "ssh -o StrictHostKeyChecking=no ${var.sudo_user}@${var.build_ip_prfx}.${var.build_ip_suffix} 'cp ~/.ssh/authorized_keys ~/.ssh/authorized_keys.bak'",
       "ssh -o StrictHostKeyChecking=no ${var.sudo_user}@${var.build_ip_prfx}.${var.build_ip_suffix} 'sudo ip addr add ${var.build_ip_prfx}.${random_integer.snaps-boot-ip-prfx.result}/24 dev ens3'",
     ]
   }
   connection {
-    host = aws_spot_instance_request.snaps-boot-host.public_ip
+    host = azurerm_public_ip.snaps-boot-pub-ip.ip_address
     type = "ssh"
     user = var.sudo_user
     private_key = file(var.private_key_file)
@@ -74,8 +74,7 @@ resource "null_resource" "snaps-boot-src-setup" {
 ${var.ANSIBLE_CMD} -u ${var.sudo_user} \
 -i ${var.build_ip_prfx}.${random_integer.snaps-boot-ip-prfx.result}, \
 ${var.SETUP_SRC} \
---ssh-common-args="-o ProxyCommand='ssh ${var.sudo_user}@${aws_spot_instance_request.snaps-boot-host.public_ip} nc ${var.build_ip_prfx}.${random_integer.snaps-boot-ip-prfx.result} 22'" \
---key-file="${var.private_key_file}" \
+--ssh-common-args="-o ProxyCommand='ssh ${var.sudo_user}@${azurerm_public_ip.snaps-boot-pub-ip.ip_address} nc ${var.build_ip_prfx}.${random_integer.snaps-boot-ip-prfx.result} 22'" \
 --extra-vars " \
 src_copy_dir=${var.src_copy_dir}
 proxy_host=${var.build_ip_prfx}.1
@@ -95,8 +94,7 @@ resource "null_resource" "snaps-boot-drp-setup" {
 ${var.ANSIBLE_CMD} -u ${var.sudo_user} \
 -i ${var.build_ip_prfx}.${random_integer.snaps-boot-ip-prfx.result}, \
 ${var.SETUP_DRP} \
---ssh-common-args="-o ProxyCommand='ssh ${var.sudo_user}@${aws_spot_instance_request.snaps-boot-host.public_ip} nc ${var.build_ip_prfx}.${random_integer.snaps-boot-ip-prfx.result} 22'" \
---key-file="${var.private_key_file}" \
+--ssh-common-args="-o ProxyCommand='ssh ${var.sudo_user}@${azurerm_public_ip.snaps-boot-pub-ip.ip_address} nc ${var.build_ip_prfx}.${random_integer.snaps-boot-ip-prfx.result} 22'" \
 --extra-vars "\
 nameserver=${var.build_ip_prfx}.1
 src_copy_dir=${var.src_copy_dir}
@@ -140,7 +138,7 @@ resource "null_resource" "snaps-boot-nodes-power-cycle" {
     ]
   }
   connection {
-    host = aws_spot_instance_request.snaps-boot-host.public_ip
+    host = azurerm_public_ip.snaps-boot-pub-ip.ip_address
     type     = "ssh"
     user     = var.sudo_user
     private_key = file(var.private_key_file)
@@ -157,8 +155,7 @@ resource "null_resource" "snaps-boot-verify-priv-intfs" {
 ${var.ANSIBLE_CMD} -u ${var.sudo_user} \
 -i ${var.build_ip_prfx}.${random_integer.snaps-boot-ip-prfx.result}, \
 ${var.VERIFY_INTFS} \
---ssh-common-args="-o ProxyCommand='ssh ${var.sudo_user}@${aws_spot_instance_request.snaps-boot-host.public_ip} nc ${var.build_ip_prfx}.${random_integer.snaps-boot-ip-prfx.result} 22'" \
---key-file="${var.private_key_file}" \
+--ssh-common-args="-o ProxyCommand='ssh ${var.sudo_user}@${azurerm_public_ip.snaps-boot-pub-ip.ip_address} nc ${var.build_ip_prfx}.${random_integer.snaps-boot-ip-prfx.result} 22'" \
 --extra-vars "{
 'username': 'root',
 'host_ips': ['${var.priv_ip_prfx}.${var.node_1_suffix}',
@@ -181,8 +178,7 @@ resource "null_resource" "snaps-boot-config-intf" {
 ${var.ANSIBLE_CMD} -u ${var.sudo_user} \
 -i ${var.build_ip_prfx}.${random_integer.snaps-boot-ip-prfx.result}, \
 ${var.CONFIG_INTFS} \
---ssh-common-args="-o ProxyCommand='ssh ${var.sudo_user}@${aws_spot_instance_request.snaps-boot-host.public_ip} nc ${var.build_ip_prfx}.${random_integer.snaps-boot-ip-prfx.result} 22'" \
---key-file="${var.private_key_file}" \
+--ssh-common-args="-o ProxyCommand='ssh ${var.sudo_user}@${azurerm_public_ip.snaps-boot-pub-ip.ip_address} nc ${var.build_ip_prfx}.${random_integer.snaps-boot-ip-prfx.result} 22'" \
 --extra-vars "\
 snaps_boot_dir=${var.src_copy_dir}/snaps-boot
 hosts_yaml_path=${var.hosts_yaml_path}
@@ -192,9 +188,29 @@ EOT
   }
 }
 
+# Add local key to build server
+resource "null_resource" "snaps-boot-reinject-pub-key-to-build" {
+  depends_on = [null_resource.snaps-boot-config-intf]
+  provisioner "remote-exec" {
+    inline = [
+      "ssh -o StrictHostKeyChecking=no ${var.sudo_user}@${var.build_ip_prfx}.${var.build_ip_suffix} 'rm -f ~/.ssh/known_hosts'",
+      "ssh -o StrictHostKeyChecking=no ${var.sudo_user}@${var.build_ip_prfx}.${var.build_ip_suffix} 'touch ~/.ssh/authorized_keys'",
+      "ssh -o StrictHostKeyChecking=no ${var.sudo_user}@${var.build_ip_prfx}.${var.build_ip_suffix} 'echo \"${file(var.public_key_file)}\" >> ~/.ssh/authorized_keys'",
+      "ssh -o StrictHostKeyChecking=no ${var.sudo_user}@${var.build_ip_prfx}.${var.build_ip_suffix} 'chmod 600 ~/.ssh/authorized_keys'",
+      "ssh -o StrictHostKeyChecking=no ${var.sudo_user}@${var.build_ip_prfx}.${var.build_ip_suffix} 'cp ~/.ssh/authorized_keys ~/.ssh/authorized_keys.bak'",
+    ]
+  }
+  connection {
+    host = azurerm_public_ip.snaps-boot-pub-ip.ip_address
+    type = "ssh"
+    user = var.sudo_user
+    private_key = file(var.private_key_file)
+  }
+}
+
 # Validate private interface is active
 resource "null_resource" "snaps-boot-verify-admin-priv-intfs" {
-  depends_on = [null_resource.snaps-boot-config-intf]
+  depends_on = [null_resource.snaps-boot-reinject-pub-key-to-build]
 
   # Setup KVM on the VM to create VMs on it for testing snaps-boot
   provisioner "local-exec" {
@@ -202,8 +218,7 @@ resource "null_resource" "snaps-boot-verify-admin-priv-intfs" {
 ${var.ANSIBLE_CMD} -u ${var.sudo_user} \
 -i ${var.build_ip_prfx}.${random_integer.snaps-boot-ip-prfx.result}, \
 ${var.VERIFY_INTFS} \
---ssh-common-args="-o ProxyCommand='ssh ${var.sudo_user}@${aws_spot_instance_request.snaps-boot-host.public_ip} nc ${var.build_ip_prfx}.${random_integer.snaps-boot-ip-prfx.result} 22'" \
---key-file="${var.private_key_file}" \
+--ssh-common-args="-o ProxyCommand='ssh ${var.sudo_user}@${azurerm_public_ip.snaps-boot-pub-ip.ip_address} nc ${var.build_ip_prfx}.${random_integer.snaps-boot-ip-prfx.result} 22'" \
 --extra-vars "{
 'username': 'root',
 'host_ips': ['${var.admin_ip_prfx}.${var.node_1_suffix}',
@@ -229,8 +244,7 @@ resource "null_resource" "snaps-boot-verify-apt-proxy-node-1" {
 ${var.ANSIBLE_CMD} -u ${var.sudo_user} \
 -i ${var.build_ip_prfx}.${random_integer.snaps-boot-ip-prfx.result}, \
 ${var.VERIFY_APT_PROXY} \
---ssh-common-args="-o ProxyCommand='ssh ${var.sudo_user}@${aws_spot_instance_request.snaps-boot-host.public_ip} nc ${var.build_ip_prfx}.${random_integer.snaps-boot-ip-prfx.result} 22'" \
---key-file="${var.private_key_file}" \
+--ssh-common-args="-o ProxyCommand='ssh ${var.sudo_user}@${azurerm_public_ip.snaps-boot-pub-ip.ip_address} nc ${var.build_ip_prfx}.${random_integer.snaps-boot-ip-prfx.result} 22'" \
 --extra-vars "{
 'username': 'root',
 'ip_addr': '${var.priv_ip_prfx}.${var.node_1_suffix}',

@@ -12,9 +12,6 @@
 # limitations under the License.
 
 # Required Variables
-variable "access_key" {}
-variable "secret_key" {}
-
 variable "build_id" {}
 
 variable "wait_timeout" {default = "600"}
@@ -22,11 +19,6 @@ variable "wait_timeout" {default = "600"}
 # Variables that are recommended to change as they won't work in all envs
 variable "public_key_file" {default = "~/.ssh/id_rsa.pub"}
 variable "private_key_file" {default = "~/.ssh/id_rsa"}
-
-# Optional Variables for Cloud
-variable "spot_type" {default = "one-time"}
-// Set wait_for_fulfillment to true in order to obtain instance attributes
-variable "wait_for_fulfillment" {default = "true"}
 
 # Playbook Constants
 variable "ANSIBLE_CMD" {default = "export ANSIBLE_HOST_KEY_CHECKING=False; ansible-playbook"}
@@ -44,13 +36,13 @@ variable "post_script_file" {default = "/tmp/snaps-boot/ci/scripts/post_script"}
 variable "hosts_yaml_path" {default = "/tmp/hosts.yaml"}
 
 # best to obtain from snaps-config/ci/snaps-boot-env/boot-env.tfvars
+variable "shared_resource_group_name" {}
+variable "built_image_id" {}
+variable "vm_size" {}
+variable "location" {}
 variable "initial_boot_timeout" {}
 variable "std_boot_timeout" {}
-variable "boot_ami" {}
 variable "sudo_user" {}
-variable "region" {}
-variable "availability_zone" {}
-variable "instance_type" {}
 variable "volume_size" {}
 variable "netmask" {}
 variable "build_ip_prfx" {}

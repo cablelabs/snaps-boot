@@ -19,7 +19,7 @@
 
   tasks:
   - name: Statically configure PXE machines' NICs
-    shell: "python {{ snaps_boot_dir }}//iaas_launch.py -f {{ hosts_yaml_path }} -s >> /tmp/snaps-boot.log"
+    shell: "python {{ snaps_boot_dir }}/iaas_launch.py -f {{ hosts_yaml_path }} -s >> /tmp/snaps-boot.log"
     register: out_config
     ignore_errors: True
 
@@ -27,7 +27,3 @@
     debug:
       var: out_config.stderr_lines
     when: out_config.rc != 0
-
-  - name: Pause 2 min to ensure the machines have begun their power cycle
-    pause:
-      minutes: 2
