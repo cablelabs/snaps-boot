@@ -31,10 +31,15 @@ ${var.WAIT_FOR_BUILD} \
 --key-file="${var.private_key_file}" \
 --extra-vars " \
 host=${var.build_ip_prfx}.${var.build_ip_suffix}
-pause_time=30
+pause_time=5
 "\
 EOT
   }
+}
+
+resource "random_integer" "snaps-boot-ip-prfx" {
+  min = 101
+  max = 254
 }
 
 # Add local key to build server
@@ -42,10 +47,12 @@ resource "null_resource" "snaps-boot-inject-pub-key-to-build" {
   depends_on = [null_resource.snaps-hyperbuild-wait-for-build]
   provisioner "remote-exec" {
     inline = [
-      "ssh -o StrictHostKeyChecking=no ${var.build_ip_prfx}.${var.build_ip_suffix} 'rm -f ~/.ssh/known_hosts'",
+      "ssh -o StrictHostKeyChecking=no ${var.sudo_user}@${var.build_ip_prfx}.${var.build_ip_suffix} 'rm -f ~/.ssh/known_hosts'",
       "ssh -o StrictHostKeyChecking=no ${var.sudo_user}@${var.build_ip_prfx}.${var.build_ip_suffix} 'touch ~/.ssh/authorized_keys'",
       "ssh -o StrictHostKeyChecking=no ${var.sudo_user}@${var.build_ip_prfx}.${var.build_ip_suffix} 'echo ${aws_key_pair.snaps-boot-pk.public_key} >> /home/${var.sudo_user}/.ssh/authorized_keys'",
       "ssh -o StrictHostKeyChecking=no ${var.sudo_user}@${var.build_ip_prfx}.${var.build_ip_suffix} 'chmod 600 ~/.ssh/authorized_keys'",
+      "ssh -o StrictHostKeyChecking=no ${var.sudo_user}@${var.build_ip_prfx}.${var.build_ip_suffix} 'cp ~/.ssh/authorized_keys ~/.ssh/authorized_keys.bak'",
+      "ssh -o StrictHostKeyChecking=no ${var.sudo_user}@${var.build_ip_prfx}.${var.build_ip_suffix} 'sudo ip addr add ${var.build_ip_prfx}.${random_integer.snaps-boot-ip-prfx.result}/24 dev ens3'",
     ]
   }
   connection {
@@ -64,9 +71,9 @@ resource "null_resource" "snaps-boot-src-setup" {
   provisioner "local-exec" {
     command = <<EOT
 ${var.ANSIBLE_CMD} -u ${var.sudo_user} \
--i ${var.build_ip_prfx}.${var.build_ip_suffix}, \
+-i ${var.build_ip_prfx}.${random_integer.snaps-boot-ip-prfx.result}, \
 ${var.SETUP_SRC} \
---ssh-common-args="-o ProxyCommand='ssh ${var.sudo_user}@${aws_spot_instance_request.snaps-boot-host.public_ip} nc ${var.build_ip_prfx}.${var.build_ip_suffix} 22'" \
+--ssh-common-args="-o ProxyCommand='ssh ${var.sudo_user}@${aws_spot_instance_request.snaps-boot-host.public_ip} nc ${var.build_ip_prfx}.${random_integer.snaps-boot-ip-prfx.result} 22'" \
 --key-file="${var.private_key_file}" \
 --extra-vars " \
 src_copy_dir=${var.src_copy_dir}
@@ -85,9 +92,9 @@ resource "null_resource" "snaps-boot-drp-setup" {
   provisioner "local-exec" {
     command = <<EOT
 ${var.ANSIBLE_CMD} -u ${var.sudo_user} \
--i ${var.build_ip_prfx}.${var.build_ip_suffix}, \
+-i ${var.build_ip_prfx}.${random_integer.snaps-boot-ip-prfx.result}, \
 ${var.SETUP_DRP} \
---ssh-common-args="-o ProxyCommand='ssh ${var.sudo_user}@${aws_spot_instance_request.snaps-boot-host.public_ip} nc ${var.build_ip_prfx}.${var.build_ip_suffix} 22'" \
+--ssh-common-args="-o ProxyCommand='ssh ${var.sudo_user}@${aws_spot_instance_request.snaps-boot-host.public_ip} nc ${var.build_ip_prfx}.${random_integer.snaps-boot-ip-prfx.result} 22'" \
 --key-file="${var.private_key_file}" \
 --extra-vars "\
 nameserver=${var.build_ip_prfx}.1
@@ -147,9 +154,9 @@ resource "null_resource" "snaps-boot-verify-priv-intfs" {
   provisioner "local-exec" {
     command = <<EOT
 ${var.ANSIBLE_CMD} -u ${var.sudo_user} \
--i ${var.build_ip_prfx}.${var.build_ip_suffix}, \
+-i ${var.build_ip_prfx}.${random_integer.snaps-boot-ip-prfx.result}, \
 ${var.VERIFY_INTFS} \
---ssh-common-args="-o ProxyCommand='ssh ${var.sudo_user}@${aws_spot_instance_request.snaps-boot-host.public_ip} nc ${var.build_ip_prfx}.${var.build_ip_suffix} 22'" \
+--ssh-common-args="-o ProxyCommand='ssh ${var.sudo_user}@${aws_spot_instance_request.snaps-boot-host.public_ip} nc ${var.build_ip_prfx}.${random_integer.snaps-boot-ip-prfx.result} 22'" \
 --key-file="${var.private_key_file}" \
 --extra-vars "{
 'username': 'root',
@@ -171,9 +178,9 @@ resource "null_resource" "snaps-boot-config-intf" {
   provisioner "local-exec" {
     command = <<EOT
 ${var.ANSIBLE_CMD} -u ${var.sudo_user} \
--i ${var.build_ip_prfx}.${var.build_ip_suffix}, \
+-i ${var.build_ip_prfx}.${random_integer.snaps-boot-ip-prfx.result}, \
 ${var.CONFIG_INTFS} \
---ssh-common-args="-o ProxyCommand='ssh ${var.sudo_user}@${aws_spot_instance_request.snaps-boot-host.public_ip} nc ${var.build_ip_prfx}.${var.build_ip_suffix} 22'" \
+--ssh-common-args="-o ProxyCommand='ssh ${var.sudo_user}@${aws_spot_instance_request.snaps-boot-host.public_ip} nc ${var.build_ip_prfx}.${random_integer.snaps-boot-ip-prfx.result} 22'" \
 --key-file="${var.private_key_file}" \
 --extra-vars "\
 snaps_boot_dir=${var.src_copy_dir}/snaps-boot
@@ -192,9 +199,9 @@ resource "null_resource" "snaps-boot-verify-admin-priv-intfs" {
   provisioner "local-exec" {
     command = <<EOT
 ${var.ANSIBLE_CMD} -u ${var.sudo_user} \
--i ${var.build_ip_prfx}.${var.build_ip_suffix}, \
+-i ${var.build_ip_prfx}.${random_integer.snaps-boot-ip-prfx.result}, \
 ${var.VERIFY_INTFS} \
---ssh-common-args="-o ProxyCommand='ssh ${var.sudo_user}@${aws_spot_instance_request.snaps-boot-host.public_ip} nc ${var.build_ip_prfx}.${var.build_ip_suffix} 22'" \
+--ssh-common-args="-o ProxyCommand='ssh ${var.sudo_user}@${aws_spot_instance_request.snaps-boot-host.public_ip} nc ${var.build_ip_prfx}.${random_integer.snaps-boot-ip-prfx.result} 22'" \
 --key-file="${var.private_key_file}" \
 --extra-vars "{
 'username': 'root',
@@ -219,9 +226,9 @@ resource "null_resource" "snaps-boot-verify-apt-proxy-node-1" {
   provisioner "local-exec" {
     command = <<EOT
 ${var.ANSIBLE_CMD} -u ${var.sudo_user} \
--i ${var.build_ip_prfx}.${var.build_ip_suffix}, \
+-i ${var.build_ip_prfx}.${random_integer.snaps-boot-ip-prfx.result}, \
 ${var.VERIFY_APT_PROXY} \
---ssh-common-args="-o ProxyCommand='ssh ${var.sudo_user}@${aws_spot_instance_request.snaps-boot-host.public_ip} nc ${var.build_ip_prfx}.${var.build_ip_suffix} 22'" \
+--ssh-common-args="-o ProxyCommand='ssh ${var.sudo_user}@${aws_spot_instance_request.snaps-boot-host.public_ip} nc ${var.build_ip_prfx}.${random_integer.snaps-boot-ip-prfx.result} 22'" \
 --key-file="${var.private_key_file}" \
 --extra-vars "{
 'username': 'root',
