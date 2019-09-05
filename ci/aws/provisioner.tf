@@ -51,6 +51,7 @@ resource "null_resource" "snaps-boot-inject-pub-key-to-build" {
       "ssh -o StrictHostKeyChecking=no ${var.sudo_user}@${var.build_ip_prfx}.${var.build_ip_suffix} 'touch ~/.ssh/authorized_keys'",
       "ssh -o StrictHostKeyChecking=no ${var.sudo_user}@${var.build_ip_prfx}.${var.build_ip_suffix} 'echo ${aws_key_pair.snaps-boot-pk.public_key} >> /home/${var.sudo_user}/.ssh/authorized_keys'",
       "ssh -o StrictHostKeyChecking=no ${var.sudo_user}@${var.build_ip_prfx}.${var.build_ip_suffix} 'chmod 600 ~/.ssh/authorized_keys'",
+      "ssh -o StrictHostKeyChecking=no ${var.sudo_user}@${var.build_ip_prfx}.${var.build_ip_suffix} 'cp ~/.ssh/authorized_keys ~/.ssh/authorized_keys.bak'",
       "ssh -o StrictHostKeyChecking=no ${var.sudo_user}@${var.build_ip_prfx}.${var.build_ip_suffix} 'sudo ip addr add ${var.build_ip_prfx}.${random_integer.snaps-boot-ip-prfx.result}/24 dev ens3'",
     ]
   }

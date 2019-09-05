@@ -43,8 +43,18 @@ def static_ip_configure(config):
 
     for host in hosts:
         interfaces = host.get('interfaces')
+        backup_var = "Y"
+        playbook_path_bak = pkg_resources.resource_filename(
+            'snaps_boot.ansible_p.commission', 'interfaceBak.yaml')
         pb_user = 'root'
+        pb_vars = {'bak': backup_var}
         ip = host.get('access_ip')
+
+        logger.info('Executing %s on host %s with user %s and vars %s',
+                    playbook_path_bak, ip, pb_user, pb_vars)
+        ansible_utils.apply_playbook(
+            playbook_path_bak, [ip], host_user=pb_user,
+            variables=pb_vars)
 
         playbook_path = pkg_resources.resource_filename(
             'snaps_boot.ansible_p.commission', 'setIPConfig.yaml')
@@ -71,6 +81,8 @@ def static_ip_cleanup(config):
 
     playbook_path = pkg_resources.resource_filename(
         'snaps_boot.ansible_p.commission', 'delIPConfig.yaml')
+    playbook_path_bak = pkg_resources.resource_filename(
+        'snaps_boot.ansible_p.commission', 'interfaceBak.yaml')
 
     host = static_dict.get('host')
     iplist = []
@@ -80,6 +92,10 @@ def static_ip_cleanup(config):
     for host_counter in host:
         target = host_counter.get('access_ip')
         interfaces = host_counter.get('interfaces')
+        backup_var = "N"
+        ansible_utils.apply_playbook(
+            playbook_path_bak, iplist,
+            variables={'target': target, 'bak': backup_var})
 
         for interface in interfaces:
             address = interface.get('address')
