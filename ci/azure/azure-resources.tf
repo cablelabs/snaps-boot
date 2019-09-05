@@ -28,8 +28,6 @@ resource "azurerm_resource_group" "snaps-boot" {
 resource "azurerm_virtual_network" "snaps-boot-net" {
   name = "snaps-boot-net-${var.build_id}"
   address_space = ["10.1.0.0/16"]
-  //  location = var.location
-  //  resource_group_name = var.resource_group_name
   location = azurerm_resource_group.snaps-boot.location
   resource_group_name = azurerm_resource_group.snaps-boot.name
 }
@@ -37,24 +35,19 @@ resource "azurerm_virtual_network" "snaps-boot-net" {
 resource "azurerm_subnet" "snaps-boot-subnet" {
   name = "snaps-boot-subnet-${var.build_id}"
   virtual_network_name = azurerm_virtual_network.snaps-boot-net.name
-  //  resource_group_name = var.resource_group_name
   resource_group_name = azurerm_resource_group.snaps-boot.name
   address_prefix = "10.1.0.0/24"
 }
 
 resource "azurerm_public_ip" "snaps-boot-pub-ip" {
   name = "snaps-boot-${var.build_id}"
-  //  location = var.location
-  //  resource_group_name = var.resource_group_name
   location = azurerm_resource_group.snaps-boot.location
   resource_group_name = azurerm_resource_group.snaps-boot.name
   allocation_method = "Static"
 }
 
 resource "azurerm_network_interface" "snaps-boot-nic" {
-  name                = "snaps-boot-${var.build_id}-nic"
-  //  location = var.location
-  //  resource_group_name = var.resource_group_name
+  name = "snaps-boot-${var.build_id}-nic"
   location = azurerm_resource_group.snaps-boot.location
   resource_group_name = azurerm_resource_group.snaps-boot.name
 
@@ -65,44 +58,6 @@ resource "azurerm_network_interface" "snaps-boot-nic" {
     public_ip_address_id          = azurerm_public_ip.snaps-boot-pub-ip.id
   }
 }
-
-//resource "azurerm_image" "snaps-boot-image" {
-//  location = var.location
-//  name = "snaps_boot_img"
-//  resource_group_name = "snaps-boot-ci"
-//}
-
-//resource "azurerm_shared_image_gallery" "snaps-boot-gallery" {
-//  name                = "images_boot"
-//  resource_group_name = azurerm_resource_group.snaps-boot.name
-//  location            = azurerm_resource_group.snaps-boot.location
-//}
-//
-//resource "azurerm_shared_image" "snaps-boot-image" {
-//  name                = "snaps_boot_img"
-//  gallery_name        = "snaps_boot_gallery"
-//  resource_group_name = "snaps-boot-ci"
-//  location            = var.location
-//  os_type             = "Linux"
-//  identifier {
-//    publisher = "snaps-boot-pub"
-//    offer     = "snaps-boot-offer"
-//    sku       = "snaps-boot-sku"
-//  }
-//}
-
-//resource "azurerm_shared_image_version" "snaps-boot-image-version" {
-//  name                = "0.0.1"
-//  gallery_name        = azurerm_shared_image_gallery.snaps-boot-gallery.name
-//  image_name          = azurerm_shared_image.snaps-boot-image.name
-//  resource_group_name = azurerm_shared_image.snaps-boot-image.resource_group_name
-//  location            = azurerm_shared_image.snaps-boot-image.location
-//  managed_image_id    = var.built_image_id
-//  target_region {
-//    name = azurerm_shared_image.snaps-boot-image.location
-//    regional_replica_count = 1
-//  }
-//}
 
 resource "azurerm_virtual_machine" "snaps-boot-host" {
   name = "snaps-boot-host-${var.build_id}"
@@ -130,7 +85,6 @@ resource "azurerm_virtual_machine" "snaps-boot-host" {
   }
 
   storage_image_reference {
-//    id = "/subscriptions/ffc5d93a-8a85-4c42-8c33-7d0d762e852d/resourceGroups/snaps-boot-ci/providers/Microsoft.Compute/galleries/snaps_boot_gallery/images/snaps_boot_img/versions/0.0.1"
     id = "/subscriptions/ffc5d93a-8a85-4c42-8c33-7d0d762e852d/resourceGroups/snaps-boot-ci/providers/Microsoft.Compute/galleries/snaps_boot_gallery/images/snaps_boot_img/versions/0.0.2"
   }
 
